@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:printing/printing.dart';
 
+import '../../l10n/libelles.dart';
+
 /// Affiche un rapport PDF déjà généré, avec les boutons Imprimer et
 /// Partager (WhatsApp, e-mail, enregistrement dans les fichiers...).
 class RapportPdfScreen extends StatelessWidget {
@@ -18,7 +20,7 @@ class RapportPdfScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Rapport d\'inspection (PDF)')),
+      appBar: AppBar(title: Text(context.l10n.rapportPdfTitre)),
       body: PdfPreview(
         build: (_) async => pdf,
         pdfFileName: nomFichier,
@@ -29,8 +31,7 @@ class RapportPdfScreen extends StatelessWidget {
         onError: (context, erreur) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: Text('Aperçu indisponible sur cet appareil.\n'
-                'Utilisez Partager ou Imprimer.\n($erreur)'),
+            child: Text(context.l10n.apercuIndisponible('$erreur')),
           ),
         ),
       ),

@@ -54,8 +54,9 @@ class SaisieDepot {
       await _mettreEnFile(
         TypeEnvoi.declaration,
         id,
-        'Déclaration ${d.navire.nom} — '
-        '${d.poidsTotalKg.toStringAsFixed(0)} kg',
+        // Résumé sans phrase (lisible en français comme en arabe) : le type
+        // de saisie est affiché, traduit, par l'écran.
+        '${d.navire.nom} · ${d.poidsTotalKg.toStringAsFixed(0)} kg',
       );
       return id;
     });
@@ -107,8 +108,7 @@ class SaisieDepot {
       await _mettreEnFile(
         TypeEnvoi.controle,
         id,
-        'Contrôle ${c.navire.nom} — '
-        '${resultat.infractions.length} infraction(s)',
+        '${c.navire.nom} · ${resultat.infractions.length} ⚠',
       );
       return id;
     });

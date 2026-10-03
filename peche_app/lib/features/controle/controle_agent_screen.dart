@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/services/services.dart';
 import '../../core/data/depots/flotte_depot.dart';
+import '../../core/format.dart';
 import '../../core/models/declaration.dart';
 import '../../core/models/enums.dart';
 import '../../core/models/navire.dart';
@@ -12,6 +13,7 @@ import '../../core/regulation/rapport.dart';
 import '../../core/regulation/rapport_pdf.dart';
 import '../../core/regulation/referentiel.dart';
 import '../../core/widgets/resultat_card.dart';
+import '../../l10n/libelles.dart';
 import 'rapport_pdf_screen.dart';
 
 /// Prototype : fiche d'inspection de l'agent garde-côtes.
@@ -100,14 +102,15 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final flotte = _flotte;
     if (flotte == null || flotte.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Contrôle garde-côtes')),
+        appBar: AppBar(title: Text(l10n.moduleControle)),
         body: Center(
           child: flotte == null
               ? const CircularProgressIndicator()
-              : const Text('Aucun navire avec licence dans la base locale.'),
+              : Text(l10n.aucunNavire),
         ),
       );
     }
@@ -117,19 +120,19 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
     final regleEspece = referentielDemo.espece(_especeEchantillon)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Contrôle garde-côtes')),
+      appBar: AppBar(title: Text(l10n.moduleControle)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // ---------- 1. Identification du navire ----------
           _Section(
-            titre: '1. Navire',
+            titre: l10n.sectionNavire,
             icone: Icons.directions_boat,
             children: [
               DropdownButtonFormField<String>(
                 isExpanded: true,
                 value: c.navire.id,
-                decoration: const InputDecoration(labelText: 'Navire inspecté'),
+                decoration: InputDecoration(labelText: l10n.navireInspecte),
                 items: [
                   for (final (:navire, licence: _) in flotte)
                     DropdownMenuItem(
@@ -140,22 +143,25 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
                 onChanged: (id) => setState(() => _nouveauControle(
                     flotte.firstWhere((x) => x.navire.id == id))),
               ),
-              Text('Pavillon : ${c.navire.pavillon} · '
-                  '${c.navire.type.libelle} · ${c.navire.longueurM} m · '
-                  '${c.navire.puissanceKw} kW'),
-              Text('Licence : ${_licence.numero}'),
-              Text('Position : '
-                  '${_position == null ? 'recherche du GPS…' : c.position}'
-                  '${_position?.demonstration ?? false ? ' (non mesurée)' : ''}'),
+              Text(l10n.detailsNavire(
+                c.navire.pavillon,
+                l10n.libelleTypeNavire(c.navire.type),
+                formaterMontant(c.navire.longueurM),
+                formaterMontant(c.navire.puissanceKw),
+              )),
+              Text(l10n.licenceNumero(_licence.numero)),
+              Text(l10n.positionValeur(
+                  '${_position == null ? l10n.gpsRecherche : isolerGaucheDroite('${c.position}')}'
+                  '${_position?.demonstration ?? false ? ' ${l10n.gpsNonMesuree}' : ''}')),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Pavillon et documents de bord concordants'),
+                title: Text(l10n.pavillonConcordant),
                 value: c.pavillonConforme,
                 onChanged: (v) => setState(() => c.pavillonConforme = v),
               ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Marquage / immatriculation visible'),
+                title: Text(l10n.marquageVisible),
                 value: c.marquageConforme,
                 onChanged: (v) => setState(() => c.marquageConforme = v),
               ),
@@ -164,7 +170,7 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
 
           // ---------- 2. Certificats ----------
           _Section(
-            titre: '2. Certificats',
+            titre: l10n.sectionCertificats,
             icone: Icons.description,
             children: [
               for (final cert in c.navire.certificats)
@@ -177,38 +183,39 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
                         : Icons.cancel,
                     color: cert.estValideLe(c.date) ? Colors.green : Colors.red,
                   ),
-                  title: Text(cert.type.libelle),
-                  subtitle: Text('${cert.numero} · expire le '
-                      '${cert.dateExpiration.toIso8601String().substring(0, 10)}'),
+                  title: Text(l10n.libelleCertificat(cert.type)),
+                  subtitle: Text(l10n.certificatExpireLe(cert.numero,
+                      cert.dateExpiration.toIso8601String().substring(0, 10))),
                 ),
             ],
           ),
 
           // ---------- 3. Engin & maillage ----------
           _Section(
-            titre: '3. Engin et maillage',
+            titre: l10n.sectionEngin,
             icone: Icons.grid_on,
             children: [
               DropdownButtonFormField<TypeEngin>(
                 isExpanded: true,
                 value: c.engin,
-                decoration: const InputDecoration(labelText: 'Engin à bord'),
+                decoration: InputDecoration(labelText: l10n.enginABord),
                 items: [
                   for (final e in TypeEngin.values)
-                    DropdownMenuItem(value: e, child: Text(e.libelle)),
+                    DropdownMenuItem(
+                        value: e, child: Text(l10n.libelleEngin(e))),
                 ],
                 onChanged: (e) => setState(() => c.engin = e!),
               ),
               if (regleEngin != null && regleEngin.maillageMinMm > 0) ...[
-                Text('Minimum : ${regleEngin.maillageMinMm} mm '
-                    '(tolérance ${referentielDemo.toleranceMaillagePct} %)'),
+                Text(l10n.maillageMinimum(
+                    formaterMontant(regleEngin.maillageMinMm),
+                    formaterMontant(referentielDemo.toleranceMaillagePct))),
                 Row(children: [
                   Expanded(
                     child: TextField(
                       controller: _maillageCtrl,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                          labelText: 'Mesure d\'une maille (mm)'),
+                      decoration: InputDecoration(labelText: l10n.mesureMaille),
                       onSubmitted: (_) => _ajouterMaillage(),
                     ),
                   ),
@@ -218,31 +225,31 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
                 Wrap(spacing: 6, children: [
                   for (final (i, m) in c.maillagesMm.indexed)
                     InputChip(
-                      label: Text('$m mm'),
+                      label: Text('$m ${l10n.uniteMm}'),
                       onDeleted: () =>
                           setState(() => c.maillagesMm.removeAt(i)),
                     ),
                 ]),
               ] else
-                const Text('Pas de maillage réglementé pour cet engin.'),
+                Text(l10n.pasDeMaillage),
             ],
           ),
 
           // ---------- 4. Échantillons ----------
           _Section(
-            titre: '4. Échantillons (tailles minimales)',
+            titre: l10n.sectionEchantillons,
             icone: Icons.straighten,
             children: [
               DropdownButtonFormField<String>(
                 isExpanded: true,
                 value: _especeEchantillon,
-                decoration: const InputDecoration(labelText: 'Espèce'),
+                decoration: InputDecoration(labelText: l10n.espece),
                 items: [
                   for (final r in referentielDemo.especes.values)
                     DropdownMenuItem(
                       value: r.code,
-                      child: Text('${r.nomCommun} — min ${r.minimum} '
-                          '${r.unite.symbole}'),
+                      child: Text(l10n.especeMinimum(l10n.nomEspece(r.code),
+                          formaterMontant(r.minimum), l10n.unite(r.unite))),
                     ),
                 ],
                 onChanged: (v) => setState(() => _especeEchantillon = v!),
@@ -253,7 +260,8 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
                     controller: _echantillonCtrl,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                        labelText: 'Mesure (${regleEspece.unite.symbole})'),
+                        labelText:
+                            l10n.mesureUnite(l10n.unite(regleEspece.unite))),
                     onSubmitted: (_) => _ajouterEchantillon(),
                   ),
                 ),
@@ -277,18 +285,17 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
 
           // ---------- 5. Stockage ----------
           _Section(
-            titre: '5. Plan de stockage',
+            titre: l10n.sectionStockage,
             icone: Icons.inventory_2,
             children: [
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text(
-                    'Cales conformes au plan de stockage et au journal'),
+                title: Text(l10n.calesConformes),
                 value: c.planStockageConforme,
                 onChanged: (v) => setState(() => c.planStockageConforme = v),
               ),
               TextField(
-                decoration: const InputDecoration(labelText: 'Observations'),
+                decoration: InputDecoration(labelText: l10n.observations),
                 maxLines: 2,
                 onChanged: (v) => c.observations = v,
               ),
@@ -300,7 +307,7 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
           const SizedBox(height: 12),
           FilledButton.icon(
             icon: const Icon(Icons.picture_as_pdf),
-            label: const Text('Générer le rapport d\'inspection'),
+            label: Text(l10n.genererRapport),
             onPressed: () => _afficherRapport(resultat),
           ),
           const SizedBox(height: 24),
@@ -329,21 +336,39 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
     _controle.position = await _attendrePosition();
     if (!mounted) return;
     final texte = genererRapportControle(_controle, r);
+    final l10n = context.l10n;
     final signe = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Rapport généré'),
+        title: Text(l10n.rapportGenere),
         content: SingleChildScrollView(
-          child: SelectableText(texte,
-              style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Le rapport officiel reste en français (comme le PDF) ; en
+              // arabe, on le précise à l'agent.
+              if (Localizations.localeOf(ctx).languageCode != 'fr') ...[
+                Text(l10n.rapportLangue,
+                    style: Theme.of(ctx).textTheme.bodySmall),
+                const SizedBox(height: 8),
+              ],
+              // Texte français : toujours de gauche à droite.
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: SelectableText(texte,
+                    style:
+                        const TextStyle(fontFamily: 'monospace', fontSize: 12)),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Fermer')),
+              child: Text(l10n.fermer)),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Signer'),
+            child: Text(l10n.signer),
           ),
         ],
       ),
@@ -363,13 +388,12 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
       // Rien n'a été écrit (transaction annulée) : l'agent peut réessayer.
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Échec de l\'enregistrement : $e')));
+          SnackBar(content: Text(l10n.echecEnregistrement('$e'))));
       return;
     }
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Rapport ${id.substring(0, 8)} signé et enregistré — '
-            'envoi à la prochaine connexion réseau.')));
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.rapportEnregistre(id.substring(0, 8)))));
     // On remplace la fiche de contrôle par l'aperçu du PDF signé.
     await Navigator.of(context).pushReplacement(MaterialPageRoute(
       builder: (_) => RapportPdfScreen(

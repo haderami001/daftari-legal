@@ -46,7 +46,7 @@ dart run build_runner build --delete-conflicting-outputs
 
 ```bash
 ./tool/preparer_web.sh       # SQLite WebAssembly, worker Drift, pdf.js
-flutter run -d chrome --web-renderer html
+flutter run -d chrome --web-renderer canvaskit --no-web-resources-cdn
 ```
 
 ### Dans VS Code
@@ -86,6 +86,27 @@ En mer il n'y a pas de réseau : tout est enregistré **sur le téléphone**.
 - **Migrations** : `schemaVersion` 2 ajoute la colonne du rapport PDF ; un
   téléphone resté en version 1 est mis à jour automatiquement (testé).
 
+## Langues : français et arabe
+
+- L'interface est traduite en **arabe** (affichage de droite à gauche) et en
+  français. Menu **Langue** (icône 文A) sur l'accueil : langue du téléphone,
+  français ou العربية. Le choix est gardé dans la base locale (table
+  `reglages`, schéma v3).
+- Les textes sont dans `lib/l10n/app_fr.arb` (modèle) et `lib/l10n/app_ar.arb`.
+  Le code Dart correspondant est généré par `flutter gen-l10n` (automatique à
+  chaque `flutter pub get`). Le pluriel arabe (1, 2, 3 à 10, 11 et plus) est
+  géré par le format ICU des fichiers ARB.
+- Le moteur réglementaire reste en français ; chaque infraction porte ses
+  valeurs brutes (`details`) et `lib/l10n/libelles.dart` rédige le message
+  dans la langue de l'écran.
+- Le **rapport officiel** (texte et PDF) reste en français.
+- Texte bidirectionnel : les montants utilisent une espace insécable et les
+  coordonnées GPS sont isolées (`lib/core/format.dart`), sinon « 1 200 000 »
+  s'afficherait « 000 200 1 » dans une phrase arabe (testé dans
+  `test/bidi_test.dart`).
+- Polices embarquées **Noto Sans** et **Noto Sans Arabic** (licence OFL,
+  `assets/fonts/`) : même rendu sur tous les appareils, sans réseau.
+
 ## Rapport PDF et GPS
 
 - **Rapport d'inspection PDF** (`lib/core/regulation/rapport_pdf.dart`) :
@@ -115,8 +136,9 @@ En mer il n'y a pas de réseau : tout est enregistré **sur le téléphone**.
 | `lib/features/controle/` | Écran **contrôle de l'agent** et aperçu du PDF |
 | `lib/features/guide/` | Guide réglementaire |
 | `lib/features/envois/` | Écran **envois en attente** |
+| `lib/l10n/` | Traductions français / arabe et libellés traduits |
 | `tool/preparer_web.sh` | Prépare la version navigateur |
-| `test/` | 25 tests : moteur (8), base (6), PDF (1), synchronisation (5), écrans (5) |
+| `test/` | 34 tests : moteur (8), base (6), PDF (1), synchronisation (5), écrans (5), traduction (7), texte bidirectionnel (2) |
 
 ## Pour apprendre (parcours conseillé)
 
@@ -139,11 +161,16 @@ En mer il n'y a pas de réseau : tout est enregistré **sur le téléphone**.
    pour les tests.
 9. **`lib/core/services/synchronisation.dart`** + **`test/faux_serveur.dart`**
    — appel HTTP, gestion des erreurs, et comment tester sans vrai serveur.
+10. **`lib/l10n/app_fr.arb`** puis **`lib/l10n/libelles.dart`** — traduire
+    une application : textes avec paramètres, pluriels, `select` pour les
+    listes, extension sur `AppLocalizations`.
 
 Exercices :
 - ajoutez une espèce (par ex. le mérou) dans `referentielDemo`,
   puis un test qui vérifie qu'un individu trop petit est signalé ;
 - ajoutez une colonne `portDebarquement` à la table `Declarations`
-  (passez `schemaVersion` à 3 et écrivez la migration : modèle dans
-  `base_de_donnees.dart`, la v2 ajoute déjà une colonne) ;
+  (passez `schemaVersion` à 4 et écrivez la migration : modèles dans
+  `base_de_donnees.dart`, la v2 ajoute une colonne, la v3 une table) ;
+- traduisez un nouveau texte : ajoutez la clé dans `app_fr.arb` et
+  `app_ar.arb`, lancez `flutter gen-l10n`, utilisez `context.l10n.maCle` ;
 - ajoutez au rapport PDF le nom du port de débarquement.

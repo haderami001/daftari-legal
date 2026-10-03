@@ -48,6 +48,9 @@ dependencies:
   # dans son build.gradle, propriété absente avec Flutter 3.24 (échec de
   # compilation Android). 4.6.1 fixe compileSdk 34 et compile.
   geolocator_android: 4.6.1
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.19.0
 
 dev_dependencies:
   flutter_test:
@@ -73,6 +76,24 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  # Polices embarquées (licence SIL OFL, voir assets/fonts/OFL.txt) :
+  # même rendu partout, y compris hors ligne et dans la version web.
+  fonts:
+    - family: NotoSans
+      fonts:
+        - asset: assets/fonts/NotoSans-Regular.ttf
+        - asset: assets/fonts/NotoSans-Bold.ttf
+          weight: 700
+    - family: NotoSansArabic
+      fonts:
+        - asset: assets/fonts/NotoSansArabic-Regular.ttf
+        - asset: assets/fonts/NotoSansArabic-Bold.ttf
+          weight: 700
+
+  # Génère lib/l10n/app_localizations*.dart depuis les fichiers .arb
+  # (voir l10n.yaml).
+  generate: true
 
   # To add assets to your application, add an assets section, like this:
   # assets:

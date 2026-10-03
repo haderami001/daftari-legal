@@ -24,6 +24,7 @@ part 'base_de_donnees.g.dart';
   ControleMaillages,
   ControleEchantillons,
   FileEnvois,
+  Reglages,
 ])
 class BaseDeDonnees extends _$BaseDeDonnees {
   /// Base réelle : un fichier SQLite sur le téléphone, ou, dans un
@@ -45,8 +46,9 @@ class BaseDeDonnees extends _$BaseDeDonnees {
   ///
   /// - v1 : schéma initial
   /// - v2 : colonne `controles.rapport_pdf` (rapport PDF signé)
+  /// - v3 : table `reglages` (langue choisie)
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -61,6 +63,9 @@ class BaseDeDonnees extends _$BaseDeDonnees {
         onUpgrade: (m, depuis, vers) async {
           if (depuis < 2) {
             await m.addColumn(controles, controles.rapportPdf);
+          }
+          if (depuis < 3) {
+            await m.createTable(reglages);
           }
         },
         beforeOpen: (details) async {

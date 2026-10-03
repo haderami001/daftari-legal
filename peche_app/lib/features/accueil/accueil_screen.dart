@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../core/services/services.dart';
+import '../../l10n/libelles.dart';
+import '../../main.dart';
 import '../controle/controle_agent_screen.dart';
 import '../declaration/declaration_capitaine_screen.dart';
 import '../envois/envois_screen.dart';
@@ -55,29 +57,33 @@ class _AccueilScreenState extends State<AccueilScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final modules = <(IconData, String, String, Widget)>[
       (
         Icons.sailing,
-        'Déclaration du capitaine',
-        'Navire, licence, équipage, captures',
+        l10n.moduleDeclaration,
+        l10n.moduleDeclarationDetail,
         const DeclarationCapitaineScreen(),
       ),
       (
         Icons.shield,
-        'Contrôle garde-côtes',
-        'Inspection, maillage, échantillons, rapport',
+        l10n.moduleControle,
+        l10n.moduleControleDetail,
         const ControleAgentScreen(),
       ),
       (
         Icons.menu_book,
-        'Guide réglementaire',
-        'Code des pêches, FAO, ICCAT, UE-Mauritanie',
+        l10n.moduleGuide,
+        l10n.moduleGuideDetail,
         const GuideReglementaireScreen(),
       ),
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Pêche Conforme')),
+      appBar: AppBar(
+        title: Text(l10n.appTitle),
+        actions: const [_ChoixLangue()],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -100,11 +106,11 @@ class _AccueilScreenState extends State<AccueilScreen> {
                 label: Text('${_enAttente ?? 0}'),
                 child: const Icon(Icons.cloud_upload, size: 36),
               ),
-              title: const Text('Envois en attente'),
+              title: Text(l10n.moduleEnvois),
               subtitle: Text(switch (_enAttente) {
-                null => 'Lecture de la base locale…',
-                0 => 'Tout est synchronisé',
-                final n => '$n saisie(s) à envoyer au serveur',
+                null => l10n.envoisLecture,
+                0 => l10n.envoisToutSynchronise,
+                final n => l10n.envoisAEnvoyer(n),
               }),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => _ouvrir(const EnvoisScreen()),
@@ -112,6 +118,29 @@ class _AccueilScreenState extends State<AccueilScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Menu « Langue » : langue du téléphone, français ou arabe.
+class _ChoixLangue extends StatelessWidget {
+  const _ChoixLangue();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final actuelle = PecheApp.langueChoisie(context)?.languageCode;
+    return PopupMenuButton<String>(
+      tooltip: l10n.langue,
+      icon: const Icon(Icons.translate),
+      initialValue: actuelle ?? 'systeme',
+      onSelected: (code) => PecheApp.choisirLangue(
+          context, code == 'systeme' ? null : Locale(code)),
+      itemBuilder: (_) => [
+        PopupMenuItem(value: 'systeme', child: Text(l10n.langueSysteme)),
+        PopupMenuItem(value: 'fr', child: Text(l10n.langueFrancais)),
+        PopupMenuItem(value: 'ar', child: Text(l10n.langueArabe)),
+      ],
     );
   }
 }

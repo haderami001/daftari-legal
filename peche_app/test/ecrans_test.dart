@@ -57,7 +57,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Retour à l'accueil : la saisie attend dans la file d'envoi.
-    expect(find.text('1 saisie(s) à envoyer au serveur'), findsOneWidget);
+    expect(find.text('1 saisie à envoyer au serveur'), findsOneWidget);
     expect(await base.select(base.declarations).get(), hasLength(1));
   });
 

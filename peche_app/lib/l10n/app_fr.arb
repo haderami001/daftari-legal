@@ -1,0 +1,452 @@
+{
+  "@@locale": "fr",
+  "appTitle": "Pêche Conforme",
+  "@appTitle": {
+    "description": "Nom de l'application"
+  },
+  "langue": "Langue",
+  "langueSysteme": "Langue du téléphone",
+  "langueFrancais": "Français",
+  "langueArabe": "العربية",
+  "moduleDeclaration": "Déclaration du capitaine",
+  "moduleDeclarationDetail": "Navire, licence, équipage, captures",
+  "moduleControle": "Contrôle garde-côtes",
+  "moduleControleDetail": "Inspection, maillage, échantillons, rapport",
+  "moduleGuide": "Guide réglementaire",
+  "moduleGuideDetail": "Code des pêches, FAO, ICCAT, UE-Mauritanie",
+  "moduleEnvois": "Envois en attente",
+  "envoisLecture": "Lecture de la base locale…",
+  "envoisToutSynchronise": "Tout est synchronisé",
+  "envoisAEnvoyer": "{n, plural, =1{1 saisie à envoyer au serveur} other{{n} saisies à envoyer au serveur}}",
+  "@envoisAEnvoyer": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "aucunNavire": "Aucun navire avec licence dans la base locale.",
+  "annuler": "Annuler",
+  "ajouter": "Ajouter",
+  "suivant": "Suivant",
+  "retour": "Retour",
+  "fermer": "Fermer",
+  "signer": "Signer",
+  "gpsRecherche": "recherche du GPS…",
+  "gpsNonMesuree": "(non mesurée)",
+  "echecEnregistrement": "Échec de l'enregistrement : {erreur}",
+  "@echecEnregistrement": {
+    "placeholders": {
+      "erreur": {
+        "type": "String"
+      }
+    }
+  },
+  "navire": "Navire",
+  "immatriculation": "Immatriculation",
+  "pavillon": "Pavillon",
+  "numeroImo": "N° IMO",
+  "licence": "Licence",
+  "positionGps": "Position GPS",
+  "espece": "Espèce",
+  "numero": "n° {id}",
+  "@numero": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "uniteKg": "kg",
+  "uniteMm": "mm",
+  "uniteCm": "cm",
+  "uniteG": "g",
+  "signerEtEnvoyer": "Signer et envoyer",
+  "etapeNavire": "Navire & licence",
+  "etapeEquipage": "Équipage ({n})",
+  "@etapeEquipage": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "etapeCaptures": "Captures ({n})",
+  "@etapeCaptures": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "etapeVerification": "Vérification",
+  "enginUtilise": "Engin utilisé",
+  "ajouterMembre": "Ajouter un membre",
+  "membreEquipage": "Membre d'équipage",
+  "nomComplet": "Nom complet",
+  "fonction": "Fonction",
+  "fonctionParDefaut": "Matelot",
+  "nationalite": "Nationalité",
+  "especeCible": "Espèce cible",
+  "priseAccessoire": "Prise accessoire",
+  "ajouterCapture": "Ajouter une capture",
+  "capture": "Capture",
+  "poidsKg": "Poids (kg)",
+  "poidsTotal": "Poids total",
+  "prisesAccessoires": "Prises accessoires",
+  "quota": "Quota {espece}",
+  "@quota": {
+    "placeholders": {
+      "espece": {
+        "type": "String"
+      }
+    }
+  },
+  "declarationEnregistree": "Déclaration {id} enregistrée sur le téléphone — envoi à la prochaine connexion réseau.",
+  "@declarationEnregistree": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "sectionNavire": "1. Navire",
+  "navireInspecte": "Navire inspecté",
+  "detailsNavire": "Pavillon : {pavillon} · {type} · {longueur} m · {puissance} kW",
+  "@detailsNavire": {
+    "placeholders": {
+      "pavillon": {
+        "type": "String"
+      },
+      "type": {
+        "type": "String"
+      },
+      "longueur": {
+        "type": "String"
+      },
+      "puissance": {
+        "type": "String"
+      }
+    }
+  },
+  "licenceNumero": "Licence : {numero}",
+  "@licenceNumero": {
+    "placeholders": {
+      "numero": {
+        "type": "String"
+      }
+    }
+  },
+  "positionValeur": "Position : {position}",
+  "@positionValeur": {
+    "placeholders": {
+      "position": {
+        "type": "String"
+      }
+    }
+  },
+  "pavillonConcordant": "Pavillon et documents de bord concordants",
+  "marquageVisible": "Marquage / immatriculation visible",
+  "sectionCertificats": "2. Certificats",
+  "certificatExpireLe": "{numero} · expire le {date}",
+  "@certificatExpireLe": {
+    "placeholders": {
+      "numero": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "sectionEngin": "3. Engin et maillage",
+  "enginABord": "Engin à bord",
+  "maillageMinimum": "Minimum : {min} mm (tolérance {tolerance} %)",
+  "@maillageMinimum": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "tolerance": {
+        "type": "String"
+      }
+    }
+  },
+  "mesureMaille": "Mesure d'une maille (mm)",
+  "pasDeMaillage": "Pas de maillage réglementé pour cet engin.",
+  "sectionEchantillons": "4. Échantillons (tailles minimales)",
+  "especeMinimum": "{espece} — min {min} {unite}",
+  "@especeMinimum": {
+    "placeholders": {
+      "espece": {
+        "type": "String"
+      },
+      "min": {
+        "type": "String"
+      },
+      "unite": {
+        "type": "String"
+      }
+    }
+  },
+  "mesureUnite": "Mesure ({unite})",
+  "@mesureUnite": {
+    "placeholders": {
+      "unite": {
+        "type": "String"
+      }
+    }
+  },
+  "sectionStockage": "5. Plan de stockage",
+  "calesConformes": "Cales conformes au plan de stockage et au journal",
+  "observations": "Observations",
+  "genererRapport": "Générer le rapport d'inspection",
+  "rapportGenere": "Rapport généré",
+  "rapportLangue": "Le rapport officiel est rédigé en français.",
+  "rapportEnregistre": "Rapport {id} signé et enregistré — envoi à la prochaine connexion réseau.",
+  "@rapportEnregistre": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "rapportPdfTitre": "Rapport d'inspection (PDF)",
+  "apercuIndisponible": "Aperçu indisponible sur cet appareil.\nUtilisez Partager ou Imprimer.\n({erreur})",
+  "@apercuIndisponible": {
+    "placeholders": {
+      "erreur": {
+        "type": "String"
+      }
+    }
+  },
+  "conforme": "Conforme",
+  "aucuneNonConformite": "Aucune non-conformité détectée.",
+  "nonConformites": "{n, plural, =1{1 non-conformité} other{{n} non-conformités}}",
+  "@nonConformites": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "amendeIndicative": "Amende indicative : {min} à {max} MRU",
+  "@amendeIndicative": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "envoyerMaintenant": "Envoyer maintenant",
+  "toutEnvoye": "Tout a été envoyé.",
+  "saisiesStockees": "{n, plural, =1{1 saisie stockée sur le téléphone} other{{n} saisies stockées sur le téléphone}}",
+  "@saisiesStockees": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "retourReseau": "Elles partiront automatiquement au retour du réseau.",
+  "echecs": "{n, plural, =1{1 échec} other{{n} échecs}}",
+  "@echecs": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "typeDeclaration": "Déclaration",
+  "typeControle": "Contrôle",
+  "pasDePdf": "Pas de PDF pour ce contrôle (version antérieure).",
+  "serveurNonConfigure": "Serveur non configuré : les saisies restent sur le téléphone (paramètre API_URL).",
+  "envoiDejaEnCours": "Envoi déjà en cours.",
+  "resultatEnvoi": "{envoyes} envoyé(s), {echecs} échec(s)",
+  "@resultatEnvoi": {
+    "placeholders": {
+      "envoyes": {
+        "type": "int"
+      },
+      "echecs": {
+        "type": "int"
+      }
+    }
+  },
+  "valeursDemo": "Valeurs de démonstration",
+  "valeursDemoDetail": "Les seuils affichés doivent être validés avec les textes officiels avant toute utilisation.",
+  "texteCodeTitre": "Code des pêches maritimes (Mauritanie)",
+  "texteCodeResume": "Loi n° 2015-017 et ses décrets/arrêtés d'application : licences, zones, engins, tailles minimales, infractions et sanctions.",
+  "textePsmaTitre": "FAO — Accord sur les mesures du ressort de l'État du port (PSMA)",
+  "textePsmaResume": "Lutte contre la pêche INN : contrôle au port des navires étrangers, refus d'accès, échange d'informations.",
+  "texteConduiteTitre": "FAO — Code de conduite pour une pêche responsable",
+  "texteConduiteResume": "Principes de gestion durable, sélectivité des engins, réduction des prises accessoires.",
+  "texteIccatTitre": "ICCAT",
+  "texteIccatResume": "Recommandations sur les thonidés de l'Atlantique : tailles minimales, quotas, déclaration des captures, observateurs.",
+  "texteUeTitre": "Accord de partenariat UE-Mauritanie (APPD)",
+  "texteUeResume": "Protocole en vigueur : catégories de pêche, possibilités de pêche, débarquements, embarquement de marins mauritaniens, VMS / ERS.",
+  "taillesMinimales": "Tailles minimales ({version})",
+  "@taillesMinimales": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "maillagesEtPrises": "Maillages et prises accessoires",
+  "prisesAccessoiresMax": "Prises accessoires max : {pct} %",
+  "@prisesAccessoiresMax": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "organismeCodePeches": "Code des pêches (MRT)",
+  "engin": "{engin, select, ligne{Ligne / palangre} filetMaillant{Filet maillant} casier{Casier / pot à poulpe} chalutDemersal{Chalut de fond} chalutPelagique{Chalut pélagique} senneTournante{Senne tournante} drague{Drague} other{{engin}}}",
+  "@engin": {
+    "placeholders": {
+      "engin": {
+        "type": "String"
+      }
+    }
+  },
+  "typeNavire": "{type, select, pirogue{Pirogue} chalutier{Chalutier} senneur{Senneur} dragueur{Dragueur} other{{type}}}",
+  "@typeNavire": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "segment": "{segment, select, artisanale{Pêche artisanale} cotiere{Pêche côtière} hauturiere{Pêche hauturière} other{{segment}}}",
+  "@segment": {
+    "placeholders": {
+      "segment": {
+        "type": "String"
+      }
+    }
+  },
+  "gravite": "{gravite, select, mineure{Mineure} grave{Grave} tresGrave{Très grave} other{{gravite}}}",
+  "@gravite": {
+    "placeholders": {
+      "gravite": {
+        "type": "String"
+      }
+    }
+  },
+  "certificat": "{certificat, select, navigabilite{Certificat de navigabilité} jaugeage{Certificat de jaugeage} hygiene{Agrément sanitaire} radio{Licence radio / VMS} other{{certificat}}}",
+  "@certificat": {
+    "placeholders": {
+      "certificat": {
+        "type": "String"
+      }
+    }
+  },
+  "especeNom": "{code, select, OCC{Poulpe} CTC{Seiche} SAA{Sardinelle ronde} SOL{Sole} YFT{Albacore} BFT{Thon rouge} other{{code}}}",
+  "@especeNom": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "infLicenceInvalide": "Licence {licence} non valide à cette date.",
+  "@infLicenceInvalide": {
+    "placeholders": {
+      "licence": {
+        "type": "String"
+      }
+    }
+  },
+  "infEnginNonAutorise": "Engin « {engin} » non autorisé par la licence.",
+  "@infEnginNonAutorise": {
+    "placeholders": {
+      "engin": {
+        "type": "String"
+      }
+    }
+  },
+  "infCertificatExpire": "{certificat} n° {numero} expiré.",
+  "@infCertificatExpire": {
+    "placeholders": {
+      "certificat": {
+        "type": "String"
+      },
+      "numero": {
+        "type": "String"
+      }
+    }
+  },
+  "infQuotaDepasse": "Quota {espece} dépassé : {poids} kg pour {quota} kg autorisés.",
+  "@infQuotaDepasse": {
+    "placeholders": {
+      "espece": {
+        "type": "String"
+      },
+      "poids": {
+        "type": "String"
+      },
+      "quota": {
+        "type": "String"
+      }
+    }
+  },
+  "infPrisesAccessoires": "Prises accessoires {pct} % (max {max} % pour {engin}).",
+  "@infPrisesAccessoires": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      },
+      "engin": {
+        "type": "String"
+      }
+    }
+  },
+  "infPavillon": "Pavillon / identification du navire non conforme.",
+  "infMarquage": "Marquage extérieur (immatriculation) absent ou illisible.",
+  "infStockage": "Plan de stockage en cale non conforme à la déclaration.",
+  "infMaillage": "Maillage moyen {moyenne} mm < {min} mm requis ({engin}).",
+  "@infMaillage": {
+    "placeholders": {
+      "moyenne": {
+        "type": "String"
+      },
+      "min": {
+        "type": "String"
+      },
+      "engin": {
+        "type": "String"
+      }
+    }
+  },
+  "infTailleMin": "{espece} : {sous}/{total} individus sous {min} {unite} ({organisme}).",
+  "@infTailleMin": {
+    "placeholders": {
+      "espece": {
+        "type": "String"
+      },
+      "sous": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "min": {
+        "type": "String"
+      },
+      "unite": {
+        "type": "String"
+      },
+      "organisme": {
+        "type": "String"
+      }
+    }
+  }
+}

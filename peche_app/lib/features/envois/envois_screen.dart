@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../core/data/base/base_de_donnees.dart';
 import '../../core/data/base/tables.dart';
 import '../../core/services/services.dart';
+import '../../core/services/synchronisation.dart';
+import '../../l10n/libelles.dart';
 import '../controle/rapport_pdf_screen.dart';
 
 /// Liste des saisies enregistrées sur le téléphone et pas encore reçues
@@ -28,8 +30,8 @@ class _EnvoisScreenState extends State<EnvoisScreen> {
     final pdf = await ServicesScope.of(context).saisies.rapportPdf(controleId);
     if (!mounted) return;
     if (pdf == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Pas de PDF pour ce contrôle (version antérieure).')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(context.l10n.pasDePdf)));
       return;
     }
     await Navigator.of(context).push(MaterialPageRoute(
@@ -48,18 +50,25 @@ class _EnvoisScreenState extends State<EnvoisScreen> {
       _envoiEnCours = false;
       _envois = services.envois.enAttente();
     });
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(resultat.toString())));
+    final l10n = context.l10n;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(switch (resultat.statut) {
+      StatutSynchro.termine =>
+        l10n.resultatEnvoi(resultat.envoyes, resultat.echecs),
+      StatutSynchro.nonConfigure => l10n.serveurNonConfigure,
+      StatutSynchro.dejaEnCours => l10n.envoiDejaEnCours,
+    })));
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Envois en attente'),
+        title: Text(l10n.moduleEnvois),
         actions: [
           IconButton(
-            tooltip: 'Envoyer maintenant',
+            tooltip: l10n.envoyerMaintenant,
             onPressed: _envoiEnCours ? null : _envoyerMaintenant,
             icon: _envoiEnCours
                 ? const SizedBox.square(
@@ -77,11 +86,11 @@ class _EnvoisScreenState extends State<EnvoisScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (envois.isEmpty) {
-            return const Center(
+            return Center(
               child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Icon(Icons.cloud_done, size: 48, color: Colors.green),
-                SizedBox(height: 8),
-                Text('Tout a été envoyé.'),
+                const Icon(Icons.cloud_done, size: 48, color: Colors.green),
+                const SizedBox(height: 8),
+                Text(l10n.toutEnvoye),
               ]),
             );
           }
@@ -89,10 +98,8 @@ class _EnvoisScreenState extends State<EnvoisScreen> {
             children: [
               ListTile(
                 leading: const Icon(Icons.cloud_off),
-                title: Text('${envois.length} saisie(s) stockée(s) '
-                    'sur le téléphone'),
-                subtitle: const Text('Elles partiront automatiquement au '
-                    'retour du réseau.'),
+                title: Text(l10n.saisiesStockees(envois.length)),
+                subtitle: Text(l10n.retourReseau),
               ),
               const Divider(),
               for (final e in envois)
@@ -101,11 +108,14 @@ class _EnvoisScreenState extends State<EnvoisScreen> {
                     TypeEnvoi.declaration => Icons.sailing,
                     TypeEnvoi.controle => Icons.shield,
                   }),
-                  title: Text(e.resume),
+                  title: Text('${switch (e.type) {
+                    TypeEnvoi.declaration => l10n.typeDeclaration,
+                    TypeEnvoi.controle => l10n.typeControle,
+                  }} — ${e.resume}'),
                   subtitle: Text(
                     '${e.creeLe.toIso8601String().substring(0, 16).replaceFirst('T', ' ')}'
-                    ' · n° ${e.entiteId.substring(0, 8)}'
-                    '${e.tentatives > 0 ? ' · ${e.tentatives} échec(s)' : ''}'
+                    ' · ${l10n.numero(e.entiteId.substring(0, 8))}'
+                    '${e.tentatives > 0 ? ' · ${l10n.echecs(e.tentatives)}' : ''}'
                     '${e.derniereErreur == null ? '' : '\n${e.derniereErreur}'}',
                   ),
                   trailing: e.type == TypeEnvoi.controle

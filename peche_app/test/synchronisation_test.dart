@@ -60,7 +60,7 @@ void main() {
 
     final r = await s.synchro.synchroniser();
 
-    expect(r.message, contains('non configuré'));
+    expect(r.statut, StatutSynchro.nonConfigure);
     expect(await s.envois.nombreEnAttente(), 2);
     expect((await s.envois.enAttente()).first.tentatives, 0);
   });

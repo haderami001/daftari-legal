@@ -9,6 +9,7 @@ import '../../core/models/navire.dart';
 import '../../core/regulation/calcul_reglementaire.dart';
 import '../../core/regulation/referentiel.dart';
 import '../../core/widgets/resultat_card.dart';
+import '../../l10n/libelles.dart';
 
 /// Prototype : déclaration du capitaine en 4 étapes (Stepper).
 ///
@@ -96,19 +97,20 @@ class _DeclarationCapitaineScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final flotte = _flotte;
     if (flotte == null || flotte.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Déclaration du capitaine')),
+        appBar: AppBar(title: Text(l10n.moduleDeclaration)),
         body: Center(
           child: flotte == null
               ? const CircularProgressIndicator()
-              : const Text('Aucun navire avec licence dans la base locale.'),
+              : Text(l10n.aucunNavire),
         ),
       );
     }
     return Scaffold(
-      appBar: AppBar(title: const Text('Déclaration du capitaine')),
+      appBar: AppBar(title: Text(l10n.moduleDeclaration)),
       body: Stepper(
         currentStep: _etape,
         onStepTapped: (i) => setState(() => _etape = i),
@@ -119,31 +121,31 @@ class _DeclarationCapitaineScreenState
           child: Wrap(spacing: 8, runSpacing: 8, children: [
             FilledButton(
               onPressed: _enregistrementEnCours ? null : details.onStepContinue,
-              child: Text(_etape < 3 ? 'Suivant' : 'Signer et envoyer'),
+              child: Text(_etape < 3 ? l10n.suivant : l10n.signerEtEnvoyer),
             ),
             if (_etape > 0)
               TextButton(
-                  onPressed: details.onStepCancel, child: const Text('Retour')),
+                  onPressed: details.onStepCancel, child: Text(l10n.retour)),
           ]),
         ),
         steps: [
           Step(
-            title: const Text('Navire & licence'),
+            title: Text(l10n.etapeNavire),
             isActive: _etape >= 0,
             content: _etapeNavire(),
           ),
           Step(
-            title: Text('Équipage (${_equipage.length})'),
+            title: Text(l10n.etapeEquipage(_equipage.length)),
             isActive: _etape >= 1,
             content: _etapeEquipage(),
           ),
           Step(
-            title: Text('Captures (${_captures.length})'),
+            title: Text(l10n.etapeCaptures(_captures.length)),
             isActive: _etape >= 2,
             content: _etapeCaptures(),
           ),
           Step(
-            title: const Text('Vérification'),
+            title: Text(l10n.etapeVerification),
             isActive: _etape >= 3,
             content: _etapeVerification(),
           ),
@@ -154,6 +156,7 @@ class _DeclarationCapitaineScreenState
 
   // ---------------- Étape 1 ----------------
   Widget _etapeNavire() {
+    final l10n = context.l10n;
     final aujourdHui = DateTime.now();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,12 +164,13 @@ class _DeclarationCapitaineScreenState
         DropdownButtonFormField<String>(
           isExpanded: true,
           value: _navire.id,
-          decoration: const InputDecoration(labelText: 'Navire'),
+          decoration: InputDecoration(labelText: l10n.navire),
           items: [
             for (final (:navire, licence: _) in _flotte!)
               DropdownMenuItem(
                 value: navire.id,
-                child: Text('${navire.nom} — ${navire.type.libelle}'),
+                child: Text(
+                    '${navire.nom} — ${l10n.libelleTypeNavire(navire.type)}'),
               ),
           ],
           onChanged: (id) => setState(
@@ -176,23 +180,26 @@ class _DeclarationCapitaineScreenState
         DropdownButtonFormField<TypeEngin>(
           isExpanded: true,
           value: _engin,
-          decoration: const InputDecoration(labelText: 'Engin utilisé'),
+          decoration: InputDecoration(labelText: l10n.enginUtilise),
           items: [
             for (final e in TypeEngin.values)
-              DropdownMenuItem(value: e, child: Text(e.libelle)),
+              DropdownMenuItem(value: e, child: Text(l10n.libelleEngin(e))),
           ],
           onChanged: (e) => setState(() => _engin = e!),
         ),
         const SizedBox(height: 12),
-        _ligne('Immatriculation', _navire.immatriculation),
-        _ligne('Pavillon', _navire.pavillon),
-        if (_navire.numeroImo != null) _ligne('N° IMO', _navire.numeroImo!),
-        _ligne('Licence', '${_licence.numero} (${_licence.segment.libelle})'),
+        _ligne(l10n.immatriculation, _navire.immatriculation),
+        _ligne(l10n.pavillon, _navire.pavillon),
+        if (_navire.numeroImo != null)
+          _ligne(l10n.numeroImo, _navire.numeroImo!),
+        _ligne(l10n.licence,
+            '${_licence.numero} (${l10n.libelleSegment(_licence.segment)})'),
         _ligne(
-          'Position GPS',
+          l10n.positionGps,
           _position == null
-              ? 'recherche du GPS…'
-              : '$_position${_position!.demonstration ? ' (non mesurée)' : ''}',
+              ? l10n.gpsRecherche
+              : '${isolerGaucheDroite('$_position')}'
+                  '${_position!.demonstration ? ' ${l10n.gpsNonMesuree}' : ''}',
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -206,7 +213,7 @@ class _DeclarationCapitaineScreenState
                   color: c.estValideLe(aujourdHui) ? Colors.green : Colors.red,
                   size: 18,
                 ),
-                label: Text(c.type.libelle),
+                label: Text(l10n.libelleCertificat(c.type)),
               ),
           ],
         ),
@@ -230,7 +237,7 @@ class _DeclarationCapitaineScreenState
           ),
         OutlinedButton.icon(
           icon: const Icon(Icons.person_add),
-          label: const Text('Ajouter un membre'),
+          label: Text(context.l10n.ajouterMembre),
           onPressed: _ajouterMembre,
         ),
       ],
@@ -238,31 +245,32 @@ class _DeclarationCapitaineScreenState
   }
 
   Future<void> _ajouterMembre() async {
+    final l10n = context.l10n;
     final nom = TextEditingController();
-    final fonction = TextEditingController(text: 'Matelot');
+    final fonction = TextEditingController(text: l10n.fonctionParDefaut);
     final nationalite = TextEditingController(text: 'MRT');
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Membre d\'équipage'),
+        title: Text(l10n.membreEquipage),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
           TextField(
               controller: nom,
-              decoration: const InputDecoration(labelText: 'Nom complet')),
+              decoration: InputDecoration(labelText: l10n.nomComplet)),
           TextField(
               controller: fonction,
-              decoration: const InputDecoration(labelText: 'Fonction')),
+              decoration: InputDecoration(labelText: l10n.fonction)),
           TextField(
               controller: nationalite,
-              decoration: const InputDecoration(labelText: 'Nationalité')),
+              decoration: InputDecoration(labelText: l10n.nationalite)),
         ]),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Annuler')),
+              child: Text(l10n.annuler)),
           FilledButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Ajouter')),
+              child: Text(l10n.ajouter)),
         ],
       ),
     );
@@ -277,6 +285,7 @@ class _DeclarationCapitaineScreenState
 
   // ---------------- Étape 3 ----------------
   Widget _etapeCaptures() {
+    final l10n = context.l10n;
     return Column(
       children: [
         for (final (i, c) in _captures.indexed)
@@ -286,12 +295,11 @@ class _DeclarationCapitaineScreenState
                   ? Icons.set_meal
                   : Icons.report_gmailerrorred,
             ),
-            title: Text(
-                '${referentielDemo.espece(c.especeCode)?.nomCommun ?? c.especeCode}'
-                ' — ${c.poidsKg.toStringAsFixed(0)} kg'),
+            title: Text('${l10n.nomEspece(c.especeCode)}'
+                ' — ${formaterMontant(c.poidsKg)} ${l10n.uniteKg}'),
             subtitle: Text(_licence.especesCibles.contains(c.especeCode)
-                ? 'Espèce cible'
-                : 'Prise accessoire'),
+                ? l10n.especeCible
+                : l10n.priseAccessoire),
             trailing: IconButton(
               icon: const Icon(Icons.delete_outline),
               onPressed: () => setState(() => _captures.removeAt(i)),
@@ -299,7 +307,7 @@ class _DeclarationCapitaineScreenState
           ),
         OutlinedButton.icon(
           icon: const Icon(Icons.add),
-          label: const Text('Ajouter une capture'),
+          label: Text(l10n.ajouterCapture),
           onPressed: _ajouterCapture,
         ),
       ],
@@ -307,37 +315,39 @@ class _DeclarationCapitaineScreenState
   }
 
   Future<void> _ajouterCapture() async {
+    final l10n = context.l10n;
     var espece = _licence.especesCibles.first;
     final poids = TextEditingController();
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Capture'),
+        title: Text(l10n.capture),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
           DropdownButtonFormField<String>(
             isExpanded: true,
             value: espece,
-            decoration: const InputDecoration(labelText: 'Espèce'),
+            decoration: InputDecoration(labelText: l10n.espece),
             items: [
               for (final r in referentielDemo.especes.values)
                 DropdownMenuItem(
-                    value: r.code, child: Text('${r.nomCommun} (${r.code})')),
+                    value: r.code,
+                    child: Text('${l10n.nomEspece(r.code)} (${r.code})')),
             ],
             onChanged: (v) => espece = v!,
           ),
           TextField(
             controller: poids,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'Poids (kg)'),
+            decoration: InputDecoration(labelText: l10n.poidsKg),
           ),
         ]),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Annuler')),
+              child: Text(l10n.annuler)),
           FilledButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Ajouter')),
+              child: Text(l10n.ajouter)),
         ],
       ),
     );
@@ -349,20 +359,22 @@ class _DeclarationCapitaineScreenState
 
   // ---------------- Étape 4 ----------------
   Widget _etapeVerification() {
+    final l10n = context.l10n;
     final d = _declaration;
     final resultat = _calcul.verifierDeclaration(d);
     final pctAcc = _calcul.pourcentagePrisesAccessoires(d.licence, d.captures);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _ligne('Poids total', '${formaterMontant(d.poidsTotalKg)} kg'),
-        _ligne('Prises accessoires', '${pctAcc.toStringAsFixed(1)} %'),
+        _ligne(l10n.poidsTotal,
+            '${formaterMontant(d.poidsTotalKg)} ${l10n.uniteKg}'),
+        _ligne(l10n.prisesAccessoires, '${pctAcc.toStringAsFixed(1)} %'),
         for (final MapEntry(key: code, value: quota)
             in d.licence.quotasKg.entries)
           _ligne(
-            'Quota $code',
+            l10n.quota(l10n.nomEspece(code)),
             '${formaterMontant(CalculReglementaire.cumulParEspece(d.captures)[code] ?? 0)}'
-                ' / ${formaterMontant(quota)} kg',
+            ' / ${formaterMontant(quota)} ${l10n.uniteKg}',
           ),
         const SizedBox(height: 8),
         ResultatCard(resultat: resultat),
@@ -385,13 +397,12 @@ class _DeclarationCapitaineScreenState
       if (!mounted) return;
       setState(() => _enregistrementEnCours = false);
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Échec de l\'enregistrement : $e')));
+          SnackBar(content: Text(context.l10n.echecEnregistrement('$e'))));
       return;
     }
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Déclaration ${id.substring(0, 8)} enregistrée sur le '
-          'téléphone — envoi à la prochaine connexion réseau.'),
+      content: Text(context.l10n.declarationEnregistree(id.substring(0, 8))),
     ));
     Navigator.of(context).pop();
   }
