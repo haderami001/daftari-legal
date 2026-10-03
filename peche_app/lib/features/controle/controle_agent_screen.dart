@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../core/data/donnees_demo.dart';
+import '../../core/data/depots/depots.dart';
+import '../../core/data/depots/flotte_depot.dart';
 import '../../core/models/declaration.dart';
 import '../../core/models/enums.dart';
 import '../../core/models/navire.dart';
@@ -22,21 +23,47 @@ class ControleAgentScreen extends StatefulWidget {
 
 class _ControleAgentScreenState extends State<ControleAgentScreen> {
   final _calcul = const CalculReglementaire(referentielDemo);
-  late Controle _controle = _nouveauControle(naviresDemo[1]);
+  late Depots _depots;
+
+  /// `null` tant que la flotte n'est pas chargée depuis la base locale.
+  List<NavireLicence>? _flotte;
+  late NavireLicence _choix;
+  late Controle _controle;
 
   final _maillageCtrl = TextEditingController();
   final _echantillonCtrl = TextEditingController();
   String _especeEchantillon = referentielDemo.especes.keys.first;
 
-  Controle _nouveauControle(Navire n) => Controle(
-        navire: n,
-        agent: 'Agent GCM-0427', // en production : utilisateur connecté
-        date: DateTime.now(),
-        position: PositionGps(20.62, -17.30, DateTime.now()),
-        engin: licencesDemo[n.id]!.enginsAutorises.first,
-      );
+  void _nouveauControle(NavireLicence choix) {
+    _choix = choix;
+    _controle = Controle(
+      navire: choix.navire,
+      agent: 'Agent GCM-0427', // en production : utilisateur connecté
+      date: DateTime.now(),
+      position: PositionGps(20.62, -17.30, DateTime.now()),
+      engin: choix.licence.enginsAutorises.first,
+    );
+  }
 
-  Licence get _licence => licencesDemo[_controle.navire.id]!;
+  Licence get _licence => _choix.licence;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_flotte == null) {
+      _depots = DepotsScope.of(context);
+      _chargerFlotte();
+    }
+  }
+
+  Future<void> _chargerFlotte() async {
+    final flotte = await _depots.flotte.naviresAvecLicence();
+    if (!mounted) return;
+    setState(() {
+      _flotte = flotte;
+      if (flotte.isNotEmpty) _nouveauControle(flotte.first);
+    });
+  }
 
   @override
   void dispose() {
@@ -47,6 +74,17 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final flotte = _flotte;
+    if (flotte == null || flotte.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Contrôle garde-côtes')),
+        body: Center(
+          child: flotte == null
+              ? const CircularProgressIndicator()
+              : const Text('Aucun navire avec licence dans la base locale.'),
+        ),
+      );
+    }
     final c = _controle;
     final resultat = _calcul.verifierControle(c, licence: _licence);
     final regleEngin = referentielDemo.engin(c.engin);
@@ -62,18 +100,19 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
             titre: '1. Navire',
             icone: Icons.directions_boat,
             children: [
-              DropdownButtonFormField<Navire>(
+              DropdownButtonFormField<String>(
                 isExpanded: true,
-                value: c.navire,
+                value: c.navire.id,
                 decoration: const InputDecoration(labelText: 'Navire inspecté'),
                 items: [
-                  for (final n in naviresDemo)
+                  for (final (:navire, licence: _) in flotte)
                     DropdownMenuItem(
-                        value: n,
-                        child: Text('${n.nom} (${n.immatriculation})')),
+                        value: navire.id,
+                        child:
+                            Text('${navire.nom} (${navire.immatriculation})')),
                 ],
-                onChanged: (n) =>
-                    setState(() => _controle = _nouveauControle(n!)),
+                onChanged: (id) => setState(() => _nouveauControle(
+                    flotte.firstWhere((x) => x.navire.id == id))),
               ),
               Text('Pavillon : ${c.navire.pavillon} · '
                   '${c.navire.type.libelle} · ${c.navire.longueurM} m · '
@@ -257,9 +296,9 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
     _echantillonCtrl.clear();
   }
 
-  void _afficherRapport(ResultatVerification r) {
+  Future<void> _afficherRapport(ResultatVerification r) async {
     final texte = genererRapportControle(_controle, r);
-    showDialog<void>(
+    final signe = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Rapport généré'),
@@ -269,18 +308,34 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx), child: const Text('Fermer')),
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Fermer')),
           FilledButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                  content: Text('Rapport signé et mis en file d\'envoi.')));
-            },
+            onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Signer'),
           ),
         ],
       ),
     );
+    if (signe != true || !mounted) return;
+
+    // Le rapport signé est figé dans la base locale, puis mis en file
+    // d'envoi vers le serveur.
+    final String id;
+    try {
+      id = await _depots.saisies.enregistrerControle(_controle, r, texte);
+    } catch (e) {
+      // Rien n'a été écrit (transaction annulée) : l'agent peut réessayer.
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Échec de l\'enregistrement : $e')));
+      return;
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Rapport ${id.substring(0, 8)} signé et enregistré — '
+            'envoi à la prochaine connexion réseau.')));
+    Navigator.of(context).pop();
   }
 }
 

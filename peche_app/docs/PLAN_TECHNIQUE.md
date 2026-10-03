@@ -114,7 +114,7 @@ lib/
 ├── core/                      ← réutilisable par tous les modules
 │   ├── models/                  navire, licence, déclaration, contrôle
 │   ├── regulation/              référentiel + moteur de calcul + rapport
-│   ├── data/                    (prod : Drift, API, synchronisation)
+│   ├── data/                    base Drift, dépôts, file d'envoi (API à venir)
 │   └── widgets/                 composants communs
 └── features/                  ← un dossier par module métier
     ├── accueil/

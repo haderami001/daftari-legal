@@ -35,6 +35,17 @@ jobs:
       - name: Dépendances
         run: flutter pub get
 
+      # Les tests de la base locale utilisent SQLite installé sur la machine.
+      - name: SQLite
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libsqlite3-dev
+
+      # Le code Drift généré (*.g.dart) est versionné : on vérifie qu'il
+      # correspond bien aux tables (sinon : lancer build_runner et committer).
+      - name: Code généré à jour
+        run: |
+          dart run build_runner build --delete-conflicting-outputs
+          git diff --exit-code -- lib
+
       - name: Formatage
         run: dart format --output=none --set-exit-if-changed lib test
 

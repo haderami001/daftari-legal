@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../core/data/donnees_demo.dart';
+import '../../core/data/depots/depots.dart';
+import '../../core/data/depots/flotte_depot.dart';
 import '../../core/models/declaration.dart';
 import '../../core/models/enums.dart';
 import '../../core/models/navire.dart';
@@ -23,9 +24,15 @@ class _DeclarationCapitaineScreenState
     extends State<DeclarationCapitaineScreen> {
   final _calcul = const CalculReglementaire(referentielDemo);
 
+  late Depots _depots;
+
+  /// `null` tant que la flotte n'est pas chargée depuis la base locale.
+  List<NavireLicence>? _flotte;
+  late NavireLicence _choix;
+  late TypeEngin _engin;
+  bool _enregistrementEnCours = false;
+
   int _etape = 0;
-  Navire _navire = naviresDemo.first;
-  late TypeEngin _engin = licencesDemo[_navire.id]!.enginsAutorises.first;
   final _equipage = <MembreEquipage>[];
   final _captures = <Capture>[];
 
@@ -33,7 +40,34 @@ class _DeclarationCapitaineScreenState
   // `geolocator` + horodatage, et contrôle de cohérence avec le VMS.
   final _position = PositionGps(20.85, -17.45, DateTime.now());
 
-  Licence get _licence => licencesDemo[_navire.id]!;
+  Navire get _navire => _choix.navire;
+  Licence get _licence => _choix.licence;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // `context` n'est pas utilisable dans initState pour lire un
+    // InheritedWidget : on le fait ici, une seule fois.
+    if (_flotte == null) {
+      _depots = DepotsScope.of(context);
+      _chargerFlotte();
+    }
+  }
+
+  Future<void> _chargerFlotte() async {
+    final flotte = await _depots.flotte.naviresAvecLicence();
+    if (!mounted) return;
+    setState(() {
+      _flotte = flotte;
+      if (flotte.isNotEmpty) _choisir(flotte.first);
+    });
+  }
+
+  void _choisir(NavireLicence choix) {
+    _choix = choix;
+    _engin = choix.licence.enginsAutorises.first;
+    _captures.clear();
+  }
 
   DeclarationCapitaine get _declaration => DeclarationCapitaine(
         navire: _navire,
@@ -46,6 +80,17 @@ class _DeclarationCapitaineScreenState
 
   @override
   Widget build(BuildContext context) {
+    final flotte = _flotte;
+    if (flotte == null || flotte.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Déclaration du capitaine')),
+        body: Center(
+          child: flotte == null
+              ? const CircularProgressIndicator()
+              : const Text('Aucun navire avec licence dans la base locale.'),
+        ),
+      );
+    }
     return Scaffold(
       appBar: AppBar(title: const Text('Déclaration du capitaine')),
       body: Stepper(
@@ -57,7 +102,7 @@ class _DeclarationCapitaineScreenState
           padding: const EdgeInsets.only(top: 12),
           child: Wrap(spacing: 8, runSpacing: 8, children: [
             FilledButton(
-              onPressed: details.onStepContinue,
+              onPressed: _enregistrementEnCours ? null : details.onStepContinue,
               child: Text(_etape < 3 ? 'Suivant' : 'Signer et envoyer'),
             ),
             if (_etape > 0)
@@ -97,22 +142,19 @@ class _DeclarationCapitaineScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        DropdownButtonFormField<Navire>(
+        DropdownButtonFormField<String>(
           isExpanded: true,
-          value: _navire,
+          value: _navire.id,
           decoration: const InputDecoration(labelText: 'Navire'),
           items: [
-            for (final n in naviresDemo)
+            for (final (:navire, licence: _) in _flotte!)
               DropdownMenuItem(
-                value: n,
-                child: Text('${n.nom} — ${n.type.libelle}'),
+                value: navire.id,
+                child: Text('${navire.nom} — ${navire.type.libelle}'),
               ),
           ],
-          onChanged: (n) => setState(() {
-            _navire = n!;
-            _engin = _licence.enginsAutorises.first;
-            _captures.clear();
-          }),
+          onChanged: (id) => setState(
+              () => _choisir(_flotte!.firstWhere((c) => c.navire.id == id))),
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<TypeEngin>(
@@ -307,12 +349,27 @@ class _DeclarationCapitaineScreenState
     );
   }
 
-  void _envoyer() {
-    // En production : enregistrement dans la file d'attente locale (Drift),
-    // signature, puis synchronisation automatique dès qu'il y a du réseau.
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('Déclaration enregistrée — envoi à la prochaine '
-          'connexion réseau.'),
+  /// Enregistre la déclaration dans la base locale et la place dans la
+  /// file d'envoi : elle partira vers le serveur au retour du réseau.
+  Future<void> _envoyer() async {
+    setState(() => _enregistrementEnCours = true);
+    final d = _declaration;
+    final String id;
+    try {
+      id = await _depots.saisies
+          .enregistrerDeclaration(d, _calcul.verifierDeclaration(d));
+    } catch (e) {
+      // Rien n'a été écrit (transaction annulée) : on peut réessayer.
+      if (!mounted) return;
+      setState(() => _enregistrementEnCours = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Échec de l\'enregistrement : $e')));
+      return;
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('Déclaration ${id.substring(0, 8)} enregistrée sur le '
+          'téléphone — envoi à la prochaine connexion réseau.'),
     ));
     Navigator.of(context).pop();
   }
