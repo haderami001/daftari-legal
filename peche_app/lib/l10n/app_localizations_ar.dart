@@ -771,4 +771,45 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get licenceSupprimee => 'تم حذف الترخيص';
+
+  @override
+  String get moduleSupervision => 'لوحة المتابعة';
+
+  @override
+  String get moduleSupervisionDetail =>
+      'التصريحات وعمليات المراقبة المستلمة، تقارير PDF (المشرف)';
+
+  @override
+  String get ongletDeclarations => 'التصريحات';
+
+  @override
+  String get ongletControles => 'عمليات المراقبة';
+
+  @override
+  String navireLe(String navire, String date) {
+    return 'السفينة $navire — $date';
+  }
+
+  @override
+  String nbInfractions(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n مخالفة',
+      many: '$n مخالفةً',
+      few: '$n مخالفات',
+      two: 'مخالفتان',
+      one: 'مخالفة واحدة',
+      zero: 'لا توجد مخالفة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String envoyePar(String compte) {
+    return 'أرسله $compte';
+  }
+
+  @override
+  String get avecInfraction => 'بها مخالفات';
 }

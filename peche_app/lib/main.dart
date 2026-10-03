@@ -4,8 +4,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/data/base/base_de_donnees.dart';
 import 'core/data/depots/reglages_depot.dart';
 import 'core/services/administration.dart';
+import 'core/services/serveur_demo.dart';
 import 'core/services/services.dart';
 import 'core/services/session.dart';
+import 'core/services/supervision.dart';
 import 'core/services/synchronisation.dart';
 import 'features/accueil/accueil_screen.dart';
 import 'features/connexion/connexion_screen.dart';
@@ -24,20 +26,36 @@ const _apiJeton = String.fromEnvironment('API_JETON');
 /// Vide = mode démonstration, sans écran de connexion.
 const _oidcEmetteur = String.fromEnvironment('OIDC_EMETTEUR');
 
+/// Démonstration complète sans réseau : le serveur du dépôt tourne dans
+/// l'application (tableau de bord, administration, synchronisation) :
+///     flutter run --dart-define=SERVEUR_DEMO=true
+const _serveurDemo = bool.fromEnvironment('SERVEUR_DEMO');
+
 void main() {
+  final client = _serveurDemo ? clientServeurDemo() : null;
+  final adresse = _serveurDemo
+      ? adresseServeurDemo
+      : (_apiUrl.isEmpty ? null : Uri.parse(_apiUrl));
   final Session session = _oidcEmetteur.isEmpty
-      ? SessionDemo(jetonPartage: _apiJeton.isEmpty ? null : _apiJeton)
+      ? SessionDemo(
+          jetonPartage: _serveurDemo
+              ? jetonServeurDemo
+              : (_apiJeton.isEmpty ? null : _apiJeton))
       : SessionKeycloak(emetteur: Uri.parse(_oidcEmetteur));
   runApp(PecheApp(
     services: Services(
       BaseDeDonnees(),
       session: session,
-      api: _apiUrl.isEmpty
+      api: adresse == null
           ? null
-          : ApiHttp(Uri.parse(_apiUrl), jeton: session.jetonAcces),
-      administration: _apiUrl.isEmpty
+          : ApiHttp(adresse, client: client, jeton: session.jetonAcces),
+      administration: adresse == null
           ? null
-          : ApiAdministration(Uri.parse(_apiUrl), jeton: session.jetonAcces),
+          : ApiAdministration(adresse,
+              client: client, jeton: session.jetonAcces),
+      supervision: adresse == null
+          ? null
+          : ApiSupervision(adresse, client: client, jeton: session.jetonAcces),
     ),
   ));
 }

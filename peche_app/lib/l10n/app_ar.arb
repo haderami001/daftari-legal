@@ -189,5 +189,13 @@
   "confirmerSuppression": "حذف «{nom}»؟",
   "suppressionExplication": "سيختفي من القوائم ومن الهواتف عند المزامنة التالية. يتم الاحتفاظ بالتصريحات وعمليات المراقبة السابقة.",
   "navireSupprime": "تم حذف السفينة",
-  "licenceSupprimee": "تم حذف الترخيص"
+  "licenceSupprimee": "تم حذف الترخيص",
+  "moduleSupervision": "لوحة المتابعة",
+  "moduleSupervisionDetail": "التصريحات وعمليات المراقبة المستلمة، تقارير PDF (المشرف)",
+  "ongletDeclarations": "التصريحات",
+  "ongletControles": "عمليات المراقبة",
+  "navireLe": "السفينة {navire} — {date}",
+  "nbInfractions": "{n, plural, =0{لا توجد مخالفة} =1{مخالفة واحدة} =2{مخالفتان} few{{n} مخالفات} many{{n} مخالفةً} other{{n} مخالفة}}",
+  "envoyePar": "أرسله {compte}",
+  "avecInfraction": "بها مخالفات"
 }
