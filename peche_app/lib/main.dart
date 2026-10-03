@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/data/base/base_de_donnees.dart';
 import 'core/data/depots/reglages_depot.dart';
+import 'core/services/administration.dart';
 import 'core/services/services.dart';
 import 'core/services/session.dart';
 import 'core/services/synchronisation.dart';
@@ -34,6 +35,9 @@ void main() {
       api: _apiUrl.isEmpty
           ? null
           : ApiHttp(Uri.parse(_apiUrl), jeton: session.jetonAcces),
+      administration: _apiUrl.isEmpty
+          ? null
+          : ApiAdministration(Uri.parse(_apiUrl), jeton: session.jetonAcces),
     ),
   ));
 }

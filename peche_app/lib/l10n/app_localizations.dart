@@ -957,6 +957,264 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Référentiel des navires mis à jour'**
   String get referentielMisAJour;
+
+  /// No description provided for @moduleAdministration.
+  ///
+  /// In fr, this message translates to:
+  /// **'Navires et licences'**
+  String get moduleAdministration;
+
+  /// No description provided for @moduleAdministrationDetail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gérer le référentiel central (administrateur)'**
+  String get moduleAdministrationDetail;
+
+  /// No description provided for @ongletNavires.
+  ///
+  /// In fr, this message translates to:
+  /// **'Navires'**
+  String get ongletNavires;
+
+  /// No description provided for @ongletLicences.
+  ///
+  /// In fr, this message translates to:
+  /// **'Licences'**
+  String get ongletLicences;
+
+  /// No description provided for @ajouterNavire.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un navire'**
+  String get ajouterNavire;
+
+  /// No description provided for @ajouterLicence.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter une licence'**
+  String get ajouterLicence;
+
+  /// No description provided for @modifierNavire.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier le navire'**
+  String get modifierNavire;
+
+  /// No description provided for @modifierLicence.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier la licence'**
+  String get modifierLicence;
+
+  /// No description provided for @actualiser.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actualiser'**
+  String get actualiser;
+
+  /// No description provided for @champIdentifiant.
+  ///
+  /// In fr, this message translates to:
+  /// **'Identifiant (ex. N4)'**
+  String get champIdentifiant;
+
+  /// No description provided for @champNom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom'**
+  String get champNom;
+
+  /// No description provided for @champImmatriculation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Immatriculation'**
+  String get champImmatriculation;
+
+  /// No description provided for @champPavillon.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pavillon (code à 3 lettres, ex. MRT)'**
+  String get champPavillon;
+
+  /// No description provided for @champTypeNavire.
+  ///
+  /// In fr, this message translates to:
+  /// **'Type de navire'**
+  String get champTypeNavire;
+
+  /// No description provided for @champLongueur.
+  ///
+  /// In fr, this message translates to:
+  /// **'Longueur (m)'**
+  String get champLongueur;
+
+  /// No description provided for @champPuissance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Puissance (kW)'**
+  String get champPuissance;
+
+  /// No description provided for @champImo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro OMI (facultatif, 7 chiffres)'**
+  String get champImo;
+
+  /// No description provided for @certificats.
+  ///
+  /// In fr, this message translates to:
+  /// **'Certificats'**
+  String get certificats;
+
+  /// No description provided for @ajouterCertificat.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un certificat'**
+  String get ajouterCertificat;
+
+  /// No description provided for @champNumero.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro'**
+  String get champNumero;
+
+  /// No description provided for @champExpiration.
+  ///
+  /// In fr, this message translates to:
+  /// **'Expiration'**
+  String get champExpiration;
+
+  /// No description provided for @champNumeroLicence.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro de licence'**
+  String get champNumeroLicence;
+
+  /// No description provided for @champNavire.
+  ///
+  /// In fr, this message translates to:
+  /// **'Navire'**
+  String get champNavire;
+
+  /// No description provided for @champSegment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Segment'**
+  String get champSegment;
+
+  /// No description provided for @enginsAutorises.
+  ///
+  /// In fr, this message translates to:
+  /// **'Engins autorisés'**
+  String get enginsAutorises;
+
+  /// No description provided for @champEspeces.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espèces ciblées (codes FAO séparés par des virgules)'**
+  String get champEspeces;
+
+  /// No description provided for @champDebut.
+  ///
+  /// In fr, this message translates to:
+  /// **'Début'**
+  String get champDebut;
+
+  /// No description provided for @champFin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fin'**
+  String get champFin;
+
+  /// No description provided for @quotas.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quotas (kg)'**
+  String get quotas;
+
+  /// No description provided for @ajouterQuota.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un quota'**
+  String get ajouterQuota;
+
+  /// No description provided for @champEspece.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espèce (code FAO)'**
+  String get champEspece;
+
+  /// No description provided for @champKg.
+  ///
+  /// In fr, this message translates to:
+  /// **'kg'**
+  String get champKg;
+
+  /// No description provided for @supprimer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get supprimer;
+
+  /// No description provided for @enregistrer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get enregistrer;
+
+  /// No description provided for @navireEnregistre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Navire enregistré'**
+  String get navireEnregistre;
+
+  /// No description provided for @licenceEnregistree.
+  ///
+  /// In fr, this message translates to:
+  /// **'Licence enregistrée'**
+  String get licenceEnregistree;
+
+  /// No description provided for @champObligatoire.
+  ///
+  /// In fr, this message translates to:
+  /// **'Obligatoire'**
+  String get champObligatoire;
+
+  /// No description provided for @nombreInvalide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nombre invalide'**
+  String get nombreInvalide;
+
+  /// No description provided for @choisirDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une date'**
+  String get choisirDate;
+
+  /// No description provided for @aucunElement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun élément pour l\'instant'**
+  String get aucunElement;
+
+  /// No description provided for @adminRefus.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refusé par le serveur : {message}'**
+  String adminRefus(String message);
+
+  /// No description provided for @adminChargement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chargement impossible : {message}'**
+  String adminChargement(String message);
+
+  /// No description provided for @licenceDe.
+  ///
+  /// In fr, this message translates to:
+  /// **'{numero} — navire {navire}'**
+  String licenceDe(String numero, String navire);
 }
 
 class _AppLocalizationsDelegate

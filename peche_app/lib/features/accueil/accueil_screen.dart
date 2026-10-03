@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/services/services.dart';
 import '../../l10n/libelles.dart';
 import '../../main.dart';
+import '../administration/administration_screen.dart';
 import '../controle/controle_agent_screen.dart';
 import '../declaration/declaration_capitaine_screen.dart';
 import '../envois/envois_screen.dart';
@@ -58,7 +59,8 @@ class _AccueilScreenState extends State<AccueilScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final session = ServicesScope.of(context).session;
+    final services = ServicesScope.of(context);
+    final session = services.session;
     final profil = session.profil!;
     // Chaque compte ne voit que les modules de son rôle.
     final modules = <(IconData, String, String, Widget)>[
@@ -82,6 +84,14 @@ class _AccueilScreenState extends State<AccueilScreen> {
         l10n.moduleGuideDetail,
         const GuideReglementaireScreen(),
       ),
+      // Administration : en ligne seulement (serveur configuré).
+      if (profil.peutAdministrer && services.administration != null)
+        (
+          Icons.admin_panel_settings,
+          l10n.moduleAdministration,
+          l10n.moduleAdministrationDetail,
+          const AdministrationScreen(),
+        ),
     ];
 
     return Scaffold(

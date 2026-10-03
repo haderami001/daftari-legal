@@ -615,4 +615,141 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get referentielMisAJour => 'Référentiel des navires mis à jour';
+
+  @override
+  String get moduleAdministration => 'Navires et licences';
+
+  @override
+  String get moduleAdministrationDetail =>
+      'Gérer le référentiel central (administrateur)';
+
+  @override
+  String get ongletNavires => 'Navires';
+
+  @override
+  String get ongletLicences => 'Licences';
+
+  @override
+  String get ajouterNavire => 'Ajouter un navire';
+
+  @override
+  String get ajouterLicence => 'Ajouter une licence';
+
+  @override
+  String get modifierNavire => 'Modifier le navire';
+
+  @override
+  String get modifierLicence => 'Modifier la licence';
+
+  @override
+  String get actualiser => 'Actualiser';
+
+  @override
+  String get champIdentifiant => 'Identifiant (ex. N4)';
+
+  @override
+  String get champNom => 'Nom';
+
+  @override
+  String get champImmatriculation => 'Immatriculation';
+
+  @override
+  String get champPavillon => 'Pavillon (code à 3 lettres, ex. MRT)';
+
+  @override
+  String get champTypeNavire => 'Type de navire';
+
+  @override
+  String get champLongueur => 'Longueur (m)';
+
+  @override
+  String get champPuissance => 'Puissance (kW)';
+
+  @override
+  String get champImo => 'Numéro OMI (facultatif, 7 chiffres)';
+
+  @override
+  String get certificats => 'Certificats';
+
+  @override
+  String get ajouterCertificat => 'Ajouter un certificat';
+
+  @override
+  String get champNumero => 'Numéro';
+
+  @override
+  String get champExpiration => 'Expiration';
+
+  @override
+  String get champNumeroLicence => 'Numéro de licence';
+
+  @override
+  String get champNavire => 'Navire';
+
+  @override
+  String get champSegment => 'Segment';
+
+  @override
+  String get enginsAutorises => 'Engins autorisés';
+
+  @override
+  String get champEspeces =>
+      'Espèces ciblées (codes FAO séparés par des virgules)';
+
+  @override
+  String get champDebut => 'Début';
+
+  @override
+  String get champFin => 'Fin';
+
+  @override
+  String get quotas => 'Quotas (kg)';
+
+  @override
+  String get ajouterQuota => 'Ajouter un quota';
+
+  @override
+  String get champEspece => 'Espèce (code FAO)';
+
+  @override
+  String get champKg => 'kg';
+
+  @override
+  String get supprimer => 'Supprimer';
+
+  @override
+  String get enregistrer => 'Enregistrer';
+
+  @override
+  String get navireEnregistre => 'Navire enregistré';
+
+  @override
+  String get licenceEnregistree => 'Licence enregistrée';
+
+  @override
+  String get champObligatoire => 'Obligatoire';
+
+  @override
+  String get nombreInvalide => 'Nombre invalide';
+
+  @override
+  String get choisirDate => 'Choisir une date';
+
+  @override
+  String get aucunElement => 'Aucun élément pour l\'instant';
+
+  @override
+  String adminRefus(String message) {
+    return 'Refusé par le serveur : $message';
+  }
+
+  @override
+  String adminChargement(String message) {
+    return 'Chargement impossible : $message';
+  }
+
+  @override
+  String licenceDe(String numero, String navire) {
+    return '$numero — navire $navire';
+  }
 }
