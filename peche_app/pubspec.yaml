@@ -65,6 +65,11 @@ dev_dependencies:
   drift_dev: ^2.23.1
   build_runner: ^2.4.13
   sqlite3: ^2.9.4
+  shelf: ^1.4.1
+  # Serveur central du dépôt : sert au test de bout en bout
+  # (test/bout_en_bout_test.dart), jamais inclus dans l'application.
+  serveur_peche:
+    path: ../serveur
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

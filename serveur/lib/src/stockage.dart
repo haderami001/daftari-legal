@@ -1,0 +1,130 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:crypto/crypto.dart';
+
+import 'validation.dart';
+
+/// Résultat d'un enregistrement, qui garantit l'idempotence :
+/// renvoyer exactement la même saisie ne crée pas de doublon.
+enum Enregistrement {
+  /// Nouvelle saisie enregistrée (HTTP 201).
+  cree,
+
+  /// Saisie identique déjà reçue : rien à faire (HTTP 200).
+  dejaRecu,
+
+  /// Même identifiant mais contenu différent : refusé (HTTP 409).
+  conflit,
+}
+
+/// Ligne de résumé pour les listes de consultation.
+class ResumeSaisie {
+  const ResumeSaisie({
+    required this.id,
+    required this.navireId,
+    required this.date,
+    required this.nbInfractions,
+    required this.recuLe,
+  });
+
+  final String id;
+  final String navireId;
+  final DateTime date;
+  final int nbInfractions;
+  final DateTime recuLe;
+
+  Map<String, Object?> versJson() => {
+        'id': id,
+        'navire_id': navireId,
+        'date': date.toUtc().toIso8601String(),
+        'nb_infractions': nbInfractions,
+        'recu_le': recuLe.toUtc().toIso8601String(),
+      };
+}
+
+/// Où le serveur range les saisies. Deux implémentations :
+/// [StockageMemoire] (tests, démo) et `StockagePostgres` (production).
+abstract class Stockage {
+  Future<Enregistrement> enregistrer(
+      TypeSaisie type, String id, Map<String, Object?> donnees);
+
+  Future<List<ResumeSaisie>> lister(TypeSaisie type, {int limite = 50});
+
+  /// Rapport PDF d'un contrôle, ou `null` s'il n'existe pas.
+  Future<Uint8List?> rapportPdf(String controleId);
+
+  Future<Map<String, int>> compter();
+
+  Future<void> fermer();
+}
+
+/// Empreinte SHA-256 du contenu canonique d'une saisie.
+String empreinte(Map<String, Object?> donnees) =>
+    sha256.convert(utf8.encode(jsonCanonique(donnees))).toString();
+
+/// Date « métier » d'une saisie : horodatage de la déclaration ou date du
+/// contrôle.
+DateTime dateSaisie(TypeSaisie type, Map<String, Object?> d) =>
+    DateTime.parse(switch (type) {
+      TypeSaisie.declaration => d['horodatage']! as String,
+      TypeSaisie.controle => d['date']! as String,
+    });
+
+/// Stockage en mémoire : perdu à l'arrêt du serveur.
+class StockageMemoire implements Stockage {
+  final _saisies = {
+    for (final t in TypeSaisie.values)
+      t: <String,
+          ({
+        Map<String, Object?> donnees,
+        String empreinte,
+        DateTime recuLe
+      })>{},
+  };
+
+  @override
+  Future<Enregistrement> enregistrer(
+      TypeSaisie type, String id, Map<String, Object?> donnees) async {
+    final table = _saisies[type]!;
+    final e = empreinte(donnees);
+    final existant = table[id];
+    if (existant != null) {
+      return existant.empreinte == e
+          ? Enregistrement.dejaRecu
+          : Enregistrement.conflit;
+    }
+    table[id] = (donnees: donnees, empreinte: e, recuLe: DateTime.now());
+    return Enregistrement.cree;
+  }
+
+  @override
+  Future<List<ResumeSaisie>> lister(TypeSaisie type, {int limite = 50}) async {
+    final lignes = [
+      for (final MapEntry(key: id, value: s) in _saisies[type]!.entries)
+        ResumeSaisie(
+          id: id,
+          navireId: s.donnees['navire_id']! as String,
+          date: dateSaisie(type, s.donnees),
+          nbInfractions: s.donnees['nb_infractions']! as int,
+          recuLe: s.recuLe,
+        ),
+    ]..sort((a, b) => b.recuLe.compareTo(a.recuLe));
+    return lignes.take(limite).toList();
+  }
+
+  @override
+  Future<Uint8List?> rapportPdf(String controleId) async {
+    final b64 = _saisies[TypeSaisie.controle]![controleId]
+        ?.donnees['rapport_pdf_base64'] as String?;
+    return b64 == null ? null : base64Decode(b64);
+  }
+
+  @override
+  Future<Map<String, int>> compter() async => {
+        for (final t in TypeSaisie.values) t.segment: _saisies[t]!.length,
+      };
+
+  @override
+  Future<void> fermer() async {}
+}

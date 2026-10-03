@@ -27,8 +27,10 @@ flutter pub get
 
 # 3. Lancer sur un téléphone Android branché ou un émulateur
 flutter run
-#    … avec un serveur central (sinon les saisies restent en file d'envoi) :
-flutter run --dart-define=API_URL=https://api.exemple.mr
+#    … avec le serveur central du dossier ../serveur (sinon les saisies
+#    restent en file d'envoi sur le téléphone) :
+flutter run --dart-define=API_URL=http://<adresse-du-serveur>:8080 \
+            --dart-define=API_JETON=<JETON_API du serveur>
 
 # 4. Vérifier le code et lancer les tests
 flutter analyze
@@ -83,6 +85,9 @@ En mer il n'y a pas de réseau : tout est enregistré **sur le téléphone**.
   `POST {API_URL}/v1/sync/{declarations|controles}/{id}` avec l'en-tête
   `Idempotency-Key` (pas de doublon si on renvoie). Un échec laisse la saisie
   en file avec le nombre de tentatives et l'erreur.
+- **Serveur central** : dossier [`../serveur`](../serveur/README.md) (Dart,
+  PostgreSQL, Docker). `test/bout_en_bout_test.dart` démarre ce serveur et
+  vérifie que les saisies de l'application y arrivent (vraies requêtes HTTP).
 - **Migrations** : `schemaVersion` 2 ajoute la colonne du rapport PDF ; un
   téléphone resté en version 1 est mis à jour automatiquement (testé).
 
@@ -122,7 +127,7 @@ En mer il n'y a pas de réseau : tout est enregistré **sur le téléphone**.
 
 | Fichier | Rôle |
 |---|---|
-| `lib/main.dart` | Point d'entrée, thème, adresse du serveur (`API_URL`) |
+| `lib/main.dart` | Point d'entrée, thème, serveur (`API_URL`, `API_JETON`) |
 | `lib/core/models/` | Modèles : navire, licence, certificat, déclaration, capture, contrôle |
 | `lib/core/regulation/referentiel.dart` | Règles (espèces, engins, barèmes) |
 | `lib/core/regulation/calcul_reglementaire.dart` | Moteur : licence, quotas, prises accessoires, maillage, tailles, sanctions |
@@ -138,7 +143,7 @@ En mer il n'y a pas de réseau : tout est enregistré **sur le téléphone**.
 | `lib/features/envois/` | Écran **envois en attente** |
 | `lib/l10n/` | Traductions français / arabe et libellés traduits |
 | `tool/preparer_web.sh` | Prépare la version navigateur |
-| `test/` | 34 tests : moteur (8), base (6), PDF (1), synchronisation (5), écrans (5), traduction (7), texte bidirectionnel (2) |
+| `test/` | 37 tests : moteur (8), base (6), PDF (1), synchronisation (5), écrans (5), traduction (7), texte bidirectionnel (2), bout en bout avec le serveur (3) |
 
 ## Pour apprendre (parcours conseillé)
 

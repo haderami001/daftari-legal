@@ -8,16 +8,22 @@ import 'core/services/synchronisation.dart';
 import 'features/accueil/accueil_screen.dart';
 import 'l10n/libelles.dart';
 
-/// Adresse du serveur central, donnée au lancement :
-///     flutter run --dart-define=API_URL=https://api.exemple.mr
+/// Adresse du serveur central (dossier `serveur/` du dépôt) et jeton
+/// d'accès, donnés au lancement :
+///     flutter run --dart-define=API_URL=https://api.exemple.mr \
+///                 --dart-define=API_JETON=le-jeton-du-serveur
 /// Vide = pas de serveur : tout reste sur le téléphone, en file d'envoi.
 const _apiUrl = String.fromEnvironment('API_URL');
+const _apiJeton = String.fromEnvironment('API_JETON');
 
 void main() {
   runApp(PecheApp(
     services: Services(
       BaseDeDonnees(),
-      api: _apiUrl.isEmpty ? null : ApiHttp(Uri.parse(_apiUrl)),
+      api: _apiUrl.isEmpty
+          ? null
+          : ApiHttp(Uri.parse(_apiUrl),
+              jeton: _apiJeton.isEmpty ? null : _apiJeton),
     ),
   ));
 }
