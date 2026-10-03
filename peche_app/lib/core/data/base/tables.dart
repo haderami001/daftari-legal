@@ -30,6 +30,10 @@ class Navires extends Table {
   RealColumn get puissanceKw => real()();
   TextColumn get numeroImo => text().nullable()();
 
+  /// Supprimé du référentiel central (v4). La ligne reste : les saisies
+  /// passées y font référence ; elle n'est plus proposée dans les écrans.
+  BoolColumn get supprime => boolean().withDefault(const Constant(false))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -53,6 +57,9 @@ class Licences extends Table {
   TextColumn get especesCibles => text().map(const CodesConverter())();
   DateTimeColumn get dateDebut => dateTime()();
   DateTimeColumn get dateFin => dateTime()();
+
+  /// Supprimée du référentiel central (v4).
+  BoolColumn get supprime => boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column> get primaryKey => {numero};

@@ -76,10 +76,15 @@ class _AdministrationScreenState extends State<AdministrationScreen> {
             if (!etat.hasData) {
               return const Center(child: CircularProgressIndicator());
             }
-            final navires =
-                (etat.data!['navires']! as List).cast<Map<String, Object?>>();
-            final licences =
-                (etat.data!['licences']! as List).cast<Map<String, Object?>>();
+            // Les éléments supprimés restent sur le serveur (marqués) mais
+            // ne sont plus affichés.
+            List<Map<String, Object?>> actifs(String cle) => [
+                  for (final e in (etat.data![cle]! as List)
+                      .cast<Map<String, Object?>>())
+                    if (e['supprime'] != true) e,
+                ];
+            final navires = actifs('navires');
+            final licences = actifs('licences');
             return TabBarView(children: [
               _Liste(
                 elements: navires,
@@ -180,9 +185,10 @@ mixin _Enregistrement<T extends StatefulWidget> on State<T> {
   ErreurAdministration? refus;
 
   Future<void> enregistrer(
-      Future<Ecriture> Function(ApiAdministration api) ecrire,
-      String confirmation) async {
-    if (!formulaire.currentState!.validate()) return;
+      Future<Object?> Function(ApiAdministration api) ecrire,
+      String confirmation,
+      {bool valider = true}) async {
+    if (valider && !formulaire.currentState!.validate()) return;
     final api = ServicesScope.of(context).administration!;
     setState(() {
       enCours = true;
@@ -200,6 +206,40 @@ mixin _Enregistrement<T extends StatefulWidget> on State<T> {
       if (mounted) setState(() => enCours = false);
     }
   }
+
+  /// Demande confirmation, puis supprime sur le serveur.
+  Future<void> supprimer(
+      String nom,
+      Future<void> Function(ApiAdministration api) suppression,
+      String confirmation) async {
+    final l10n = context.l10n;
+    final oui = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.confirmerSuppression(nom)),
+        content: Text(l10n.suppressionExplication),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.annuler),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.supprimer),
+          ),
+        ],
+      ),
+    );
+    if (oui == true && mounted) {
+      await enregistrer(suppression, confirmation, valider: false);
+    }
+  }
+
+  Widget boutonSupprimer(VoidCallback onPressed) => IconButton(
+        tooltip: context.l10n.supprimer,
+        onPressed: enCours ? null : onPressed,
+        icon: const Icon(Icons.delete_forever),
+      );
 
   Widget refusAffiche() {
     final r = refus;
@@ -340,7 +380,15 @@ class _NavireFormScreenState extends State<NavireFormScreen>
     final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
-          title: Text(_nouveau ? l10n.ajouterNavire : l10n.modifierNavire)),
+        title: Text(_nouveau ? l10n.ajouterNavire : l10n.modifierNavire),
+        actions: [
+          if (!_nouveau)
+            boutonSupprimer(() => supprimer(
+                '${n['nom']}',
+                (api) => api.supprimerNavire('${n['id']}'),
+                l10n.navireSupprime)),
+        ],
+      ),
       body: Form(
         key: formulaire,
         child: ListView(
@@ -524,7 +572,15 @@ class _LicenceFormScreenState extends State<LicenceFormScreen>
     final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
-          title: Text(_nouvelle ? l10n.ajouterLicence : l10n.modifierLicence)),
+        title: Text(_nouvelle ? l10n.ajouterLicence : l10n.modifierLicence),
+        actions: [
+          if (!_nouvelle)
+            boutonSupprimer(() => supprimer(
+                '${l['numero']}',
+                (api) => api.supprimerLicence('${l['numero']}'),
+                l10n.licenceSupprimee)),
+        ],
+      ),
       body: Form(
         key: formulaire,
         child: ListView(

@@ -59,6 +59,16 @@ class $NaviresTable extends Navires with TableInfo<$NaviresTable, NavireLigne> {
   late final GeneratedColumn<String> numeroImo = GeneratedColumn<String>(
       'numero_imo', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _supprimeMeta =
+      const VerificationMeta('supprime');
+  @override
+  late final GeneratedColumn<bool> supprime = GeneratedColumn<bool>(
+      'supprime', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("supprime" IN (0, 1))'),
+      defaultValue: const Constant(false));
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -68,7 +78,8 @@ class $NaviresTable extends Navires with TableInfo<$NaviresTable, NavireLigne> {
         type,
         longueurM,
         puissanceKw,
-        numeroImo
+        numeroImo,
+        supprime
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -124,6 +135,10 @@ class $NaviresTable extends Navires with TableInfo<$NaviresTable, NavireLigne> {
       context.handle(_numeroImoMeta,
           numeroImo.isAcceptableOrUnknown(data['numero_imo']!, _numeroImoMeta));
     }
+    if (data.containsKey('supprime')) {
+      context.handle(_supprimeMeta,
+          supprime.isAcceptableOrUnknown(data['supprime']!, _supprimeMeta));
+    }
     return context;
   }
 
@@ -149,6 +164,8 @@ class $NaviresTable extends Navires with TableInfo<$NaviresTable, NavireLigne> {
           .read(DriftSqlType.double, data['${effectivePrefix}puissance_kw'])!,
       numeroImo: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}numero_imo']),
+      supprime: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}supprime'])!,
     );
   }
 
@@ -170,6 +187,10 @@ class NavireLigne extends DataClass implements Insertable<NavireLigne> {
   final double longueurM;
   final double puissanceKw;
   final String? numeroImo;
+
+  /// Supprimé du référentiel central (v4). La ligne reste : les saisies
+  /// passées y font référence ; elle n'est plus proposée dans les écrans.
+  final bool supprime;
   const NavireLigne(
       {required this.id,
       required this.nom,
@@ -178,7 +199,8 @@ class NavireLigne extends DataClass implements Insertable<NavireLigne> {
       required this.type,
       required this.longueurM,
       required this.puissanceKw,
-      this.numeroImo});
+      this.numeroImo,
+      required this.supprime});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -194,6 +216,7 @@ class NavireLigne extends DataClass implements Insertable<NavireLigne> {
     if (!nullToAbsent || numeroImo != null) {
       map['numero_imo'] = Variable<String>(numeroImo);
     }
+    map['supprime'] = Variable<bool>(supprime);
     return map;
   }
 
@@ -209,6 +232,7 @@ class NavireLigne extends DataClass implements Insertable<NavireLigne> {
       numeroImo: numeroImo == null && nullToAbsent
           ? const Value.absent()
           : Value(numeroImo),
+      supprime: Value(supprime),
     );
   }
 
@@ -225,6 +249,7 @@ class NavireLigne extends DataClass implements Insertable<NavireLigne> {
       longueurM: serializer.fromJson<double>(json['longueurM']),
       puissanceKw: serializer.fromJson<double>(json['puissanceKw']),
       numeroImo: serializer.fromJson<String?>(json['numeroImo']),
+      supprime: serializer.fromJson<bool>(json['supprime']),
     );
   }
   @override
@@ -240,6 +265,7 @@ class NavireLigne extends DataClass implements Insertable<NavireLigne> {
       'longueurM': serializer.toJson<double>(longueurM),
       'puissanceKw': serializer.toJson<double>(puissanceKw),
       'numeroImo': serializer.toJson<String?>(numeroImo),
+      'supprime': serializer.toJson<bool>(supprime),
     };
   }
 
@@ -251,7 +277,8 @@ class NavireLigne extends DataClass implements Insertable<NavireLigne> {
           TypeNavire? type,
           double? longueurM,
           double? puissanceKw,
-          Value<String?> numeroImo = const Value.absent()}) =>
+          Value<String?> numeroImo = const Value.absent(),
+          bool? supprime}) =>
       NavireLigne(
         id: id ?? this.id,
         nom: nom ?? this.nom,
@@ -261,6 +288,7 @@ class NavireLigne extends DataClass implements Insertable<NavireLigne> {
         longueurM: longueurM ?? this.longueurM,
         puissanceKw: puissanceKw ?? this.puissanceKw,
         numeroImo: numeroImo.present ? numeroImo.value : this.numeroImo,
+        supprime: supprime ?? this.supprime,
       );
   NavireLigne copyWithCompanion(NaviresCompanion data) {
     return NavireLigne(
@@ -275,6 +303,7 @@ class NavireLigne extends DataClass implements Insertable<NavireLigne> {
       puissanceKw:
           data.puissanceKw.present ? data.puissanceKw.value : this.puissanceKw,
       numeroImo: data.numeroImo.present ? data.numeroImo.value : this.numeroImo,
+      supprime: data.supprime.present ? data.supprime.value : this.supprime,
     );
   }
 
@@ -288,14 +317,15 @@ class NavireLigne extends DataClass implements Insertable<NavireLigne> {
           ..write('type: $type, ')
           ..write('longueurM: $longueurM, ')
           ..write('puissanceKw: $puissanceKw, ')
-          ..write('numeroImo: $numeroImo')
+          ..write('numeroImo: $numeroImo, ')
+          ..write('supprime: $supprime')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(id, nom, immatriculation, pavillon, type,
-      longueurM, puissanceKw, numeroImo);
+      longueurM, puissanceKw, numeroImo, supprime);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -307,7 +337,8 @@ class NavireLigne extends DataClass implements Insertable<NavireLigne> {
           other.type == this.type &&
           other.longueurM == this.longueurM &&
           other.puissanceKw == this.puissanceKw &&
-          other.numeroImo == this.numeroImo);
+          other.numeroImo == this.numeroImo &&
+          other.supprime == this.supprime);
 }
 
 class NaviresCompanion extends UpdateCompanion<NavireLigne> {
@@ -319,6 +350,7 @@ class NaviresCompanion extends UpdateCompanion<NavireLigne> {
   final Value<double> longueurM;
   final Value<double> puissanceKw;
   final Value<String?> numeroImo;
+  final Value<bool> supprime;
   final Value<int> rowid;
   const NaviresCompanion({
     this.id = const Value.absent(),
@@ -329,6 +361,7 @@ class NaviresCompanion extends UpdateCompanion<NavireLigne> {
     this.longueurM = const Value.absent(),
     this.puissanceKw = const Value.absent(),
     this.numeroImo = const Value.absent(),
+    this.supprime = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   NaviresCompanion.insert({
@@ -340,6 +373,7 @@ class NaviresCompanion extends UpdateCompanion<NavireLigne> {
     required double longueurM,
     required double puissanceKw,
     this.numeroImo = const Value.absent(),
+    this.supprime = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         nom = Value(nom),
@@ -357,6 +391,7 @@ class NaviresCompanion extends UpdateCompanion<NavireLigne> {
     Expression<double>? longueurM,
     Expression<double>? puissanceKw,
     Expression<String>? numeroImo,
+    Expression<bool>? supprime,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -368,6 +403,7 @@ class NaviresCompanion extends UpdateCompanion<NavireLigne> {
       if (longueurM != null) 'longueur_m': longueurM,
       if (puissanceKw != null) 'puissance_kw': puissanceKw,
       if (numeroImo != null) 'numero_imo': numeroImo,
+      if (supprime != null) 'supprime': supprime,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -381,6 +417,7 @@ class NaviresCompanion extends UpdateCompanion<NavireLigne> {
       Value<double>? longueurM,
       Value<double>? puissanceKw,
       Value<String?>? numeroImo,
+      Value<bool>? supprime,
       Value<int>? rowid}) {
     return NaviresCompanion(
       id: id ?? this.id,
@@ -391,6 +428,7 @@ class NaviresCompanion extends UpdateCompanion<NavireLigne> {
       longueurM: longueurM ?? this.longueurM,
       puissanceKw: puissanceKw ?? this.puissanceKw,
       numeroImo: numeroImo ?? this.numeroImo,
+      supprime: supprime ?? this.supprime,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -423,6 +461,9 @@ class NaviresCompanion extends UpdateCompanion<NavireLigne> {
     if (numeroImo.present) {
       map['numero_imo'] = Variable<String>(numeroImo.value);
     }
+    if (supprime.present) {
+      map['supprime'] = Variable<bool>(supprime.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -440,6 +481,7 @@ class NaviresCompanion extends UpdateCompanion<NavireLigne> {
           ..write('longueurM: $longueurM, ')
           ..write('puissanceKw: $puissanceKw, ')
           ..write('numeroImo: $numeroImo, ')
+          ..write('supprime: $supprime, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -812,6 +854,16 @@ class $LicencesTable extends Licences
   late final GeneratedColumn<DateTime> dateFin = GeneratedColumn<DateTime>(
       'date_fin', aliasedName, false,
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _supprimeMeta =
+      const VerificationMeta('supprime');
+  @override
+  late final GeneratedColumn<bool> supprime = GeneratedColumn<bool>(
+      'supprime', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("supprime" IN (0, 1))'),
+      defaultValue: const Constant(false));
   @override
   List<GeneratedColumn> get $columns => [
         numero,
@@ -820,7 +872,8 @@ class $LicencesTable extends Licences
         enginsAutorises,
         especesCibles,
         dateDebut,
-        dateFin
+        dateFin,
+        supprime
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -859,6 +912,10 @@ class $LicencesTable extends Licences
     } else if (isInserting) {
       context.missing(_dateFinMeta);
     }
+    if (data.containsKey('supprime')) {
+      context.handle(_supprimeMeta,
+          supprime.isAcceptableOrUnknown(data['supprime']!, _supprimeMeta));
+    }
     return context;
   }
 
@@ -885,6 +942,8 @@ class $LicencesTable extends Licences
           .read(DriftSqlType.dateTime, data['${effectivePrefix}date_debut'])!,
       dateFin: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}date_fin'])!,
+      supprime: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}supprime'])!,
     );
   }
 
@@ -909,6 +968,9 @@ class LicenceLigne extends DataClass implements Insertable<LicenceLigne> {
   final Set<String> especesCibles;
   final DateTime dateDebut;
   final DateTime dateFin;
+
+  /// Supprimée du référentiel central (v4).
+  final bool supprime;
   const LicenceLigne(
       {required this.numero,
       required this.navireId,
@@ -916,7 +978,8 @@ class LicenceLigne extends DataClass implements Insertable<LicenceLigne> {
       required this.enginsAutorises,
       required this.especesCibles,
       required this.dateDebut,
-      required this.dateFin});
+      required this.dateFin,
+      required this.supprime});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -936,6 +999,7 @@ class LicenceLigne extends DataClass implements Insertable<LicenceLigne> {
     }
     map['date_debut'] = Variable<DateTime>(dateDebut);
     map['date_fin'] = Variable<DateTime>(dateFin);
+    map['supprime'] = Variable<bool>(supprime);
     return map;
   }
 
@@ -948,6 +1012,7 @@ class LicenceLigne extends DataClass implements Insertable<LicenceLigne> {
       especesCibles: Value(especesCibles),
       dateDebut: Value(dateDebut),
       dateFin: Value(dateFin),
+      supprime: Value(supprime),
     );
   }
 
@@ -964,6 +1029,7 @@ class LicenceLigne extends DataClass implements Insertable<LicenceLigne> {
       especesCibles: serializer.fromJson<Set<String>>(json['especesCibles']),
       dateDebut: serializer.fromJson<DateTime>(json['dateDebut']),
       dateFin: serializer.fromJson<DateTime>(json['dateFin']),
+      supprime: serializer.fromJson<bool>(json['supprime']),
     );
   }
   @override
@@ -978,6 +1044,7 @@ class LicenceLigne extends DataClass implements Insertable<LicenceLigne> {
       'especesCibles': serializer.toJson<Set<String>>(especesCibles),
       'dateDebut': serializer.toJson<DateTime>(dateDebut),
       'dateFin': serializer.toJson<DateTime>(dateFin),
+      'supprime': serializer.toJson<bool>(supprime),
     };
   }
 
@@ -988,7 +1055,8 @@ class LicenceLigne extends DataClass implements Insertable<LicenceLigne> {
           Set<TypeEngin>? enginsAutorises,
           Set<String>? especesCibles,
           DateTime? dateDebut,
-          DateTime? dateFin}) =>
+          DateTime? dateFin,
+          bool? supprime}) =>
       LicenceLigne(
         numero: numero ?? this.numero,
         navireId: navireId ?? this.navireId,
@@ -997,6 +1065,7 @@ class LicenceLigne extends DataClass implements Insertable<LicenceLigne> {
         especesCibles: especesCibles ?? this.especesCibles,
         dateDebut: dateDebut ?? this.dateDebut,
         dateFin: dateFin ?? this.dateFin,
+        supprime: supprime ?? this.supprime,
       );
   LicenceLigne copyWithCompanion(LicencesCompanion data) {
     return LicenceLigne(
@@ -1011,6 +1080,7 @@ class LicenceLigne extends DataClass implements Insertable<LicenceLigne> {
           : this.especesCibles,
       dateDebut: data.dateDebut.present ? data.dateDebut.value : this.dateDebut,
       dateFin: data.dateFin.present ? data.dateFin.value : this.dateFin,
+      supprime: data.supprime.present ? data.supprime.value : this.supprime,
     );
   }
 
@@ -1023,14 +1093,15 @@ class LicenceLigne extends DataClass implements Insertable<LicenceLigne> {
           ..write('enginsAutorises: $enginsAutorises, ')
           ..write('especesCibles: $especesCibles, ')
           ..write('dateDebut: $dateDebut, ')
-          ..write('dateFin: $dateFin')
+          ..write('dateFin: $dateFin, ')
+          ..write('supprime: $supprime')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(numero, navireId, segment, enginsAutorises,
-      especesCibles, dateDebut, dateFin);
+      especesCibles, dateDebut, dateFin, supprime);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1041,7 +1112,8 @@ class LicenceLigne extends DataClass implements Insertable<LicenceLigne> {
           other.enginsAutorises == this.enginsAutorises &&
           other.especesCibles == this.especesCibles &&
           other.dateDebut == this.dateDebut &&
-          other.dateFin == this.dateFin);
+          other.dateFin == this.dateFin &&
+          other.supprime == this.supprime);
 }
 
 class LicencesCompanion extends UpdateCompanion<LicenceLigne> {
@@ -1052,6 +1124,7 @@ class LicencesCompanion extends UpdateCompanion<LicenceLigne> {
   final Value<Set<String>> especesCibles;
   final Value<DateTime> dateDebut;
   final Value<DateTime> dateFin;
+  final Value<bool> supprime;
   final Value<int> rowid;
   const LicencesCompanion({
     this.numero = const Value.absent(),
@@ -1061,6 +1134,7 @@ class LicencesCompanion extends UpdateCompanion<LicenceLigne> {
     this.especesCibles = const Value.absent(),
     this.dateDebut = const Value.absent(),
     this.dateFin = const Value.absent(),
+    this.supprime = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   LicencesCompanion.insert({
@@ -1071,6 +1145,7 @@ class LicencesCompanion extends UpdateCompanion<LicenceLigne> {
     required Set<String> especesCibles,
     required DateTime dateDebut,
     required DateTime dateFin,
+    this.supprime = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : numero = Value(numero),
         navireId = Value(navireId),
@@ -1087,6 +1162,7 @@ class LicencesCompanion extends UpdateCompanion<LicenceLigne> {
     Expression<String>? especesCibles,
     Expression<DateTime>? dateDebut,
     Expression<DateTime>? dateFin,
+    Expression<bool>? supprime,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1097,6 +1173,7 @@ class LicencesCompanion extends UpdateCompanion<LicenceLigne> {
       if (especesCibles != null) 'especes_cibles': especesCibles,
       if (dateDebut != null) 'date_debut': dateDebut,
       if (dateFin != null) 'date_fin': dateFin,
+      if (supprime != null) 'supprime': supprime,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1109,6 +1186,7 @@ class LicencesCompanion extends UpdateCompanion<LicenceLigne> {
       Value<Set<String>>? especesCibles,
       Value<DateTime>? dateDebut,
       Value<DateTime>? dateFin,
+      Value<bool>? supprime,
       Value<int>? rowid}) {
     return LicencesCompanion(
       numero: numero ?? this.numero,
@@ -1118,6 +1196,7 @@ class LicencesCompanion extends UpdateCompanion<LicenceLigne> {
       especesCibles: especesCibles ?? this.especesCibles,
       dateDebut: dateDebut ?? this.dateDebut,
       dateFin: dateFin ?? this.dateFin,
+      supprime: supprime ?? this.supprime,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1150,6 +1229,9 @@ class LicencesCompanion extends UpdateCompanion<LicenceLigne> {
     if (dateFin.present) {
       map['date_fin'] = Variable<DateTime>(dateFin.value);
     }
+    if (supprime.present) {
+      map['supprime'] = Variable<bool>(supprime.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1166,6 +1248,7 @@ class LicencesCompanion extends UpdateCompanion<LicenceLigne> {
           ..write('especesCibles: $especesCibles, ')
           ..write('dateDebut: $dateDebut, ')
           ..write('dateFin: $dateFin, ')
+          ..write('supprime: $supprime, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4530,6 +4613,7 @@ typedef $$NaviresTableCreateCompanionBuilder = NaviresCompanion Function({
   required double longueurM,
   required double puissanceKw,
   Value<String?> numeroImo,
+  Value<bool> supprime,
   Value<int> rowid,
 });
 typedef $$NaviresTableUpdateCompanionBuilder = NaviresCompanion Function({
@@ -4541,6 +4625,7 @@ typedef $$NaviresTableUpdateCompanionBuilder = NaviresCompanion Function({
   Value<double> longueurM,
   Value<double> puissanceKw,
   Value<String?> numeroImo,
+  Value<bool> supprime,
   Value<int> rowid,
 });
 
@@ -4643,6 +4728,9 @@ class $$NaviresTableFilterComposer
 
   ColumnFilters<String> get numeroImo => $composableBuilder(
       column: $table.numeroImo, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get supprime => $composableBuilder(
+      column: $table.supprime, builder: (column) => ColumnFilters(column));
 
   Expression<bool> certificatsRefs(
       Expression<bool> Function($$CertificatsTableFilterComposer f) f) {
@@ -4762,6 +4850,9 @@ class $$NaviresTableOrderingComposer
 
   ColumnOrderings<String> get numeroImo => $composableBuilder(
       column: $table.numeroImo, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get supprime => $composableBuilder(
+      column: $table.supprime, builder: (column) => ColumnOrderings(column));
 }
 
 class $$NaviresTableAnnotationComposer
@@ -4796,6 +4887,9 @@ class $$NaviresTableAnnotationComposer
 
   GeneratedColumn<String> get numeroImo =>
       $composableBuilder(column: $table.numeroImo, builder: (column) => column);
+
+  GeneratedColumn<bool> get supprime =>
+      $composableBuilder(column: $table.supprime, builder: (column) => column);
 
   Expression<T> certificatsRefs<T extends Object>(
       Expression<T> Function($$CertificatsTableAnnotationComposer a) f) {
@@ -4917,6 +5011,7 @@ class $$NaviresTableTableManager extends RootTableManager<
             Value<double> longueurM = const Value.absent(),
             Value<double> puissanceKw = const Value.absent(),
             Value<String?> numeroImo = const Value.absent(),
+            Value<bool> supprime = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               NaviresCompanion(
@@ -4928,6 +5023,7 @@ class $$NaviresTableTableManager extends RootTableManager<
             longueurM: longueurM,
             puissanceKw: puissanceKw,
             numeroImo: numeroImo,
+            supprime: supprime,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -4939,6 +5035,7 @@ class $$NaviresTableTableManager extends RootTableManager<
             required double longueurM,
             required double puissanceKw,
             Value<String?> numeroImo = const Value.absent(),
+            Value<bool> supprime = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               NaviresCompanion.insert(
@@ -4950,6 +5047,7 @@ class $$NaviresTableTableManager extends RootTableManager<
             longueurM: longueurM,
             puissanceKw: puissanceKw,
             numeroImo: numeroImo,
+            supprime: supprime,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -5322,6 +5420,7 @@ typedef $$LicencesTableCreateCompanionBuilder = LicencesCompanion Function({
   required Set<String> especesCibles,
   required DateTime dateDebut,
   required DateTime dateFin,
+  Value<bool> supprime,
   Value<int> rowid,
 });
 typedef $$LicencesTableUpdateCompanionBuilder = LicencesCompanion Function({
@@ -5332,6 +5431,7 @@ typedef $$LicencesTableUpdateCompanionBuilder = LicencesCompanion Function({
   Value<Set<String>> especesCibles,
   Value<DateTime> dateDebut,
   Value<DateTime> dateFin,
+  Value<bool> supprime,
   Value<int> rowid,
 });
 
@@ -5414,6 +5514,9 @@ class $$LicencesTableFilterComposer
 
   ColumnFilters<DateTime> get dateFin => $composableBuilder(
       column: $table.dateFin, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get supprime => $composableBuilder(
+      column: $table.supprime, builder: (column) => ColumnFilters(column));
 
   $$NaviresTableFilterComposer get navireId {
     final $$NaviresTableFilterComposer composer = $composerBuilder(
@@ -5507,6 +5610,9 @@ class $$LicencesTableOrderingComposer
   ColumnOrderings<DateTime> get dateFin => $composableBuilder(
       column: $table.dateFin, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get supprime => $composableBuilder(
+      column: $table.supprime, builder: (column) => ColumnOrderings(column));
+
   $$NaviresTableOrderingComposer get navireId {
     final $$NaviresTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -5556,6 +5662,9 @@ class $$LicencesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get dateFin =>
       $composableBuilder(column: $table.dateFin, builder: (column) => column);
+
+  GeneratedColumn<bool> get supprime =>
+      $composableBuilder(column: $table.supprime, builder: (column) => column);
 
   $$NaviresTableAnnotationComposer get navireId {
     final $$NaviresTableAnnotationComposer composer = $composerBuilder(
@@ -5651,6 +5760,7 @@ class $$LicencesTableTableManager extends RootTableManager<
             Value<Set<String>> especesCibles = const Value.absent(),
             Value<DateTime> dateDebut = const Value.absent(),
             Value<DateTime> dateFin = const Value.absent(),
+            Value<bool> supprime = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               LicencesCompanion(
@@ -5661,6 +5771,7 @@ class $$LicencesTableTableManager extends RootTableManager<
             especesCibles: especesCibles,
             dateDebut: dateDebut,
             dateFin: dateFin,
+            supprime: supprime,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -5671,6 +5782,7 @@ class $$LicencesTableTableManager extends RootTableManager<
             required Set<String> especesCibles,
             required DateTime dateDebut,
             required DateTime dateFin,
+            Value<bool> supprime = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               LicencesCompanion.insert(
@@ -5681,6 +5793,7 @@ class $$LicencesTableTableManager extends RootTableManager<
             especesCibles: especesCibles,
             dateDebut: dateDebut,
             dateFin: dateFin,
+            supprime: supprime,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0

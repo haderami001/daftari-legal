@@ -15,11 +15,15 @@ class FlotteDepot {
 
   /// Navires ayant au moins une licence, triés par nom.
   Future<List<NavireLicence>> naviresAvecLicence() async {
+    // Les navires et licences supprimés du référentiel ne sont plus
+    // proposés (ils restent en base pour les saisies passées).
     final lignes = await (_db.select(_db.navires)
+          ..where((n) => n.supprime.not())
           ..orderBy([(n) => OrderingTerm(expression: n.nom)]))
         .get();
     final certificats = await _db.select(_db.certificats).get();
     final licences = await (_db.select(_db.licences)
+          ..where((l) => l.supprime.not())
           ..orderBy([(l) => OrderingTerm.desc(l.dateFin)]))
         .get();
     final quotas = await _db.select(_db.quotas).get();
@@ -71,8 +75,9 @@ class FlotteDepot {
   /// et renvoie sa version. Tout ou rien : en cas d'erreur, l'ancien
   /// référentiel reste intact.
   ///
-  /// Les navires et licences sont mis à jour ou ajoutés (jamais supprimés :
-  /// les saisies déjà faites y font référence) ; leurs certificats et
+  /// Les navires et licences sont mis à jour ou ajoutés ; ceux supprimés
+  /// sur le serveur (`"supprime": true`) sont marqués et masqués, pas
+  /// effacés (les saisies déjà faites y font référence). Certificats et
   /// quotas sont remplacés.
   Future<int> appliquerReferentiel(Map<String, Object?> ref) =>
       _db.transaction(() async {
@@ -87,6 +92,7 @@ class FlotteDepot {
                 longueurM: (n['longueur_m'] as num).toDouble(),
                 puissanceKw: (n['puissance_kw'] as num).toDouble(),
                 numeroImo: n['numero_imo'] as String?,
+                supprime: n['supprime'] == true,
               ));
           await (_db.delete(_db.certificats)
                 ..where((c) => c.navireId.equals(id)))
@@ -115,6 +121,7 @@ class FlotteDepot {
                     (l['especes_cibles'] as List).cast<String>().toSet(),
                 dateDebut: DateTime.parse(l['date_debut'] as String),
                 dateFin: DateTime.parse(l['date_fin'] as String),
+                supprime: l['supprime'] == true,
               ));
           await (_db.delete(_db.quotas)
                 ..where((q) => q.licenceNumero.equals(numero)))

@@ -330,8 +330,10 @@ class StockagePostgres implements Stockage {
       _ecrire('''
           INSERT INTO licences (numero, navire_id, donnees, version,
               modifie_par)
-          VALUES (@id, @cle, @d:jsonb, nextval('referentiel_version_seq'),
-              @par:text)
+          SELECT @id, @cle, @d:jsonb, nextval('referentiel_version_seq'),
+              @par:text
+          WHERE EXISTS (SELECT 1 FROM navires WHERE id = @cle
+              AND NOT coalesce((donnees->>'supprime')::boolean, false))
           ON CONFLICT (numero) DO UPDATE SET
               navire_id = EXCLUDED.navire_id,
               donnees = EXCLUDED.donnees, version = EXCLUDED.version,
@@ -349,6 +351,8 @@ class StockagePostgres implements Stockage {
       String sql, Map<String, Object?> parametres) async {
     try {
       final r = await _pool.execute(Sql.named(sql), parameters: parametres);
+      // Aucune ligne : licence d'un navire absent ou supprimé.
+      if (r.isEmpty) return EcritureReferentiel.navireInconnu;
       return r.first.first == true
           ? EcritureReferentiel.cree
           : EcritureReferentiel.modifie;
@@ -359,6 +363,51 @@ class StockagePostgres implements Stockage {
       if (e.code == '23503') return EcritureReferentiel.navireInconnu;
       rethrow;
     }
+  }
+
+  @override
+  Future<SuppressionReferentiel> supprimerNavire(String id,
+          {Utilisateur? par}) =>
+      _pool.runTx((tx) async {
+        // Verrou sur le navire : pas de licence ajoutée pendant ce temps.
+        final n = await tx.execute(
+            Sql.named('SELECT 1 FROM navires WHERE id = @id '
+                "AND NOT coalesce((donnees->>'supprime')::boolean, false) "
+                'FOR UPDATE'),
+            parameters: {'id': id});
+        if (n.isEmpty) return SuppressionReferentiel.introuvable;
+        final l = await tx.execute(
+            Sql.named('SELECT 1 FROM licences WHERE navire_id = @id '
+                "AND NOT coalesce((donnees->>'supprime')::boolean, false) "
+                'LIMIT 1'),
+            parameters: {'id': id});
+        if (l.isNotEmpty) return SuppressionReferentiel.licencesActives;
+        await _marquerSupprime(tx, 'navires', 'id', id, par);
+        return SuppressionReferentiel.supprime;
+      });
+
+  @override
+  Future<SuppressionReferentiel> supprimerLicence(String numero,
+          {Utilisateur? par}) =>
+      _pool.runTx((tx) async {
+        final fait =
+            await _marquerSupprime(tx, 'licences', 'numero', numero, par);
+        return fait
+            ? SuppressionReferentiel.supprime
+            : SuppressionReferentiel.introuvable;
+      });
+
+  Future<bool> _marquerSupprime(Session s, String table, String cle,
+      String valeur, Utilisateur? par) async {
+    final r = await s.execute(Sql.named('''
+          UPDATE $table SET
+              donnees = donnees || '{"supprime": true}'::jsonb,
+              version = nextval('referentiel_version_seq'),
+              modifie_le = now(), modifie_par = @par:text
+          WHERE $cle = @v
+              AND NOT coalesce((donnees->>'supprime')::boolean, false)
+          RETURNING 1'''), parameters: {'v': valeur, 'par': par?.id});
+    return r.isNotEmpty;
   }
 
   @override

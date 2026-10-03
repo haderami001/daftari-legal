@@ -47,8 +47,9 @@ class BaseDeDonnees extends _$BaseDeDonnees {
   /// - v1 : schéma initial
   /// - v2 : colonne `controles.rapport_pdf` (rapport PDF signé)
   /// - v3 : table `reglages` (langue choisie)
+  /// - v4 : colonnes `supprime` (navires, licences retirés du référentiel)
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -68,6 +69,10 @@ class BaseDeDonnees extends _$BaseDeDonnees {
           if (depuis < 3) {
             await m.createTable(reglages);
           }
+          if (depuis < 4) {
+            await m.addColumn(navires, navires.supprime);
+            await m.addColumn(licences, licences.supprime);
+          }
         },
         beforeOpen: (details) async {
           // SQLite n'applique les clés étrangères que si on le demande.
@@ -86,6 +91,7 @@ class BaseDeDonnees extends _$BaseDeDonnees {
             longueurM: n.longueurM,
             puissanceKw: n.puissanceKw,
             numeroImo: n.numeroImo,
+            supprime: false,
           ));
           for (final c in n.certificats) {
             await into(certificats).insert(CertificatsCompanion.insert(
@@ -105,6 +111,7 @@ class BaseDeDonnees extends _$BaseDeDonnees {
             especesCibles: l.especesCibles,
             dateDebut: l.dateDebut,
             dateFin: l.dateFin,
+            supprime: false,
           ));
           for (final MapEntry(key: code, value: kg) in l.quotasKg.entries) {
             await into(quotas).insert(QuotaLigne(

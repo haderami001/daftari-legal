@@ -756,4 +756,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String licenceDe(String numero, String navire) {
     return '$numero — السفينة $navire';
   }
+
+  @override
+  String confirmerSuppression(String nom) {
+    return 'حذف «$nom»؟';
+  }
+
+  @override
+  String get suppressionExplication =>
+      'سيختفي من القوائم ومن الهواتف عند المزامنة التالية. يتم الاحتفاظ بالتصريحات وعمليات المراقبة السابقة.';
+
+  @override
+  String get navireSupprime => 'تم حذف السفينة';
+
+  @override
+  String get licenceSupprimee => 'تم حذف الترخيص';
 }

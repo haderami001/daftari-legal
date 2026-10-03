@@ -155,6 +155,45 @@ void main() {
         400);
   });
 
+  test('suppression : licence puis navire, marqués supprimés, rétablis',
+      () async {
+    await appeler('PUT', '/v1/navires/N9', corps: navire());
+    await appeler('PUT', '/v1/licences/LIC-9', corps: licence());
+
+    // Réservé à l'admin.
+    expect(
+        (await appeler('DELETE', '/v1/licences/LIC-9', role: 'agent'))
+            .statusCode,
+        403);
+    // Le navire a encore une licence.
+    final refus = await appeler('DELETE', '/v1/navires/N9');
+    expect(refus.statusCode, 409);
+    expect((await lire(refus) as Map)['erreur'], 'licences_actives');
+
+    final v1 = await stockage.versionReferentiel();
+    expect((await appeler('DELETE', '/v1/licences/LIC-9')).statusCode, 200);
+    expect((await appeler('DELETE', '/v1/licences/LIC-9')).statusCode, 404);
+    expect((await appeler('DELETE', '/v1/navires/N9')).statusCode, 200);
+    expect((await appeler('DELETE', '/v1/navires/INCONNU')).statusCode, 404);
+    expect(await stockage.versionReferentiel(), greaterThan(v1));
+
+    // Toujours dans le référentiel, marqués : les téléphones les retirent.
+    final ref = await stockage.referentiel();
+    expect((ref['navires']! as List).single, containsPair('supprime', true));
+    expect((ref['licences']! as List).single, containsPair('supprime', true));
+
+    // Pas de licence sur un navire supprimé.
+    expect(
+        (await appeler('PUT', '/v1/licences/LIC-10', corps: licence()))
+            .statusCode,
+        422);
+    // Un nouvel enregistrement rétablit le navire.
+    expect((await appeler('PUT', '/v1/navires/N9', corps: navire())).statusCode,
+        200);
+    expect(((await stockage.referentiel())['navires']! as List).single,
+        isNot(contains('supprime')));
+  });
+
   test('le référentiel de démonstration est valide et s\'importe', () async {
     await importerReferentiel(
         stockage,
