@@ -89,6 +89,19 @@ jobs:
           name: peche-conforme-apk
           path: peche_app/build/app/outputs/flutter-apk/app-debug.apk
 
+      # Démonstration complète sur téléphone, sans réseau : le serveur du
+      # dépôt tourne dans l'application (tableau de bord, administration).
+      - name: Construire l'APK de démonstration complète
+        run: |
+          flutter build apk --debug --dart-define=SERVEUR_DEMO=true
+          mv build/app/outputs/flutter-apk/app-debug.apk \
+             build/app/outputs/flutter-apk/peche-conforme-demo.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: peche-conforme-apk-demo
+          path: peche_app/build/app/outputs/flutter-apk/peche-conforme-demo.apk
+
   # Version navigateur (la même que la simulation) : téléchargeable aussi.
   web:
     needs: analyse-et-tests

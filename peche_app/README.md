@@ -62,6 +62,8 @@ puis lancez « Pêche Conforme » depuis l'onglet *Exécuter et déboguer*
 À chaque modification, GitHub Actions construit l'**APK Android** et la
 **version web** : onglet *Actions* du dépôt → dernière exécution →
 section *Artifacts* (`peche-conforme-apk`, `peche-conforme-web`).
+`peche-conforme-apk-demo` est la démonstration complète pour téléphone
+(serveur intégré : tableau de bord et administration, sans réseau).
 
 ## Base de données hors ligne (Drift / SQLite)
 
