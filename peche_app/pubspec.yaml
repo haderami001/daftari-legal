@@ -44,6 +44,10 @@ dependencies:
   printing: ^5.14.3
   geolocator: ^13.0.4
   http: ^1.6.0
+  # Version fixée : geolocator_android 4.6.2 utilise `flutter.compileSdkVersion`
+  # dans son build.gradle, propriété absente avec Flutter 3.24 (échec de
+  # compilation Android). 4.6.1 fixe compileSdk 34 et compile.
+  geolocator_android: 4.6.1
 
 dev_dependencies:
   flutter_test:
