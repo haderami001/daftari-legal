@@ -38,8 +38,9 @@ class ApiHttp implements ApiSynchro {
   final Uri base;
   final http.Client _client;
 
-  /// Jeton d'authentification (OpenID Connect) — à brancher sur Keycloak.
-  final String? jeton;
+  /// Fournit le jeton d'accès (Keycloak), renouvelé si besoin ; `null` =
+  /// pas d'en-tête Authorization.
+  final Future<String?> Function()? jeton;
 
   @override
   Future<void> envoyer(
@@ -49,6 +50,7 @@ class ApiHttp implements ApiSynchro {
       TypeEnvoi.controle => 'controles',
     };
     final url = base.resolve('v1/sync/$segment/$id');
+    final cle = await jeton?.call();
     final http.Response reponse;
     try {
       reponse = await _client
@@ -57,7 +59,7 @@ class ApiHttp implements ApiSynchro {
             headers: {
               'Content-Type': 'application/json',
               'Idempotency-Key': id,
-              if (jeton != null) 'Authorization': 'Bearer $jeton',
+              if (cle != null) 'Authorization': 'Bearer $cle',
             },
             body: jsonEncode(donnees),
           )

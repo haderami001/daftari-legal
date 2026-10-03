@@ -448,5 +448,16 @@
         "type": "String"
       }
     }
-  }
+  },
+  "connexionSousTitre": "Connectez-vous avec votre compte",
+  "identifiant": "Identifiant",
+  "motDePasse": "Mot de passe",
+  "seConnecter": "Se connecter",
+  "connexionChampsVides": "Saisissez votre identifiant et votre mot de passe.",
+  "connexionIdentifiants": "Identifiant ou mot de passe incorrect.",
+  "connexionReseau": "Pas de réseau : la première connexion doit se faire à terre.",
+  "connexionServeur": "Le serveur de connexion ne répond pas. Réessayez plus tard.",
+  "deconnexion": "Se déconnecter",
+  "compte": "Compte",
+  "aucunModule": "Votre compte n'a pas de rôle de saisie (capitaine ou agent)."
 }

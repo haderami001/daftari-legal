@@ -575,4 +575,41 @@ class AppLocalizationsFr extends AppLocalizations {
       String unite, String organisme) {
     return '$espece : $sous/$total individus sous $min $unite ($organisme).';
   }
+
+  @override
+  String get connexionSousTitre => 'Connectez-vous avec votre compte';
+
+  @override
+  String get identifiant => 'Identifiant';
+
+  @override
+  String get motDePasse => 'Mot de passe';
+
+  @override
+  String get seConnecter => 'Se connecter';
+
+  @override
+  String get connexionChampsVides =>
+      'Saisissez votre identifiant et votre mot de passe.';
+
+  @override
+  String get connexionIdentifiants => 'Identifiant ou mot de passe incorrect.';
+
+  @override
+  String get connexionReseau =>
+      'Pas de réseau : la première connexion doit se faire à terre.';
+
+  @override
+  String get connexionServeur =>
+      'Le serveur de connexion ne répond pas. Réessayez plus tard.';
+
+  @override
+  String get deconnexion => 'Se déconnecter';
+
+  @override
+  String get compte => 'Compte';
+
+  @override
+  String get aucunModule =>
+      'Votre compte n\'a pas de rôle de saisie (capitaine ou agent).';
 }

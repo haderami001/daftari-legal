@@ -10,7 +10,9 @@ void main() {
   late Handler api;
 
   setUp(() {
-    api = construireApi(stockage: StockageMemoire(), jeton: jetonTest);
+    api = construireApi(
+        stockage: StockageMemoire(),
+        authentificateur: AuthJetonPartage(jetonTest));
   });
 
   Future<(int, Object?)> appeler(

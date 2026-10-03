@@ -4,8 +4,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/data/base/base_de_donnees.dart';
 import 'core/data/depots/reglages_depot.dart';
 import 'core/services/services.dart';
+import 'core/services/session.dart';
 import 'core/services/synchronisation.dart';
 import 'features/accueil/accueil_screen.dart';
+import 'features/connexion/connexion_screen.dart';
 import 'l10n/libelles.dart';
 
 /// Adresse du serveur central (dossier `serveur/` du dépôt) et jeton
@@ -16,14 +18,22 @@ import 'l10n/libelles.dart';
 const _apiUrl = String.fromEnvironment('API_URL');
 const _apiJeton = String.fromEnvironment('API_JETON');
 
+/// Comptes Keycloak (voir keycloak/realm-peche.json) :
+///     --dart-define=OIDC_EMETTEUR=https://auth.exemple.mr/realms/peche
+/// Vide = mode démonstration, sans écran de connexion.
+const _oidcEmetteur = String.fromEnvironment('OIDC_EMETTEUR');
+
 void main() {
+  final Session session = _oidcEmetteur.isEmpty
+      ? SessionDemo(jetonPartage: _apiJeton.isEmpty ? null : _apiJeton)
+      : SessionKeycloak(emetteur: Uri.parse(_oidcEmetteur));
   runApp(PecheApp(
     services: Services(
       BaseDeDonnees(),
+      session: session,
       api: _apiUrl.isEmpty
           ? null
-          : ApiHttp(Uri.parse(_apiUrl),
-              jeton: _apiJeton.isEmpty ? null : _apiJeton),
+          : ApiHttp(Uri.parse(_apiUrl), jeton: session.jetonAcces),
     ),
   ));
 }
@@ -52,6 +62,9 @@ class _PecheAppState extends State<PecheApp> {
   @override
   void initState() {
     super.initState();
+    // Session gardée sur le téléphone : pas besoin de se reconnecter (ni
+    // de réseau) à chaque lancement.
+    widget.services.session.restaurer();
     // La langue choisie est gardée dans la base locale.
     widget.services.reglages.lire(ReglagesDepot.cleLangue).then((code) {
       if (code != null && mounted) setState(() => _langue = Locale(code));
@@ -84,7 +97,16 @@ class _PecheAppState extends State<PecheApp> {
         ],
         theme: _theme(Brightness.light),
         darkTheme: _theme(Brightness.dark),
-        home: const AccueilScreen(),
+        // Écran de connexion tant qu'aucun compte n'est connecté.
+        home: ListenableBuilder(
+          listenable: widget.services.session,
+          builder: (context, _) {
+            final s = widget.services.session;
+            return s.exigeConnexion && s.profil == null
+                ? const ConnexionScreen()
+                : const AccueilScreen();
+          },
+        ),
       ),
     );
   }

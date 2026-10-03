@@ -59,7 +59,8 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
     _choix = choix;
     _controle = Controle(
       navire: choix.navire,
-      agent: 'Agent GCM-0427', // en production : utilisateur connecté
+      // Nom de l'agent connecté (compte Keycloak).
+      agent: _services.session.profil?.nomComplet ?? '?',
       date: DateTime.now(),
       position: _positionAffichee,
       engin: choix.licence.enginsAutorises.first,

@@ -7,7 +7,12 @@ import 'package:shelf/shelf_io.dart' as shelf_io;
 ///
 /// | Variable              | Rôle                                              |
 /// |-----------------------|---------------------------------------------------|
-/// | `JETON_API`           | secret partagé avec l'application (obligatoire)   |
+/// | `OIDC_EMETTEUR`       | Keycloak : `https://auth.exemple.mr/realms/peche` |
+/// |                       | (comptes et rôles ; recommandé)                   |
+/// | `OIDC_AUDIENCE`       | `aud` attendu dans les jetons (`peche-api`)       |
+/// | `OIDC_JWKS_URL`       | clés publiques, si l'adresse interne diffère de   |
+/// |                       | l'émetteur (ex. réseau Docker)                    |
+/// | `JETON_API`           | sans Keycloak : secret partagé (développement)    |
 /// | `DATABASE_URL`        | `postgres://user:mdp@hote:5432/base` ; absent =   |
 /// |                       | stockage en mémoire (démo, perdu à l'arrêt)       |
 /// | `PORT`                | port d'écoute (8080 par défaut)                   |
@@ -16,9 +21,25 @@ import 'package:shelf/shelf_io.dart' as shelf_io;
 Future<void> main() async {
   final env = Platform.environment;
 
+  final Authentificateur auth;
+  final emetteur = env['OIDC_EMETTEUR'] ?? '';
   final jeton = env['JETON_API'] ?? '';
-  if (jeton.length < 16) {
-    stderr.writeln('JETON_API manquant ou trop court (16 caractères minimum).');
+  if (emetteur.isNotEmpty) {
+    final jwks = env['OIDC_JWKS_URL'] ?? '';
+    auth = AuthOidc(
+      emetteur: emetteur,
+      audience: env['OIDC_AUDIENCE'] ?? 'peche-api',
+      cles: ClesJwks(Uri.parse(
+          jwks.isNotEmpty ? jwks : '$emetteur/protocol/openid-connect/certs')),
+    );
+    stdout.writeln('Authentification Keycloak : $emetteur');
+  } else if (jeton.length >= 16) {
+    auth = AuthJetonPartage(jeton);
+    stdout.writeln('ATTENTION : authentification par jeton partagé '
+        '(développement). Utilisez Keycloak en production (OIDC_EMETTEUR).');
+  } else {
+    stderr.writeln('Configurez OIDC_EMETTEUR (Keycloak) ou JETON_API '
+        '(16 caractères minimum).');
     exit(64);
   }
 
@@ -35,7 +56,7 @@ Future<void> main() async {
 
   final api = construireApi(
     stockage: stockage,
-    jeton: jeton,
+    authentificateur: auth,
     originesAutorisees: (env['ORIGINES_AUTORISEES'] ?? '*')
         .split(',')
         .map((o) => o.trim())

@@ -1,0 +1,185 @@
+{
+  "realm": "peche",
+  "displayName": "Pêche Conforme",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": false,
+  "bruteForceProtected": true,
+  "failureFactor": 5,
+  "passwordPolicy": "length(10) and notUsername",
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 28800,
+  "offlineSessionIdleTimeout": 2592000,
+  "internationalizationEnabled": true,
+  "supportedLocales": [
+    "fr",
+    "ar"
+  ],
+  "defaultLocale": "fr",
+  "roles": {
+    "realm": [
+      {
+        "name": "capitaine",
+        "description": "Capitaine : envoie les déclarations de captures"
+      },
+      {
+        "name": "agent",
+        "description": "Agent garde-côtes : envoie les rapports de contrôle"
+      },
+      {
+        "name": "superviseur",
+        "description": "Superviseur : consulte les saisies et les rapports"
+      },
+      {
+        "name": "admin",
+        "description": "Administrateur : tous les droits"
+      },
+      {
+        "name": "default-roles-peche",
+        "description": "Rôles par défaut",
+        "composite": true,
+        "composites": {
+          "realm": [
+            "offline_access",
+            "uma_authorization"
+          ]
+        }
+      },
+      {
+        "name": "offline_access",
+        "description": "Session hors ligne (en mer)"
+      },
+      {
+        "name": "uma_authorization",
+        "description": "UMA"
+      }
+    ]
+  },
+  "defaultRole": {
+    "name": "default-roles-peche"
+  },
+  "clients": [
+    {
+      "clientId": "peche-app",
+      "name": "Application Pêche Conforme",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "mr.gov.peche:/oauthredirect"
+      ],
+      "webOrigins": [
+        "+"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "+"
+      },
+      "defaultClientScopes": [
+        "web-origins",
+        "profile",
+        "roles",
+        "basic"
+      ],
+      "optionalClientScopes": [
+        "offline_access"
+      ],
+      "protocolMappers": [
+        {
+          "name": "audience-peche-api",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "peche-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "capitaine.demo",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Ahmed",
+      "lastName": "Salem",
+      "email": "capitaine.demo@demo.peche.mr",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo-Peche-2026",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-peche",
+        "capitaine"
+      ]
+    },
+    {
+      "username": "agent.demo",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Mariem",
+      "lastName": "Cheikh",
+      "email": "agent.demo@demo.peche.mr",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo-Peche-2026",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-peche",
+        "agent"
+      ]
+    },
+    {
+      "username": "superviseur.demo",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Sidi",
+      "lastName": "Mohamed",
+      "email": "superviseur.demo@demo.peche.mr",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo-Peche-2026",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-peche",
+        "superviseur"
+      ]
+    },
+    {
+      "username": "admin.demo",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Admin",
+      "lastName": "Pêche",
+      "email": "admin.demo@demo.peche.mr",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo-Peche-2026",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-peche",
+        "admin"
+      ]
+    }
+  ]
+}

@@ -31,14 +31,36 @@ Sans `DATABASE_URL`, le serveur démarre avec un stockage **en mémoire**
 ```bash
 cd peche_app
 flutter run --dart-define=API_URL=http://<adresse-du-serveur>:8080 \
-            --dart-define=API_JETON=un-secret-d-au-moins-16-caracteres
+            --dart-define=OIDC_EMETTEUR=http://<adresse>:8180/realms/peche
+# Développement sans Keycloak : --dart-define=API_JETON=<JETON_API>
 ```
+
+## Comptes et rôles (Keycloak)
+
+Le domaine Keycloak `peche` est décrit dans
+[`../keycloak/realm-peche.json`](../keycloak/realm-peche.json) (importé par
+`docker compose`). Le serveur vérifie la signature des jetons (clés publiées
+par Keycloak), l'émetteur, le destinataire `peche-api` et l'expiration.
+
+| Rôle | Droits |
+|---|---|
+| `capitaine` | envoyer des déclarations |
+| `agent` | envoyer des contrôles |
+| `superviseur` | consulter listes, statistiques, rapports PDF |
+| `admin` | tout |
+
+Comptes de démonstration (mot de passe `Demo-Peche-2026`, **à supprimer en
+production**) : `capitaine.demo`, `agent.demo`, `superviseur.demo`,
+`admin.demo`. Chaque saisie garde le compte qui l'a envoyée (`envoye_par`).
 
 ## Configuration
 
 | Variable | Rôle |
 |---|---|
-| `JETON_API` | Secret partagé avec l'application (16 caractères minimum, obligatoire) |
+| `OIDC_EMETTEUR` | Keycloak : `https://auth.exemple.mr/realms/peche` (recommandé) |
+| `OIDC_AUDIENCE` | `aud` attendu, `peche-api` par défaut |
+| `OIDC_JWKS_URL` | Adresse des clés si elle diffère (réseau Docker) |
+| `JETON_API` | Sans Keycloak : secret partagé, **développement seulement** |
 | `DATABASE_URL` | `postgres://user:mdp@hote:5432/base` (ajouter `?sslmode=require` en production) |
 | `PORT` | Port d'écoute, 8080 par défaut |
 | `ORIGINES_AUTORISEES` | Origines web autorisées (CORS), séparées par des virgules ; `*` par défaut |
@@ -48,8 +70,9 @@ versionnées dans `lib/src/stockage_postgres.dart`, table `schema_version`).
 
 ## API
 
-Toutes les routes, sauf `/v1/sante`, exigent l'en-tête
-`Authorization: Bearer <JETON_API>`.
+Toutes les routes, sauf `/v1/sante`, exigent `Authorization: Bearer <jeton
+Keycloak>` (401 sinon) et le bon rôle (403 sinon). `GET /v1/moi` renvoie le
+compte et les rôles du jeton.
 
 | Méthode | Route | Réponse |
 |---|---|---|
@@ -90,8 +113,8 @@ envoie de vraies requêtes HTTP.
 
 ## À faire pour la production
 
-- Remplacer le jeton partagé par **Keycloak / OpenID Connect** (un compte
-  par agent et par capitaine, révocation d'un téléphone perdu).
+- Créer les vrais comptes dans Keycloak, supprimer les comptes de démo,
+  activer HTTPS sur Keycloak.
 - Mettre le serveur derrière **HTTPS** (reverse proxy ou hébergeur).
 - Ajouter les référentiels (navires, licences, quotas) et leur
   téléchargement par l'application, puis recalculer les infractions côté

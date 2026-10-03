@@ -113,7 +113,7 @@ void main() {
       late http.Request requete;
       final api = ApiHttp(
         Uri.parse('https://api.exemple.mr/peche'), // sans « / » final
-        jeton: 'abc',
+        jeton: () async => 'abc',
         client: MockClient((r) async {
           requete = r;
           return http.Response('', 201);

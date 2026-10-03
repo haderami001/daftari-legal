@@ -7,9 +7,11 @@ on:
     paths:
       - 'serveur/**'
       - '.github/workflows/serveur.yml'
+      - 'keycloak/**'
   pull_request:
     paths:
       - 'serveur/**'
+      - 'keycloak/**'
       - '.github/workflows/serveur.yml'
 
 concurrency:
@@ -51,9 +53,25 @@ jobs:
       - name: Analyse statique
         run: dart analyze --fatal-infos
 
-      - name: Tests (API + PostgreSQL)
+      # Un vrai Keycloak avec le domaine « peche » (keycloak/realm-peche.json).
+      - name: Keycloak
+        working-directory: .
+        run: |
+          docker run -d --name keycloak -p 8180:8080 \
+            -e KC_BOOTSTRAP_ADMIN_USERNAME=admin \
+            -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
+            -v "$PWD/keycloak:/opt/keycloak/data/import:ro" \
+            quay.io/keycloak/keycloak:26.0.7 start-dev --import-realm
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:8180/realms/peche/.well-known/openid-configuration >/dev/null && exit 0
+            sleep 3
+          done
+          docker logs keycloak; exit 1
+
+      - name: Tests (API + PostgreSQL + Keycloak)
         env:
           DATABASE_URL_TEST: postgres://postgres:postgres@localhost:5432/peche_test
+          KEYCLOAK_URL_TEST: http://localhost:8180
         run: dart test
 
   # Vérifie que l'image de déploiement se construit.

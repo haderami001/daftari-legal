@@ -130,5 +130,16 @@
   "infMarquage": "العلامات الخارجية (رقم التسجيل) غائبة أو غير مقروءة.",
   "infStockage": "مخطط التخزين في العنابر غير مطابق للتصريح.",
   "infMaillage": "متوسط مقاس العين {moyenne} مم أقل من {min} مم المطلوبة ({engin}).",
-  "infTailleMin": "{espece}: {sous} من {total} دون {min} {unite} ({organisme})."
+  "infTailleMin": "{espece}: {sous} من {total} دون {min} {unite} ({organisme}).",
+  "connexionSousTitre": "سجّل الدخول بحسابك",
+  "identifiant": "اسم المستخدم",
+  "motDePasse": "كلمة المرور",
+  "seConnecter": "تسجيل الدخول",
+  "connexionChampsVides": "أدخل اسم المستخدم وكلمة المرور.",
+  "connexionIdentifiants": "اسم المستخدم أو كلمة المرور غير صحيحة.",
+  "connexionReseau": "لا توجد شبكة: يجب أن يتم تسجيل الدخول الأول على اليابسة.",
+  "connexionServeur": "خادم تسجيل الدخول لا يستجيب. أعد المحاولة لاحقًا.",
+  "deconnexion": "تسجيل الخروج",
+  "compte": "الحساب",
+  "aucunModule": "ليس لحسابك دور إدخال (ربّان أو عون)."
 }

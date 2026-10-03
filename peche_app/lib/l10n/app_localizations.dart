@@ -885,6 +885,72 @@ abstract class AppLocalizations {
   /// **'{espece} : {sous}/{total} individus sous {min} {unite} ({organisme}).'**
   String infTailleMin(String espece, String sous, String total, String min,
       String unite, String organisme);
+
+  /// No description provided for @connexionSousTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connectez-vous avec votre compte'**
+  String get connexionSousTitre;
+
+  /// No description provided for @identifiant.
+  ///
+  /// In fr, this message translates to:
+  /// **'Identifiant'**
+  String get identifiant;
+
+  /// No description provided for @motDePasse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe'**
+  String get motDePasse;
+
+  /// No description provided for @seConnecter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se connecter'**
+  String get seConnecter;
+
+  /// No description provided for @connexionChampsVides.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez votre identifiant et votre mot de passe.'**
+  String get connexionChampsVides;
+
+  /// No description provided for @connexionIdentifiants.
+  ///
+  /// In fr, this message translates to:
+  /// **'Identifiant ou mot de passe incorrect.'**
+  String get connexionIdentifiants;
+
+  /// No description provided for @connexionReseau.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de réseau : la première connexion doit se faire à terre.'**
+  String get connexionReseau;
+
+  /// No description provided for @connexionServeur.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le serveur de connexion ne répond pas. Réessayez plus tard.'**
+  String get connexionServeur;
+
+  /// No description provided for @deconnexion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se déconnecter'**
+  String get deconnexion;
+
+  /// No description provided for @compte.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte'**
+  String get compte;
+
+  /// No description provided for @aucunModule.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre compte n\'a pas de rôle de saisie (capitaine ou agent).'**
+  String get aucunModule;
 }
 
 class _AppLocalizationsDelegate

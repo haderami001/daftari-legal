@@ -6,6 +6,7 @@ import '../data/depots/flotte_depot.dart';
 import '../data/depots/reglages_depot.dart';
 import '../data/depots/saisie_depot.dart';
 import 'position_service.dart';
+import 'session.dart';
 import 'synchronisation.dart';
 
 /// Tout ce dont les écrans ont besoin, créé une seule fois au démarrage :
@@ -18,7 +19,9 @@ class Services {
     this.base, {
     this.position = const PositionGeolocator(),
     ApiSynchro? api,
-  })  : flotte = FlotteDepot(base),
+    Session? session,
+  })  : session = session ?? SessionDemo(),
+        flotte = FlotteDepot(base),
         saisies = SaisieDepot(base),
         envois = FileEnvoiDepot(base),
         reglages = ReglagesDepot(base) {
@@ -31,6 +34,9 @@ class Services {
   final FileEnvoiDepot envois;
   final ReglagesDepot reglages;
   final ServicePosition position;
+
+  /// Compte connecté (Keycloak) ou mode démonstration.
+  final Session session;
   late final Synchroniseur synchro;
 }
 

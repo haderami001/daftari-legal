@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:postgres/postgres.dart';
 
+import 'authentification.dart';
 import 'stockage.dart';
 import 'validation.dart';
 
@@ -51,6 +52,13 @@ const migrations = <String>[
       recu_le            TIMESTAMPTZ NOT NULL DEFAULT now()
   );
   CREATE INDEX controles_navire_idx ON controles (navire_id, date_controle DESC);
+  ''',
+  // 2 — compte Keycloak qui a envoyé la saisie (traçabilité).
+  '''
+  ALTER TABLE declarations ADD COLUMN envoye_par TEXT;
+  ALTER TABLE declarations ADD COLUMN envoye_par_nom TEXT;
+  ALTER TABLE controles ADD COLUMN envoye_par TEXT;
+  ALTER TABLE controles ADD COLUMN envoye_par_nom TEXT;
   ''',
 ];
 
@@ -115,7 +123,8 @@ class StockagePostgres implements Stockage {
 
   @override
   Future<Enregistrement> enregistrer(
-      TypeSaisie type, String id, Map<String, Object?> d) async {
+      TypeSaisie type, String id, Map<String, Object?> d,
+      {Utilisateur? par}) async {
     final e = empreinte(d);
     final position = d['position']! as Map;
     final commun = <String, Object?>{
@@ -126,6 +135,8 @@ class StockagePostgres implements Stockage {
       'lon': (position['lon'] as num).toDouble(),
       'nb': d['nb_infractions'],
       'empreinte': e,
+      'par': par?.id,
+      'par_nom': par?.nom,
     };
     final Result r;
     switch (type) {
@@ -137,10 +148,11 @@ class StockagePostgres implements Stockage {
           Sql.named('''
             INSERT INTO declarations (id, navire_id, licence_numero, engin,
                 latitude, longitude, horodatage, nb_infractions,
-                poids_total_kg, equipage, captures, empreinte)
+                poids_total_kg, equipage, captures, empreinte, envoye_par,
+                envoye_par_nom)
             VALUES (@id:uuid, @navire, @licence, @engin, @lat, @lon,
                 @horodatage:timestamptz, @nb, @poids, @equipage:jsonb,
-                @captures:jsonb, @empreinte)
+                @captures:jsonb, @empreinte, @par:text, @par_nom:text)
             ON CONFLICT (id) DO NOTHING
             RETURNING id'''),
           parameters: {
@@ -160,11 +172,13 @@ class StockagePostgres implements Stockage {
                 latitude, longitude, engin, pavillon_conforme,
                 marquage_conforme, stockage_conforme, observations,
                 nb_infractions, amende_min_mru, amende_max_mru, maillages_mm,
-                echantillons, rapport, rapport_pdf, empreinte)
+                echantillons, rapport, rapport_pdf, empreinte, envoye_par,
+                envoye_par_nom)
             VALUES (@id:uuid, @navire, @agent, @date:timestamptz, @lat, @lon,
                 @engin, @pavillon, @marquage, @stockage, @observations, @nb,
                 @amende_min, @amende_max, @maillages:jsonb,
-                @echantillons:jsonb, @rapport, @pdf:bytea, @empreinte)
+                @echantillons:jsonb, @rapport, @pdf:bytea, @empreinte,
+                @par:text, @par_nom:text)
             ON CONFLICT (id) DO NOTHING
             RETURNING id'''),
           parameters: {
@@ -204,7 +218,8 @@ class StockagePostgres implements Stockage {
     };
     final r = await _pool.execute(
       Sql.named('SELECT id::text, navire_id, $colonneDate, nb_infractions, '
-          'recu_le FROM ${type.segment} ORDER BY recu_le DESC LIMIT @limite'),
+          'recu_le, envoye_par_nom FROM ${type.segment} '
+          'ORDER BY recu_le DESC LIMIT @limite'),
       parameters: {'limite': limite},
     );
     return [
@@ -215,6 +230,7 @@ class StockagePostgres implements Stockage {
           date: l[2]! as DateTime,
           nbInfractions: l[3]! as int,
           recuLe: l[4]! as DateTime,
+          envoyePar: l[5] as String?,
         ),
     ];
   }
