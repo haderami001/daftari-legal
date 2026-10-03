@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../format.dart';
 import '../models/enums.dart';
 import '../regulation/calcul_reglementaire.dart';
 
@@ -31,8 +32,8 @@ class ResultatCard extends StatelessWidget {
             leading: Icon(Icons.warning_amber, color: scheme.error),
             title: Text('${resultat.infractions.length} non-conformité(s)'),
             subtitle: Text(
-              'Amende indicative : ${resultat.amendeMin.toStringAsFixed(0)}'
-              ' – ${resultat.amendeMax.toStringAsFixed(0)} MRU',
+              'Amende indicative : ${formaterMontant(resultat.amendeMin)}'
+              ' à ${formaterMontant(resultat.amendeMax)} MRU',
             ),
           ),
           for (final i in resultat.infractions)

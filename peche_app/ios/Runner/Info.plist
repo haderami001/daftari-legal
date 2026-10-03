@@ -5,7 +5,9 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Peche App</string>
+	<string>Pêche Conforme</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>La position est enregistrée avec chaque déclaration de captures et chaque rapport d'inspection.</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../core/data/depots/depots.dart';
+import '../../core/services/services.dart';
 import '../../core/data/depots/flotte_depot.dart';
+import '../../core/format.dart';
 import '../../core/models/declaration.dart';
 import '../../core/models/enums.dart';
 import '../../core/models/navire.dart';
@@ -24,7 +25,7 @@ class _DeclarationCapitaineScreenState
     extends State<DeclarationCapitaineScreen> {
   final _calcul = const CalculReglementaire(referentielDemo);
 
-  late Depots _depots;
+  late Services _services;
 
   /// `null` tant que la flotte n'est pas chargée depuis la base locale.
   List<NavireLicence>? _flotte;
@@ -36,9 +37,20 @@ class _DeclarationCapitaineScreenState
   final _equipage = <MembreEquipage>[];
   final _captures = <Capture>[];
 
-  // Position fictive au large de Nouadhibou. En production : package
-  // `geolocator` + horodatage, et contrôle de cohérence avec le VMS.
-  final _position = PositionGps(20.85, -17.45, DateTime.now());
+  /// La mesure GPS peut prendre plusieurs secondes : l'écran s'affiche tout
+  /// de suite et la position est mise à jour dès qu'elle arrive.
+  PositionGps? _position;
+  bool _chargementLance = false;
+
+  /// Position utilisée tant que le GPS n'a pas répondu.
+  PositionGps get _positionAffichee =>
+      _position ??
+      PositionGps(20.85, -17.45, DateTime.now(), demonstration: true);
+
+  /// Une seule mesure GPS par écran, même si plusieurs parties l'attendent.
+  Future<PositionGps>? _mesureGps;
+  Future<PositionGps> _attendrePosition() => _mesureGps ??=
+      _services.position.positionActuelle()..then((p) => _position = p);
 
   Navire get _navire => _choix.navire;
   Licence get _licence => _choix.licence;
@@ -48,14 +60,18 @@ class _DeclarationCapitaineScreenState
     super.didChangeDependencies();
     // `context` n'est pas utilisable dans initState pour lire un
     // InheritedWidget : on le fait ici, une seule fois.
-    if (_flotte == null) {
-      _depots = DepotsScope.of(context);
+    if (!_chargementLance) {
+      _chargementLance = true;
+      _services = ServicesScope.of(context);
       _chargerFlotte();
+      _attendrePosition().then((_) {
+        if (mounted) setState(() {});
+      });
     }
   }
 
   Future<void> _chargerFlotte() async {
-    final flotte = await _depots.flotte.naviresAvecLicence();
+    final flotte = await _services.flotte.naviresAvecLicence();
     if (!mounted) return;
     setState(() {
       _flotte = flotte;
@@ -73,7 +89,7 @@ class _DeclarationCapitaineScreenState
         navire: _navire,
         licence: _licence,
         engin: _engin,
-        position: _position,
+        position: _positionAffichee,
         equipage: _equipage,
         captures: _captures,
       );
@@ -172,7 +188,12 @@ class _DeclarationCapitaineScreenState
         _ligne('Pavillon', _navire.pavillon),
         if (_navire.numeroImo != null) _ligne('N° IMO', _navire.numeroImo!),
         _ligne('Licence', '${_licence.numero} (${_licence.segment.libelle})'),
-        _ligne('Position GPS', _position.toString()),
+        _ligne(
+          'Position GPS',
+          _position == null
+              ? 'recherche du GPS…'
+              : '$_position${_position!.demonstration ? ' (non mesurée)' : ''}',
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 6,
@@ -334,14 +355,14 @@ class _DeclarationCapitaineScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _ligne('Poids total', '${d.poidsTotalKg.toStringAsFixed(0)} kg'),
+        _ligne('Poids total', '${formaterMontant(d.poidsTotalKg)} kg'),
         _ligne('Prises accessoires', '${pctAcc.toStringAsFixed(1)} %'),
         for (final MapEntry(key: code, value: quota)
             in d.licence.quotasKg.entries)
           _ligne(
             'Quota $code',
-            '${(CalculReglementaire.cumulParEspece(d.captures)[code] ?? 0).toStringAsFixed(0)}'
-                ' / ${quota.toStringAsFixed(0)} kg',
+            '${formaterMontant(CalculReglementaire.cumulParEspece(d.captures)[code] ?? 0)}'
+                ' / ${formaterMontant(quota)} kg',
           ),
         const SizedBox(height: 8),
         ResultatCard(resultat: resultat),
@@ -353,10 +374,11 @@ class _DeclarationCapitaineScreenState
   /// file d'envoi : elle partira vers le serveur au retour du réseau.
   Future<void> _envoyer() async {
     setState(() => _enregistrementEnCours = true);
+    await _attendrePosition();
     final d = _declaration;
     final String id;
     try {
-      id = await _depots.saisies
+      id = await _services.saisies
           .enregistrerDeclaration(d, _calcul.verifierDeclaration(d));
     } catch (e) {
       // Rien n'a été écrit (transaction annulée) : on peut réessayer.

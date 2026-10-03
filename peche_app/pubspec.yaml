@@ -40,6 +40,14 @@ dependencies:
   # de drift utilisable avec Flutter 3.24) ; 0.2.4 est vérifiée.
   drift_flutter: 0.2.4
   uuid: ^4.6.0
+  pdf: ^3.11.3
+  printing: ^5.14.3
+  geolocator: ^13.0.4
+  http: ^1.6.0
+  # Version fixée : geolocator_android 4.6.2 utilise `flutter.compileSdkVersion`
+  # dans son build.gradle, propriété absente avec Flutter 3.24 (échec de
+  # compilation Android). 4.6.1 fixe compileSdk 34 et compile.
+  geolocator_android: 4.6.1
 
 dev_dependencies:
   flutter_test:
@@ -53,6 +61,7 @@ dev_dependencies:
   flutter_lints: ^4.0.0
   drift_dev: ^2.23.1
   build_runner: ^2.4.13
+  sqlite3: ^2.9.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

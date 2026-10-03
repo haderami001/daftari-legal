@@ -113,8 +113,9 @@ lib/
 ├── main.dart
 ├── core/                      ← réutilisable par tous les modules
 │   ├── models/                  navire, licence, déclaration, contrôle
-│   ├── regulation/              référentiel + moteur de calcul + rapport
-│   ├── data/                    base Drift, dépôts, file d'envoi (API à venir)
+│   ├── regulation/              référentiel, moteur de calcul, rapports texte et PDF
+│   ├── data/                    base Drift, dépôts, file d'envoi
+│   ├── services/                GPS, synchronisation avec l'API
 │   └── widgets/                 composants communs
 └── features/                  ← un dossier par module métier
     ├── accueil/

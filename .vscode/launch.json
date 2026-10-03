@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Pêche Conforme (téléphone / émulateur)",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "peche_app",
+      "program": "lib/main.dart"
+    },
+    {
+      "name": "Pêche Conforme (navigateur Chrome)",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "peche_app",
+      "program": "lib/main.dart",
+      "deviceId": "chrome",
+      "args": ["--web-renderer", "html"]
+    }
+  ]
+}

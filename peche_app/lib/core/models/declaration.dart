@@ -2,11 +2,20 @@ import 'enums.dart';
 import 'navire.dart';
 
 class PositionGps {
-  const PositionGps(this.latitude, this.longitude, this.horodatage);
+  const PositionGps(
+    this.latitude,
+    this.longitude,
+    this.horodatage, {
+    this.demonstration = false,
+  });
 
   final double latitude;
   final double longitude;
   final DateTime horodatage;
+
+  /// `true` si ce n'est pas une vraie mesure GPS (GPS refusé, indisponible,
+  /// ou démo dans un navigateur) : l'écran l'indique clairement.
+  final bool demonstration;
 
   @override
   String toString() =>
@@ -86,7 +95,10 @@ class Controle {
   final Navire navire;
   final String agent;
   final DateTime date;
-  final PositionGps position;
+
+  /// Mise à jour quand la mesure GPS arrive (elle peut prendre quelques
+  /// secondes en mer).
+  PositionGps position;
   TypeEngin engin;
   bool pavillonConforme;
   bool marquageConforme;

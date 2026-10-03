@@ -2598,6 +2598,12 @@ class $ControlesTable extends Controles
   late final GeneratedColumn<String> rapport = GeneratedColumn<String>(
       'rapport', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _rapportPdfMeta =
+      const VerificationMeta('rapportPdf');
+  @override
+  late final GeneratedColumn<Uint8List> rapportPdf = GeneratedColumn<Uint8List>(
+      'rapport_pdf', aliasedName, true,
+      type: DriftSqlType.blob, requiredDuringInsert: false);
   static const VerificationMeta _creeLeMeta = const VerificationMeta('creeLe');
   @override
   late final GeneratedColumn<DateTime> creeLe = GeneratedColumn<DateTime>(
@@ -2622,6 +2628,7 @@ class $ControlesTable extends Controles
         amendeMin,
         amendeMax,
         rapport,
+        rapportPdf,
         creeLe
       ];
   @override
@@ -2726,6 +2733,12 @@ class $ControlesTable extends Controles
     } else if (isInserting) {
       context.missing(_rapportMeta);
     }
+    if (data.containsKey('rapport_pdf')) {
+      context.handle(
+          _rapportPdfMeta,
+          rapportPdf.isAcceptableOrUnknown(
+              data['rapport_pdf']!, _rapportPdfMeta));
+    }
     if (data.containsKey('cree_le')) {
       context.handle(_creeLeMeta,
           creeLe.isAcceptableOrUnknown(data['cree_le']!, _creeLeMeta));
@@ -2770,6 +2783,8 @@ class $ControlesTable extends Controles
           .read(DriftSqlType.double, data['${effectivePrefix}amende_max'])!,
       rapport: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}rapport'])!,
+      rapportPdf: attachedDatabase.typeMapping
+          .read(DriftSqlType.blob, data['${effectivePrefix}rapport_pdf']),
       creeLe: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}cree_le'])!,
     );
@@ -2802,6 +2817,9 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
 
   /// Texte du rapport tel que signé par l'agent (valeur probante).
   final String rapport;
+
+  /// Rapport PDF tel que signé (ajouté dans la version 2 du schéma).
+  final Uint8List? rapportPdf;
   final DateTime creeLe;
   const ControleLigne(
       {required this.id,
@@ -2819,6 +2837,7 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
       required this.amendeMin,
       required this.amendeMax,
       required this.rapport,
+      this.rapportPdf,
       required this.creeLe});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2841,6 +2860,9 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
     map['amende_min'] = Variable<double>(amendeMin);
     map['amende_max'] = Variable<double>(amendeMax);
     map['rapport'] = Variable<String>(rapport);
+    if (!nullToAbsent || rapportPdf != null) {
+      map['rapport_pdf'] = Variable<Uint8List>(rapportPdf);
+    }
     map['cree_le'] = Variable<DateTime>(creeLe);
     return map;
   }
@@ -2862,6 +2884,9 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
       amendeMin: Value(amendeMin),
       amendeMax: Value(amendeMax),
       rapport: Value(rapport),
+      rapportPdf: rapportPdf == null && nullToAbsent
+          ? const Value.absent()
+          : Value(rapportPdf),
       creeLe: Value(creeLe),
     );
   }
@@ -2887,6 +2912,7 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
       amendeMin: serializer.fromJson<double>(json['amendeMin']),
       amendeMax: serializer.fromJson<double>(json['amendeMax']),
       rapport: serializer.fromJson<String>(json['rapport']),
+      rapportPdf: serializer.fromJson<Uint8List?>(json['rapportPdf']),
       creeLe: serializer.fromJson<DateTime>(json['creeLe']),
     );
   }
@@ -2910,6 +2936,7 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
       'amendeMin': serializer.toJson<double>(amendeMin),
       'amendeMax': serializer.toJson<double>(amendeMax),
       'rapport': serializer.toJson<String>(rapport),
+      'rapportPdf': serializer.toJson<Uint8List?>(rapportPdf),
       'creeLe': serializer.toJson<DateTime>(creeLe),
     };
   }
@@ -2930,6 +2957,7 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
           double? amendeMin,
           double? amendeMax,
           String? rapport,
+          Value<Uint8List?> rapportPdf = const Value.absent(),
           DateTime? creeLe}) =>
       ControleLigne(
         id: id ?? this.id,
@@ -2947,6 +2975,7 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
         amendeMin: amendeMin ?? this.amendeMin,
         amendeMax: amendeMax ?? this.amendeMax,
         rapport: rapport ?? this.rapport,
+        rapportPdf: rapportPdf.present ? rapportPdf.value : this.rapportPdf,
         creeLe: creeLe ?? this.creeLe,
       );
   ControleLigne copyWithCompanion(ControlesCompanion data) {
@@ -2976,6 +3005,8 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
       amendeMin: data.amendeMin.present ? data.amendeMin.value : this.amendeMin,
       amendeMax: data.amendeMax.present ? data.amendeMax.value : this.amendeMax,
       rapport: data.rapport.present ? data.rapport.value : this.rapport,
+      rapportPdf:
+          data.rapportPdf.present ? data.rapportPdf.value : this.rapportPdf,
       creeLe: data.creeLe.present ? data.creeLe.value : this.creeLe,
     );
   }
@@ -2998,6 +3029,7 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
           ..write('amendeMin: $amendeMin, ')
           ..write('amendeMax: $amendeMax, ')
           ..write('rapport: $rapport, ')
+          ..write('rapportPdf: $rapportPdf, ')
           ..write('creeLe: $creeLe')
           ..write(')'))
         .toString();
@@ -3020,6 +3052,7 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
       amendeMin,
       amendeMax,
       rapport,
+      $driftBlobEquality.hash(rapportPdf),
       creeLe);
   @override
   bool operator ==(Object other) =>
@@ -3040,6 +3073,7 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
           other.amendeMin == this.amendeMin &&
           other.amendeMax == this.amendeMax &&
           other.rapport == this.rapport &&
+          $driftBlobEquality.equals(other.rapportPdf, this.rapportPdf) &&
           other.creeLe == this.creeLe);
 }
 
@@ -3059,6 +3093,7 @@ class ControlesCompanion extends UpdateCompanion<ControleLigne> {
   final Value<double> amendeMin;
   final Value<double> amendeMax;
   final Value<String> rapport;
+  final Value<Uint8List?> rapportPdf;
   final Value<DateTime> creeLe;
   final Value<int> rowid;
   const ControlesCompanion({
@@ -3077,6 +3112,7 @@ class ControlesCompanion extends UpdateCompanion<ControleLigne> {
     this.amendeMin = const Value.absent(),
     this.amendeMax = const Value.absent(),
     this.rapport = const Value.absent(),
+    this.rapportPdf = const Value.absent(),
     this.creeLe = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -3096,6 +3132,7 @@ class ControlesCompanion extends UpdateCompanion<ControleLigne> {
     required double amendeMin,
     required double amendeMax,
     required String rapport,
+    this.rapportPdf = const Value.absent(),
     this.creeLe = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
@@ -3128,6 +3165,7 @@ class ControlesCompanion extends UpdateCompanion<ControleLigne> {
     Expression<double>? amendeMin,
     Expression<double>? amendeMax,
     Expression<String>? rapport,
+    Expression<Uint8List>? rapportPdf,
     Expression<DateTime>? creeLe,
     Expression<int>? rowid,
   }) {
@@ -3148,6 +3186,7 @@ class ControlesCompanion extends UpdateCompanion<ControleLigne> {
       if (amendeMin != null) 'amende_min': amendeMin,
       if (amendeMax != null) 'amende_max': amendeMax,
       if (rapport != null) 'rapport': rapport,
+      if (rapportPdf != null) 'rapport_pdf': rapportPdf,
       if (creeLe != null) 'cree_le': creeLe,
       if (rowid != null) 'rowid': rowid,
     });
@@ -3169,6 +3208,7 @@ class ControlesCompanion extends UpdateCompanion<ControleLigne> {
       Value<double>? amendeMin,
       Value<double>? amendeMax,
       Value<String>? rapport,
+      Value<Uint8List?>? rapportPdf,
       Value<DateTime>? creeLe,
       Value<int>? rowid}) {
     return ControlesCompanion(
@@ -3187,6 +3227,7 @@ class ControlesCompanion extends UpdateCompanion<ControleLigne> {
       amendeMin: amendeMin ?? this.amendeMin,
       amendeMax: amendeMax ?? this.amendeMax,
       rapport: rapport ?? this.rapport,
+      rapportPdf: rapportPdf ?? this.rapportPdf,
       creeLe: creeLe ?? this.creeLe,
       rowid: rowid ?? this.rowid,
     );
@@ -3242,6 +3283,9 @@ class ControlesCompanion extends UpdateCompanion<ControleLigne> {
     if (rapport.present) {
       map['rapport'] = Variable<String>(rapport.value);
     }
+    if (rapportPdf.present) {
+      map['rapport_pdf'] = Variable<Uint8List>(rapportPdf.value);
+    }
     if (creeLe.present) {
       map['cree_le'] = Variable<DateTime>(creeLe.value);
     }
@@ -3269,6 +3313,7 @@ class ControlesCompanion extends UpdateCompanion<ControleLigne> {
           ..write('amendeMin: $amendeMin, ')
           ..write('amendeMax: $amendeMax, ')
           ..write('rapport: $rapport, ')
+          ..write('rapportPdf: $rapportPdf, ')
           ..write('creeLe: $creeLe, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -6864,6 +6909,7 @@ typedef $$ControlesTableCreateCompanionBuilder = ControlesCompanion Function({
   required double amendeMin,
   required double amendeMax,
   required String rapport,
+  Value<Uint8List?> rapportPdf,
   Value<DateTime> creeLe,
   Value<int> rowid,
 });
@@ -6883,6 +6929,7 @@ typedef $$ControlesTableUpdateCompanionBuilder = ControlesCompanion Function({
   Value<double> amendeMin,
   Value<double> amendeMax,
   Value<String> rapport,
+  Value<Uint8List?> rapportPdf,
   Value<DateTime> creeLe,
   Value<int> rowid,
 });
@@ -6994,6 +7041,9 @@ class $$ControlesTableFilterComposer
 
   ColumnFilters<String> get rapport => $composableBuilder(
       column: $table.rapport, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<Uint8List> get rapportPdf => $composableBuilder(
+      column: $table.rapportPdf, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get creeLe => $composableBuilder(
       column: $table.creeLe, builder: (column) => ColumnFilters(column));
@@ -7118,6 +7168,9 @@ class $$ControlesTableOrderingComposer
   ColumnOrderings<String> get rapport => $composableBuilder(
       column: $table.rapport, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<Uint8List> get rapportPdf => $composableBuilder(
+      column: $table.rapportPdf, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get creeLe => $composableBuilder(
       column: $table.creeLe, builder: (column) => ColumnOrderings(column));
 
@@ -7192,6 +7245,9 @@ class $$ControlesTableAnnotationComposer
 
   GeneratedColumn<String> get rapport =>
       $composableBuilder(column: $table.rapport, builder: (column) => column);
+
+  GeneratedColumn<Uint8List> get rapportPdf => $composableBuilder(
+      column: $table.rapportPdf, builder: (column) => column);
 
   GeneratedColumn<DateTime> get creeLe =>
       $composableBuilder(column: $table.creeLe, builder: (column) => column);
@@ -7303,6 +7359,7 @@ class $$ControlesTableTableManager extends RootTableManager<
             Value<double> amendeMin = const Value.absent(),
             Value<double> amendeMax = const Value.absent(),
             Value<String> rapport = const Value.absent(),
+            Value<Uint8List?> rapportPdf = const Value.absent(),
             Value<DateTime> creeLe = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -7322,6 +7379,7 @@ class $$ControlesTableTableManager extends RootTableManager<
             amendeMin: amendeMin,
             amendeMax: amendeMax,
             rapport: rapport,
+            rapportPdf: rapportPdf,
             creeLe: creeLe,
             rowid: rowid,
           ),
@@ -7341,6 +7399,7 @@ class $$ControlesTableTableManager extends RootTableManager<
             required double amendeMin,
             required double amendeMax,
             required String rapport,
+            Value<Uint8List?> rapportPdf = const Value.absent(),
             Value<DateTime> creeLe = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -7360,6 +7419,7 @@ class $$ControlesTableTableManager extends RootTableManager<
             amendeMin: amendeMin,
             amendeMax: amendeMax,
             rapport: rapport,
+            rapportPdf: rapportPdf,
             creeLe: creeLe,
             rowid: rowid,
           ),
