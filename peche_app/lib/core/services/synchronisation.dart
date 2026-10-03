@@ -71,21 +71,37 @@ class ApiHttp implements ApiSynchro {
   }
 }
 
+enum StatutSynchro {
+  /// La file a été parcourue (voir envoyés / échecs).
+  termine,
+
+  /// Aucun serveur configuré : rien n'a été tenté.
+  nonConfigure,
+
+  /// Un envoi était déjà en cours : rien n'a été tenté.
+  dejaEnCours,
+}
+
 class ResultatSynchro {
   const ResultatSynchro({
+    this.statut = StatutSynchro.termine,
     this.envoyes = 0,
     this.echecs = 0,
-    this.message,
   });
 
+  final StatutSynchro statut;
   final int envoyes;
   final int echecs;
 
-  /// Explication si rien n'a pu être tenté (ex. serveur non configuré).
-  final String? message;
-
+  /// Résumé en français (journaux, tests). L'interface utilise [statut]
+  /// pour afficher un message traduit.
   @override
-  String toString() => message ?? '$envoyes envoyé(s), $echecs échec(s)';
+  String toString() => switch (statut) {
+        StatutSynchro.termine => '$envoyes envoyé(s), $echecs échec(s)',
+        StatutSynchro.nonConfigure => 'Serveur non configuré : les saisies '
+            'restent sur le téléphone (paramètre API_URL).',
+        StatutSynchro.dejaEnCours => 'Envoi déjà en cours.',
+      };
 }
 
 /// Vide la file d'envoi vers le serveur.
@@ -113,13 +129,11 @@ class Synchroniseur {
   Future<ResultatSynchro> synchroniser() async {
     final api = this.api;
     if (api == null) {
-      return const ResultatSynchro(
-          message: 'Serveur non configuré : les saisies restent sur le '
-              'téléphone (paramètre API_URL).');
+      return const ResultatSynchro(statut: StatutSynchro.nonConfigure);
     }
     // Évite deux envois simultanés de la même file.
     if (_enCours) {
-      return const ResultatSynchro(message: 'Envoi déjà en cours.');
+      return const ResultatSynchro(statut: StatutSynchro.dejaEnCours);
     }
     _enCours = true;
     var envoyes = 0;

@@ -4247,6 +4247,196 @@ class FileEnvoisCompanion extends UpdateCompanion<EnvoiLigne> {
   }
 }
 
+class $ReglagesTable extends Reglages
+    with TableInfo<$ReglagesTable, ReglageLigne> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ReglagesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _cleMeta = const VerificationMeta('cle');
+  @override
+  late final GeneratedColumn<String> cle = GeneratedColumn<String>(
+      'cle', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _valeurMeta = const VerificationMeta('valeur');
+  @override
+  late final GeneratedColumn<String> valeur = GeneratedColumn<String>(
+      'valeur', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [cle, valeur];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'reglages';
+  @override
+  VerificationContext validateIntegrity(Insertable<ReglageLigne> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('cle')) {
+      context.handle(
+          _cleMeta, cle.isAcceptableOrUnknown(data['cle']!, _cleMeta));
+    } else if (isInserting) {
+      context.missing(_cleMeta);
+    }
+    if (data.containsKey('valeur')) {
+      context.handle(_valeurMeta,
+          valeur.isAcceptableOrUnknown(data['valeur']!, _valeurMeta));
+    } else if (isInserting) {
+      context.missing(_valeurMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {cle};
+  @override
+  ReglageLigne map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ReglageLigne(
+      cle: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}cle'])!,
+      valeur: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}valeur'])!,
+    );
+  }
+
+  @override
+  $ReglagesTable createAlias(String alias) {
+    return $ReglagesTable(attachedDatabase, alias);
+  }
+}
+
+class ReglageLigne extends DataClass implements Insertable<ReglageLigne> {
+  final String cle;
+  final String valeur;
+  const ReglageLigne({required this.cle, required this.valeur});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['cle'] = Variable<String>(cle);
+    map['valeur'] = Variable<String>(valeur);
+    return map;
+  }
+
+  ReglagesCompanion toCompanion(bool nullToAbsent) {
+    return ReglagesCompanion(
+      cle: Value(cle),
+      valeur: Value(valeur),
+    );
+  }
+
+  factory ReglageLigne.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ReglageLigne(
+      cle: serializer.fromJson<String>(json['cle']),
+      valeur: serializer.fromJson<String>(json['valeur']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'cle': serializer.toJson<String>(cle),
+      'valeur': serializer.toJson<String>(valeur),
+    };
+  }
+
+  ReglageLigne copyWith({String? cle, String? valeur}) => ReglageLigne(
+        cle: cle ?? this.cle,
+        valeur: valeur ?? this.valeur,
+      );
+  ReglageLigne copyWithCompanion(ReglagesCompanion data) {
+    return ReglageLigne(
+      cle: data.cle.present ? data.cle.value : this.cle,
+      valeur: data.valeur.present ? data.valeur.value : this.valeur,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReglageLigne(')
+          ..write('cle: $cle, ')
+          ..write('valeur: $valeur')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(cle, valeur);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ReglageLigne &&
+          other.cle == this.cle &&
+          other.valeur == this.valeur);
+}
+
+class ReglagesCompanion extends UpdateCompanion<ReglageLigne> {
+  final Value<String> cle;
+  final Value<String> valeur;
+  final Value<int> rowid;
+  const ReglagesCompanion({
+    this.cle = const Value.absent(),
+    this.valeur = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ReglagesCompanion.insert({
+    required String cle,
+    required String valeur,
+    this.rowid = const Value.absent(),
+  })  : cle = Value(cle),
+        valeur = Value(valeur);
+  static Insertable<ReglageLigne> custom({
+    Expression<String>? cle,
+    Expression<String>? valeur,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (cle != null) 'cle': cle,
+      if (valeur != null) 'valeur': valeur,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ReglagesCompanion copyWith(
+      {Value<String>? cle, Value<String>? valeur, Value<int>? rowid}) {
+    return ReglagesCompanion(
+      cle: cle ?? this.cle,
+      valeur: valeur ?? this.valeur,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (cle.present) {
+      map['cle'] = Variable<String>(cle.value);
+    }
+    if (valeur.present) {
+      map['valeur'] = Variable<String>(valeur.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReglagesCompanion(')
+          ..write('cle: $cle, ')
+          ..write('valeur: $valeur, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$BaseDeDonnees extends GeneratedDatabase {
   _$BaseDeDonnees(QueryExecutor e) : super(e);
   $BaseDeDonneesManager get managers => $BaseDeDonneesManager(this);
@@ -4263,6 +4453,7 @@ abstract class _$BaseDeDonnees extends GeneratedDatabase {
   late final $ControleEchantillonsTable controleEchantillons =
       $ControleEchantillonsTable(this);
   late final $FileEnvoisTable fileEnvois = $FileEnvoisTable(this);
+  late final $ReglagesTable reglages = $ReglagesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4278,7 +4469,8 @@ abstract class _$BaseDeDonnees extends GeneratedDatabase {
         controles,
         controleMaillages,
         controleEchantillons,
-        fileEnvois
+        fileEnvois,
+        reglages
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -8220,6 +8412,132 @@ typedef $$FileEnvoisTableProcessedTableManager = ProcessedTableManager<
     (EnvoiLigne, BaseReferences<_$BaseDeDonnees, $FileEnvoisTable, EnvoiLigne>),
     EnvoiLigne,
     PrefetchHooks Function()>;
+typedef $$ReglagesTableCreateCompanionBuilder = ReglagesCompanion Function({
+  required String cle,
+  required String valeur,
+  Value<int> rowid,
+});
+typedef $$ReglagesTableUpdateCompanionBuilder = ReglagesCompanion Function({
+  Value<String> cle,
+  Value<String> valeur,
+  Value<int> rowid,
+});
+
+class $$ReglagesTableFilterComposer
+    extends Composer<_$BaseDeDonnees, $ReglagesTable> {
+  $$ReglagesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get cle => $composableBuilder(
+      column: $table.cle, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get valeur => $composableBuilder(
+      column: $table.valeur, builder: (column) => ColumnFilters(column));
+}
+
+class $$ReglagesTableOrderingComposer
+    extends Composer<_$BaseDeDonnees, $ReglagesTable> {
+  $$ReglagesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get cle => $composableBuilder(
+      column: $table.cle, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get valeur => $composableBuilder(
+      column: $table.valeur, builder: (column) => ColumnOrderings(column));
+}
+
+class $$ReglagesTableAnnotationComposer
+    extends Composer<_$BaseDeDonnees, $ReglagesTable> {
+  $$ReglagesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get cle =>
+      $composableBuilder(column: $table.cle, builder: (column) => column);
+
+  GeneratedColumn<String> get valeur =>
+      $composableBuilder(column: $table.valeur, builder: (column) => column);
+}
+
+class $$ReglagesTableTableManager extends RootTableManager<
+    _$BaseDeDonnees,
+    $ReglagesTable,
+    ReglageLigne,
+    $$ReglagesTableFilterComposer,
+    $$ReglagesTableOrderingComposer,
+    $$ReglagesTableAnnotationComposer,
+    $$ReglagesTableCreateCompanionBuilder,
+    $$ReglagesTableUpdateCompanionBuilder,
+    (
+      ReglageLigne,
+      BaseReferences<_$BaseDeDonnees, $ReglagesTable, ReglageLigne>
+    ),
+    ReglageLigne,
+    PrefetchHooks Function()> {
+  $$ReglagesTableTableManager(_$BaseDeDonnees db, $ReglagesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ReglagesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ReglagesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ReglagesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> cle = const Value.absent(),
+            Value<String> valeur = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ReglagesCompanion(
+            cle: cle,
+            valeur: valeur,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String cle,
+            required String valeur,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ReglagesCompanion.insert(
+            cle: cle,
+            valeur: valeur,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$ReglagesTableProcessedTableManager = ProcessedTableManager<
+    _$BaseDeDonnees,
+    $ReglagesTable,
+    ReglageLigne,
+    $$ReglagesTableFilterComposer,
+    $$ReglagesTableOrderingComposer,
+    $$ReglagesTableAnnotationComposer,
+    $$ReglagesTableCreateCompanionBuilder,
+    $$ReglagesTableUpdateCompanionBuilder,
+    (
+      ReglageLigne,
+      BaseReferences<_$BaseDeDonnees, $ReglagesTable, ReglageLigne>
+    ),
+    ReglageLigne,
+    PrefetchHooks Function()>;
 
 class $BaseDeDonneesManager {
   final _$BaseDeDonnees _db;
@@ -8246,4 +8564,6 @@ class $BaseDeDonneesManager {
       $$ControleEchantillonsTableTableManager(_db, _db.controleEchantillons);
   $$FileEnvoisTableTableManager get fileEnvois =>
       $$FileEnvoisTableTableManager(_db, _db.fileEnvois);
+  $$ReglagesTableTableManager get reglages =>
+      $$ReglagesTableTableManager(_db, _db.reglages);
 }

@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../data/base/base_de_donnees.dart';
 import '../data/depots/file_envoi_depot.dart';
 import '../data/depots/flotte_depot.dart';
+import '../data/depots/reglages_depot.dart';
 import '../data/depots/saisie_depot.dart';
 import 'position_service.dart';
 import 'synchronisation.dart';
@@ -19,7 +20,8 @@ class Services {
     ApiSynchro? api,
   })  : flotte = FlotteDepot(base),
         saisies = SaisieDepot(base),
-        envois = FileEnvoiDepot(base) {
+        envois = FileEnvoiDepot(base),
+        reglages = ReglagesDepot(base) {
     synchro = Synchroniseur(saisies: saisies, file: envois, api: api);
   }
 
@@ -27,6 +29,7 @@ class Services {
   final FlotteDepot flotte;
   final SaisieDepot saisies;
   final FileEnvoiDepot envois;
+  final ReglagesDepot reglages;
   final ServicePosition position;
   late final Synchroniseur synchro;
 }

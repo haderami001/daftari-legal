@@ -9,12 +9,19 @@ class Infraction {
     required this.code,
     required this.gravite,
     required this.message,
+    this.details = const {},
   });
 
   /// Code stable (utile pour les statistiques et la synchronisation).
   final String code;
   final Gravite gravite;
+
+  /// Message en français (rapport officiel, PDF).
   final String message;
+
+  /// Valeurs brutes du message (numéro, engin, poids...) : l'interface s'en
+  /// sert pour rédiger le message dans la langue de l'utilisateur.
+  final Map<String, Object> details;
 
   @override
   String toString() => '[${gravite.libelle}] $message';
@@ -71,12 +78,14 @@ class CalculReglementaire {
           code: 'LIC_INVALIDE',
           gravite: Gravite.tresGrave,
           message: 'Licence ${licence.numero} non valide à cette date.',
+          details: {'licence': licence.numero},
         ),
       if (!licence.enginsAutorises.contains(engin))
         Infraction(
           code: 'ENGIN_NON_AUTORISE',
           gravite: Gravite.grave,
           message: 'Engin « ${engin.libelle} » non autorisé par la licence.',
+          details: {'engin': engin},
         ),
     ];
   }
@@ -89,6 +98,7 @@ class CalculReglementaire {
             code: 'CERT_EXPIRE',
             gravite: Gravite.mineure,
             message: '${c.type.libelle} n° ${c.numero} expiré.',
+            details: {'certificat': c.type, 'numero': c.numero},
           ),
     ];
   }
@@ -104,6 +114,7 @@ class CalculReglementaire {
             gravite: Gravite.grave,
             message: 'Quota $code dépassé : ${poids.toStringAsFixed(0)} kg '
                 'pour ${quota.toStringAsFixed(0)} kg autorisés.',
+            details: {'espece': code, 'poids': poids, 'quota': quota},
           ),
     ];
   }
@@ -120,6 +131,7 @@ class CalculReglementaire {
         gravite: Gravite.grave,
         message: 'Prises accessoires ${pct.toStringAsFixed(1)} % '
             '(max ${max.toStringAsFixed(0)} % pour ${engin.libelle}).',
+        details: {'pct': pct, 'max': max, 'engin': engin},
       ),
     ];
   }
@@ -190,6 +202,11 @@ class CalculReglementaire {
         message: 'Maillage moyen ${moyenne.toStringAsFixed(1)} mm < '
             '${regle.maillageMinMm.toStringAsFixed(0)} mm requis '
             '(${engin.libelle}).',
+        details: {
+          'moyenne': moyenne,
+          'min': regle.maillageMinMm,
+          'engin': engin,
+        },
       ),
     ];
   }
@@ -214,6 +231,14 @@ class CalculReglementaire {
         message: '${regle.nomCommun} : $sousTaille/${liste.length} '
             'individus sous ${regle.minimum.toStringAsFixed(0)} '
             '${regle.unite.symbole} (${regle.organisme}).',
+        details: {
+          'espece': code,
+          'sous': sousTaille,
+          'total': liste.length,
+          'min': regle.minimum,
+          'unite': regle.unite,
+          'organisme': regle.organisme,
+        },
       ));
     });
     return result;

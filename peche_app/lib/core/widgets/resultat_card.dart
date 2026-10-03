@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/libelles.dart';
 import '../format.dart';
 import '../models/enums.dart';
 import '../regulation/calcul_reglementaire.dart';
@@ -13,13 +14,14 @@ class ResultatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
     if (resultat.conforme) {
       return Card(
         color: Colors.green.withOpacity(0.15),
-        child: const ListTile(
-          leading: Icon(Icons.verified, color: Colors.green),
-          title: Text('Conforme'),
-          subtitle: Text('Aucune non-conformité détectée.'),
+        child: ListTile(
+          leading: const Icon(Icons.verified, color: Colors.green),
+          title: Text(l10n.conforme),
+          subtitle: Text(l10n.aucuneNonConformite),
         ),
       );
     }
@@ -30,11 +32,11 @@ class ResultatCard extends StatelessWidget {
         children: [
           ListTile(
             leading: Icon(Icons.warning_amber, color: scheme.error),
-            title: Text('${resultat.infractions.length} non-conformité(s)'),
-            subtitle: Text(
-              'Amende indicative : ${formaterMontant(resultat.amendeMin)}'
-              ' à ${formaterMontant(resultat.amendeMax)} MRU',
-            ),
+            title: Text(l10n.nonConformites(resultat.infractions.length)),
+            subtitle: Text(l10n.amendeIndicative(
+              formaterMontant(resultat.amendeMin),
+              formaterMontant(resultat.amendeMax),
+            )),
           ),
           for (final i in resultat.infractions)
             ListTile(
@@ -48,8 +50,8 @@ class ResultatCard extends StatelessWidget {
                   Gravite.tresGrave => Colors.red,
                 },
               ),
-              title: Text(i.message),
-              subtitle: Text(i.gravite.libelle),
+              title: Text(l10n.messageInfraction(i)),
+              subtitle: Text(l10n.libelleGravite(i.gravite)),
             ),
         ],
       ),

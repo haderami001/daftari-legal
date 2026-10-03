@@ -1,0 +1,13 @@
+# Traductions de l'interface (outil officiel Flutter « gen-l10n »).
+# - Textes français (modèle) : lib/l10n/app_fr.arb
+# - Textes arabes            : lib/l10n/app_ar.arb
+# Le code Dart est régénéré à chaque `flutter pub get` / `flutter run`,
+# ou à la main avec `flutter gen-l10n`.
+arb-dir: lib/l10n
+template-arb-file: app_fr.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+synthetic-package: false
+nullable-getter: false
+# Formate le code généré (sinon la vérification « dart format » du CI échoue).
+format: true

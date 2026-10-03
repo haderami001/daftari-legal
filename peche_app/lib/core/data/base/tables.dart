@@ -178,6 +178,20 @@ class FileEnvois extends Table {
 }
 
 // ---------------------------------------------------------------------------
+// Réglages de l'appareil (ex. langue choisie), en clé / valeur
+// ---------------------------------------------------------------------------
+
+/// Ajoutée dans la version 3 du schéma.
+@DataClassName('ReglageLigne')
+class Reglages extends Table {
+  TextColumn get cle => text()();
+  TextColumn get valeur => text()();
+
+  @override
+  Set<Column> get primaryKey => {cle};
+}
+
+// ---------------------------------------------------------------------------
 // Convertisseurs : un ensemble de valeurs stocké en JSON dans une colonne
 // ---------------------------------------------------------------------------
 

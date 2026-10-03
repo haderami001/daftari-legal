@@ -105,7 +105,9 @@ jobs:
         run: flutter pub get && ./tool/preparer_web.sh
 
       - name: Construire la version web
-        run: flutter build web --web-renderer html --pwa-strategy none
+        # CanvasKit (même moteur de texte que sur téléphone : l'arabe et les
+        # nombres s'affichent correctement), servi avec l'app, sans CDN.
+        run: flutter build web --web-renderer canvaskit --no-web-resources-cdn --pwa-strategy none
 
       - uses: actions/upload-artifact@v4
         with:
