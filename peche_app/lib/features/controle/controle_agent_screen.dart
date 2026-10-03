@@ -1,14 +1,18 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
-import '../../core/data/depots/depots.dart';
+import '../../core/services/services.dart';
 import '../../core/data/depots/flotte_depot.dart';
 import '../../core/models/declaration.dart';
 import '../../core/models/enums.dart';
 import '../../core/models/navire.dart';
 import '../../core/regulation/calcul_reglementaire.dart';
 import '../../core/regulation/rapport.dart';
+import '../../core/regulation/rapport_pdf.dart';
 import '../../core/regulation/referentiel.dart';
 import '../../core/widgets/resultat_card.dart';
+import 'rapport_pdf_screen.dart';
 
 /// Prototype : fiche d'inspection de l'agent garde-côtes.
 ///
@@ -23,7 +27,7 @@ class ControleAgentScreen extends StatefulWidget {
 
 class _ControleAgentScreenState extends State<ControleAgentScreen> {
   final _calcul = const CalculReglementaire(referentielDemo);
-  late Depots _depots;
+  late Services _services;
 
   /// `null` tant que la flotte n'est pas chargée depuis la base locale.
   List<NavireLicence>? _flotte;
@@ -34,13 +38,28 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
   final _echantillonCtrl = TextEditingController();
   String _especeEchantillon = referentielDemo.especes.keys.first;
 
+  /// La mesure GPS peut prendre plusieurs secondes : l'écran s'affiche tout
+  /// de suite et la position est mise à jour dès qu'elle arrive.
+  PositionGps? _position;
+  bool _chargementLance = false;
+
+  /// Position utilisée tant que le GPS n'a pas répondu.
+  PositionGps get _positionAffichee =>
+      _position ??
+      PositionGps(20.85, -17.45, DateTime.now(), demonstration: true);
+
+  /// Une seule mesure GPS par écran, même si plusieurs parties l'attendent.
+  Future<PositionGps>? _mesureGps;
+  Future<PositionGps> _attendrePosition() => _mesureGps ??=
+      _services.position.positionActuelle()..then((p) => _position = p);
+
   void _nouveauControle(NavireLicence choix) {
     _choix = choix;
     _controle = Controle(
       navire: choix.navire,
       agent: 'Agent GCM-0427', // en production : utilisateur connecté
       date: DateTime.now(),
-      position: PositionGps(20.62, -17.30, DateTime.now()),
+      position: _positionAffichee,
       engin: choix.licence.enginsAutorises.first,
     );
   }
@@ -50,14 +69,21 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_flotte == null) {
-      _depots = DepotsScope.of(context);
+    if (!_chargementLance) {
+      _chargementLance = true;
+      _services = ServicesScope.of(context);
       _chargerFlotte();
+      _attendrePosition().then((p) {
+        if (!mounted) return;
+        setState(() {
+          if (_flotte?.isNotEmpty ?? false) _controle.position = p;
+        });
+      });
     }
   }
 
   Future<void> _chargerFlotte() async {
-    final flotte = await _depots.flotte.naviresAvecLicence();
+    final flotte = await _services.flotte.naviresAvecLicence();
     if (!mounted) return;
     setState(() {
       _flotte = flotte;
@@ -118,7 +144,9 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
                   '${c.navire.type.libelle} · ${c.navire.longueurM} m · '
                   '${c.navire.puissanceKw} kW'),
               Text('Licence : ${_licence.numero}'),
-              Text('Position : ${c.position}'),
+              Text('Position : '
+                  '${_position == null ? 'recherche du GPS…' : c.position}'
+                  '${_position?.demonstration ?? false ? ' (non mesurée)' : ''}'),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: const Text('Pavillon et documents de bord concordants'),
@@ -297,6 +325,9 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
   }
 
   Future<void> _afficherRapport(ResultatVerification r) async {
+    // Le rapport doit porter la position mesurée : on attend le GPS.
+    _controle.position = await _attendrePosition();
+    if (!mounted) return;
     final texte = genererRapportControle(_controle, r);
     final signe = await showDialog<bool>(
       context: context,
@@ -319,11 +350,15 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
     );
     if (signe != true || !mounted) return;
 
-    // Le rapport signé est figé dans la base locale, puis mis en file
-    // d'envoi vers le serveur.
-    final String id;
+    // Le rapport signé (texte + PDF) est figé dans la base locale, puis mis
+    // en file d'envoi vers le serveur.
+    final id = _services.saisies.nouvelIdentifiant();
+    final Uint8List pdf;
     try {
-      id = await _depots.saisies.enregistrerControle(_controle, r, texte);
+      pdf = await genererRapportPdf(_controle, r,
+          licence: _licence, identifiant: id.substring(0, 8));
+      await _services.saisies.enregistrerControle(_controle, r, texte,
+          identifiant: id, rapportPdf: pdf);
     } catch (e) {
       // Rien n'a été écrit (transaction annulée) : l'agent peut réessayer.
       if (!mounted) return;
@@ -335,7 +370,14 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Rapport ${id.substring(0, 8)} signé et enregistré — '
             'envoi à la prochaine connexion réseau.')));
-    Navigator.of(context).pop();
+    // On remplace la fiche de contrôle par l'aperçu du PDF signé.
+    await Navigator.of(context).pushReplacement(MaterialPageRoute(
+      builder: (_) => RapportPdfScreen(
+        pdf: pdf,
+        nomFichier: 'rapport_${_controle.navire.immatriculation}_'
+            '${id.substring(0, 8)}.pdf',
+      ),
+    ));
   }
 }
 

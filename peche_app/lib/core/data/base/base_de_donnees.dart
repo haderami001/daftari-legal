@@ -26,16 +26,27 @@ part 'base_de_donnees.g.dart';
   FileEnvois,
 ])
 class BaseDeDonnees extends _$BaseDeDonnees {
-  /// Base réelle, stockée dans un fichier sur le téléphone.
-  BaseDeDonnees() : super(driftDatabase(name: 'peche_conforme'));
+  /// Base réelle : un fichier SQLite sur le téléphone, ou, dans un
+  /// navigateur (démo web), SQLite compilé en WebAssembly (`web/`).
+  BaseDeDonnees()
+      : super(driftDatabase(
+          name: 'peche_conforme',
+          web: DriftWebOptions(
+            sqlite3Wasm: Uri.parse('sqlite3.wasm'),
+            driftWorker: Uri.parse('drift_worker.js'),
+          ),
+        ));
 
   /// Base fournie de l'extérieur (ex. `NativeDatabase.memory()` en test).
   BaseDeDonnees.avec(super.executor);
 
   /// À incrémenter à chaque changement de structure, avec une étape de
   /// migration dans [migration].
+  ///
+  /// - v1 : schéma initial
+  /// - v2 : colonne `controles.rapport_pdf` (rapport PDF signé)
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -44,6 +55,13 @@ class BaseDeDonnees extends _$BaseDeDonnees {
           // Prototype : on remplit la base avec la flotte de démo.
           // En production : téléchargement depuis l'API (GET /navires...).
           await insererDonneesDemo();
+        },
+        // Mise à jour d'une base existante, étape par étape : un téléphone
+        // resté en v1 passe par chaque étape jusqu'à la version actuelle.
+        onUpgrade: (m, depuis, vers) async {
+          if (depuis < 2) {
+            await m.addColumn(controles, controles.rapportPdf);
+          }
         },
         beforeOpen: (details) async {
           // SQLite n'applique les clés étrangères que si on le demande.

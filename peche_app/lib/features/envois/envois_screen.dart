@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../core/data/base/base_de_donnees.dart';
 import '../../core/data/base/tables.dart';
-import '../../core/data/depots/depots.dart';
+import '../../core/services/services.dart';
+import '../controle/rapport_pdf_screen.dart';
 
 /// Liste des saisies enregistrées sur le téléphone et pas encore reçues
 /// par le serveur (file d'envoi).
@@ -15,17 +16,59 @@ class EnvoisScreen extends StatefulWidget {
 
 class _EnvoisScreenState extends State<EnvoisScreen> {
   Future<List<EnvoiLigne>>? _envois;
+  bool _envoiEnCours = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _envois ??= DepotsScope.of(context).envois.enAttente();
+    _envois ??= ServicesScope.of(context).envois.enAttente();
+  }
+
+  Future<void> _ouvrirPdf(String controleId) async {
+    final pdf = await ServicesScope.of(context).saisies.rapportPdf(controleId);
+    if (!mounted) return;
+    if (pdf == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Pas de PDF pour ce contrôle (version antérieure).')));
+      return;
+    }
+    await Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => RapportPdfScreen(
+          pdf: pdf, nomFichier: 'rapport_${controleId.substring(0, 8)}.pdf'),
+    ));
+  }
+
+  /// Tente d'envoyer toute la file au serveur, puis rafraîchit la liste.
+  Future<void> _envoyerMaintenant() async {
+    final services = ServicesScope.of(context);
+    setState(() => _envoiEnCours = true);
+    final resultat = await services.synchro.synchroniser();
+    if (!mounted) return;
+    setState(() {
+      _envoiEnCours = false;
+      _envois = services.envois.enAttente();
+    });
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(resultat.toString())));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Envois en attente')),
+      appBar: AppBar(
+        title: const Text('Envois en attente'),
+        actions: [
+          IconButton(
+            tooltip: 'Envoyer maintenant',
+            onPressed: _envoiEnCours ? null : _envoyerMaintenant,
+            icon: _envoiEnCours
+                ? const SizedBox.square(
+                    dimension: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.cloud_upload),
+          ),
+        ],
+      ),
       body: FutureBuilder<List<EnvoiLigne>>(
         future: _envois,
         builder: (context, snapshot) {
@@ -62,8 +105,15 @@ class _EnvoisScreenState extends State<EnvoisScreen> {
                   subtitle: Text(
                     '${e.creeLe.toIso8601String().substring(0, 16).replaceFirst('T', ' ')}'
                     ' · n° ${e.entiteId.substring(0, 8)}'
-                    '${e.tentatives > 0 ? ' · ${e.tentatives} échec(s)' : ''}',
+                    '${e.tentatives > 0 ? ' · ${e.tentatives} échec(s)' : ''}'
+                    '${e.derniereErreur == null ? '' : '\n${e.derniereErreur}'}',
                   ),
+                  trailing: e.type == TypeEnvoi.controle
+                      ? const Icon(Icons.picture_as_pdf)
+                      : null,
+                  onTap: e.type == TypeEnvoi.controle
+                      ? () => _ouvrirPdf(e.entiteId)
+                      : null,
                 ),
             ],
           );

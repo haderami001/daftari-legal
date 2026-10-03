@@ -3,21 +3,22 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peche_app/core/data/base/base_de_donnees.dart';
 import 'package:peche_app/core/data/base/tables.dart';
-import 'package:peche_app/core/data/depots/depots.dart';
+import 'package:peche_app/core/services/services.dart';
 import 'package:peche_app/core/models/declaration.dart';
 import 'package:peche_app/core/models/enums.dart';
 import 'package:peche_app/core/regulation/calcul_reglementaire.dart';
 import 'package:peche_app/core/regulation/referentiel.dart';
+import 'package:sqlite3/sqlite3.dart';
 
 void main() {
   late BaseDeDonnees base;
-  late Depots depots;
+  late Services depots;
   const calcul = CalculReglementaire(referentielDemo);
 
   setUp(() {
     // Base SQLite en mémoire : recréée vide (puis remplie) à chaque test.
     base = BaseDeDonnees.avec(NativeDatabase.memory());
-    depots = Depots(base);
+    depots = Services(base);
   });
   tearDown(() => base.close());
 
@@ -141,5 +142,40 @@ void main() {
     );
     expect(await base.select(base.declarations).get(), isEmpty);
     expect(await depots.envois.nombreEnAttente(), 0);
+  });
+
+  test('migration v1 -> v2 : la colonne du rapport PDF est ajoutée', () async {
+    // 1. On fabrique une base « comme sur un téléphone resté en v1 » :
+    //    schéma actuel, puis on retire la colonne ajoutée en v2.
+    final brute = sqlite3.openInMemory();
+    final v1 = BaseDeDonnees.avec(
+        NativeDatabase.opened(brute, closeUnderlyingOnClose: false));
+    await v1.customSelect('SELECT 1').get(); // crée et remplit la base
+    await v1.close();
+    brute.execute('ALTER TABLE controles DROP COLUMN rapport_pdf');
+    brute.userVersion = 1;
+
+    // 2. On la rouvre avec le code actuel : onUpgrade doit s'exécuter.
+    final v2 = BaseDeDonnees.avec(NativeDatabase.opened(brute));
+    addTearDown(v2.close);
+    final saisies = Services(v2).saisies;
+    final (:navire, :licence) =
+        (await Services(v2).flotte.naviresAvecLicence()).first;
+    final c = Controle(
+      navire: navire,
+      agent: 'Agent test',
+      date: DateTime(2026, 10, 3),
+      position: PositionGps(20, -17, DateTime(2026, 10, 3)),
+      engin: TypeEngin.chalutDemersal,
+    );
+    final id = await saisies.enregistrerControle(
+      c,
+      calcul.verifierControle(c, licence: licence),
+      'RAPPORT',
+      rapportPdf: Uint8List.fromList([37, 80, 68, 70]), // « %PDF »
+    );
+
+    expect(brute.userVersion, 2);
+    expect(await saisies.rapportPdf(id), [37, 80, 68, 70]);
   });
 }

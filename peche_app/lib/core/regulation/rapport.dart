@@ -1,10 +1,10 @@
+import '../format.dart';
 import '../models/declaration.dart';
 import 'calcul_reglementaire.dart';
 
-/// Génère le texte du rapport d'inspection automatique.
-///
-/// En production : export PDF (package `pdf`) signé et horodaté, puis
-/// envoyé au serveur dès que le réseau est disponible.
+/// Génère le texte du rapport d'inspection automatique : affiché à l'agent
+/// avant signature et stocké avec le contrôle. La version PDF signée est
+/// produite par `genererRapportPdf` (rapport_pdf.dart).
 String genererRapportControle(Controle c, ResultatVerification r) {
   final b = StringBuffer()
     ..writeln('RAPPORT D\'INSPECTION EN MER')
@@ -27,8 +27,8 @@ String genererRapportControle(Controle c, ResultatVerification r) {
     }
     b
       ..writeln()
-      ..writeln('Amende indicative : ${r.amendeMin.toStringAsFixed(0)} – '
-          '${r.amendeMax.toStringAsFixed(0)} MRU')
+      ..writeln('Amende indicative : ${formaterMontant(r.amendeMin)} à '
+          '${formaterMontant(r.amendeMax)} MRU')
       ..writeln('(montant définitif fixé par l\'autorité compétente)');
   }
   if (c.observations.isNotEmpty) {

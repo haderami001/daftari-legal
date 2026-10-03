@@ -129,6 +129,9 @@ class Controles extends Table {
 
   /// Texte du rapport tel que signé par l'agent (valeur probante).
   TextColumn get rapport => text()();
+
+  /// Rapport PDF tel que signé (ajouté dans la version 2 du schéma).
+  BlobColumn get rapportPdf => blob().nullable()();
   DateTimeColumn get creeLe => dateTime().withDefault(currentDateAndTime)();
 
   @override

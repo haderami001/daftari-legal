@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/data/depots/depots.dart';
+import '../../core/services/services.dart';
 import '../controle/controle_agent_screen.dart';
 import '../declaration/declaration_capitaine_screen.dart';
 import '../envois/envois_screen.dart';
@@ -19,21 +19,38 @@ class AccueilScreen extends StatefulWidget {
 class _AccueilScreenState extends State<AccueilScreen> {
   int? _enAttente;
 
+  bool _demarre = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_enAttente == null) _compterEnvois();
+    if (!_demarre) {
+      _demarre = true;
+      _synchroniserPuisCompter();
+    }
+  }
+
+  /// Si un serveur est configuré, envoie la file en arrière-plan (sans
+  /// bloquer l'écran), puis met à jour le compteur.
+  Future<void> _synchroniserPuisCompter() async {
+    await _compterEnvois();
+    if (!mounted) return;
+    final synchro = ServicesScope.of(context).synchro;
+    if (synchro.estConfigure) {
+      await synchro.synchroniser();
+      if (mounted) await _compterEnvois();
+    }
   }
 
   Future<void> _compterEnvois() async {
-    final n = await DepotsScope.of(context).envois.nombreEnAttente();
+    final n = await ServicesScope.of(context).envois.nombreEnAttente();
     if (mounted) setState(() => _enAttente = n);
   }
 
   /// Ouvre un module puis, au retour, met à jour le compteur d'envois.
   Future<void> _ouvrir(Widget ecran) async {
     await Navigator.of(context).push(MaterialPageRoute(builder: (_) => ecran));
-    if (mounted) await _compterEnvois();
+    if (mounted) await _synchroniserPuisCompter();
   }
 
   @override

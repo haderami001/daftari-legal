@@ -2,19 +2,32 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peche_app/core/data/base/base_de_donnees.dart';
-import 'package:peche_app/core/data/depots/depots.dart';
+import 'package:peche_app/core/data/base/tables.dart';
+import 'package:peche_app/core/services/position_service.dart';
+import 'package:peche_app/core/services/services.dart';
+import 'package:peche_app/core/models/declaration.dart';
+import 'package:peche_app/core/models/enums.dart';
+import 'package:peche_app/core/regulation/calcul_reglementaire.dart';
+import 'package:peche_app/core/regulation/referentiel.dart';
+import 'package:peche_app/core/services/synchronisation.dart';
 import 'package:peche_app/main.dart';
+
+import 'faux_serveur.dart';
 
 void main() {
   late BaseDeDonnees base;
+  late Services services;
 
-  /// Lance l'application avec une base SQLite en mémoire.
-  Future<void> lancer(WidgetTester tester) async {
+  /// Lance l'application avec une base SQLite en mémoire, une position
+  /// fixe et, si fourni, un faux serveur.
+  Future<void> lancer(WidgetTester tester, {ApiSynchro? api}) async {
     tester.view.physicalSize = const Size(1080, 2400);
     addTearDown(tester.view.reset);
     base = BaseDeDonnees.avec(NativeDatabase.memory());
     addTearDown(base.close);
-    await tester.pumpWidget(PecheApp(depots: Depots(base)));
+    services =
+        Services(base, position: const PositionFixe(20.62, -17.30), api: api);
+    await tester.pumpWidget(PecheApp(services: services));
     await tester.pumpAndSettle();
   }
 
@@ -60,11 +73,46 @@ void main() {
     expect(find.textContaining('RAPPORT D\'INSPECTION'), findsOneWidget);
 
     await tester.tap(find.text('Signer'));
-    await tester.pumpAndSettle();
+    // La génération du PDF est un vrai travail asynchrone : on lui laisse
+    // le temps de finir, puis on affiche les images suivantes. (Pas de
+    // pumpAndSettle : l'indicateur de chargement de l'aperçu tourne.)
+    await tester.runAsync(() => Future.delayed(const Duration(seconds: 1)));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
 
+    expect(find.text('Rapport d\'inspection (PDF)'), findsOneWidget);
     final controles = await base.select(base.controles).get();
     expect(controles.single.rapport, contains('RAPPORT D\'INSPECTION'));
-    expect(find.text('1 saisie(s) à envoyer au serveur'), findsOneWidget);
+    final pdf = controles.single.rapportPdf!;
+    expect(String.fromCharCodes(pdf.take(5)), '%PDF-');
+  });
+
+  testWidgets('envois en attente : « Envoyer maintenant » vide la file',
+      (tester) async {
+    final serveur = FauxServeur();
+    await lancer(tester, api: serveur);
+    final (:navire, :licence) =
+        (await services.flotte.naviresAvecLicence()).first;
+    final d = DeclarationCapitaine(
+      navire: navire,
+      licence: licence,
+      engin: TypeEngin.chalutDemersal,
+      position: PositionGps(20, -17, DateTime(2026, 10, 3)),
+      captures: [const Capture(especeCode: 'SOL', poidsKg: 500)],
+    );
+    await services.saisies.enregistrerDeclaration(
+        d, const CalculReglementaire(referentielDemo).verifierDeclaration(d));
+
+    await tester.tap(find.text('Envois en attente'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('500 kg'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Envoyer maintenant'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tout a été envoyé.'), findsOneWidget);
+    expect(find.text('1 envoyé(s), 0 échec(s)'), findsOneWidget);
+    expect(serveur.recus.single.$1, TypeEnvoi.declaration);
   });
 
   testWidgets('envois en attente : vide au départ', (tester) async {
