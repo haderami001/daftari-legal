@@ -8,6 +8,7 @@ import '../data/depots/saisie_depot.dart';
 import 'administration.dart';
 import 'position_service.dart';
 import 'session.dart';
+import 'supervision.dart';
 import 'synchronisation.dart';
 
 /// Tout ce dont les écrans ont besoin, créé une seule fois au démarrage :
@@ -21,6 +22,7 @@ class Services {
     this.position = const PositionGeolocator(),
     ApiSynchro? api,
     this.administration,
+    this.supervision,
     Session? session,
   })  : session = session ?? SessionDemo(),
         flotte = FlotteDepot(base),
@@ -48,6 +50,9 @@ class Services {
 
   /// Administration du référentiel sur le serveur (`null` sans serveur).
   final ApiAdministration? administration;
+
+  /// Tableau de bord du superviseur (`null` sans serveur).
+  final ApiSupervision? supervision;
 }
 
 /// Rend les [Services] accessibles à tous les écrans :

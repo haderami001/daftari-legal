@@ -1239,6 +1239,54 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Licence supprimée'**
   String get licenceSupprimee;
+
+  /// No description provided for @moduleSupervision.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tableau de bord'**
+  String get moduleSupervision;
+
+  /// No description provided for @moduleSupervisionDetail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déclarations et contrôles reçus, rapports PDF (superviseur)'**
+  String get moduleSupervisionDetail;
+
+  /// No description provided for @ongletDeclarations.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déclarations'**
+  String get ongletDeclarations;
+
+  /// No description provided for @ongletControles.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contrôles'**
+  String get ongletControles;
+
+  /// No description provided for @navireLe.
+  ///
+  /// In fr, this message translates to:
+  /// **'Navire {navire} — {date}'**
+  String navireLe(String navire, String date);
+
+  /// No description provided for @nbInfractions.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n, plural, =0{aucune infraction} =1{1 infraction} other{{n} infractions}}'**
+  String nbInfractions(int n);
+
+  /// No description provided for @envoyePar.
+  ///
+  /// In fr, this message translates to:
+  /// **'envoyé par {compte}'**
+  String envoyePar(String compte);
+
+  /// No description provided for @avecInfraction.
+  ///
+  /// In fr, this message translates to:
+  /// **'avec infraction(s)'**
+  String get avecInfraction;
 }
 
 class _AppLocalizationsDelegate

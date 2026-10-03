@@ -20,6 +20,9 @@ class Profil {
   bool get peutDeclarer => _a('capitaine');
   bool get peutControler => _a('agent');
 
+  /// Consultation des saisies reçues par le serveur.
+  bool get peutSuperviser => _a('superviseur');
+
   /// Gestion du référentiel central (navires, licences).
   bool get peutAdministrer => roles.contains('admin');
 

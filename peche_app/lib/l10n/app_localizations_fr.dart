@@ -767,4 +767,42 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get licenceSupprimee => 'Licence supprimée';
+
+  @override
+  String get moduleSupervision => 'Tableau de bord';
+
+  @override
+  String get moduleSupervisionDetail =>
+      'Déclarations et contrôles reçus, rapports PDF (superviseur)';
+
+  @override
+  String get ongletDeclarations => 'Déclarations';
+
+  @override
+  String get ongletControles => 'Contrôles';
+
+  @override
+  String navireLe(String navire, String date) {
+    return 'Navire $navire — $date';
+  }
+
+  @override
+  String nbInfractions(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n infractions',
+      one: '1 infraction',
+      zero: 'aucune infraction',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String envoyePar(String compte) {
+    return 'envoyé par $compte';
+  }
+
+  @override
+  String get avecInfraction => 'avec infraction(s)';
 }

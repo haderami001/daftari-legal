@@ -88,6 +88,10 @@ En mer il n'y a pas de réseau : tout est enregistré **sur le téléphone**.
   **référentiel** (navires, certificats, licences, quotas) est téléchargé
   depuis `GET {API_URL}/v1/referentiel` s'il a changé (version comparée),
   puis installé dans la base locale en une seule transaction.
+- **Tableau de bord** (`lib/features/supervision/`) : rôle `superviseur`
+  (et admin), serveur requis. Chiffres clés, dernières déclarations et
+  derniers contrôles reçus par le serveur (navire, date, infractions,
+  compte qui a envoyé) et rapport PDF signé de chaque contrôle.
 - **Administration** (`lib/features/administration/`) : réservée au rôle
   `admin`, visible quand un serveur est configuré. Liste, ajoute et modifie
   les navires (avec certificats) et les licences (engins, espèces, dates,

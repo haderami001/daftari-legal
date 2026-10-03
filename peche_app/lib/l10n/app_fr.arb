@@ -511,5 +511,16 @@
   "@confirmerSuppression": {"placeholders": {"nom": {"type": "String"}}},
   "suppressionExplication": "Il disparaîtra des listes et des téléphones à la prochaine synchronisation. Les déclarations et contrôles déjà faits sont conservés.",
   "navireSupprime": "Navire supprimé",
-  "licenceSupprimee": "Licence supprimée"
+  "licenceSupprimee": "Licence supprimée",
+  "moduleSupervision": "Tableau de bord",
+  "moduleSupervisionDetail": "Déclarations et contrôles reçus, rapports PDF (superviseur)",
+  "ongletDeclarations": "Déclarations",
+  "ongletControles": "Contrôles",
+  "navireLe": "Navire {navire} — {date}",
+  "@navireLe": {"placeholders": {"navire": {"type": "String"}, "date": {"type": "String"}}},
+  "nbInfractions": "{n, plural, =0{aucune infraction} =1{1 infraction} other{{n} infractions}}",
+  "@nbInfractions": {"placeholders": {"n": {"type": "int"}}},
+  "envoyePar": "envoyé par {compte}",
+  "@envoyePar": {"placeholders": {"compte": {"type": "String"}}},
+  "avecInfraction": "avec infraction(s)"
 }

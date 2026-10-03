@@ -8,6 +8,7 @@ import '../controle/controle_agent_screen.dart';
 import '../declaration/declaration_capitaine_screen.dart';
 import '../envois/envois_screen.dart';
 import '../guide/guide_reglementaire_screen.dart';
+import '../supervision/supervision_screen.dart';
 
 /// Écran d'accueil : chaque profil (capitaine, agent) accède à son module.
 /// En production, les tuiles visibles dépendent du rôle de l'utilisateur
@@ -84,6 +85,14 @@ class _AccueilScreenState extends State<AccueilScreen> {
         l10n.moduleGuideDetail,
         const GuideReglementaireScreen(),
       ),
+      // Tableau de bord : en ligne seulement (serveur configuré).
+      if (profil.peutSuperviser && services.supervision != null)
+        (
+          Icons.dashboard,
+          l10n.moduleSupervision,
+          l10n.moduleSupervisionDetail,
+          const SupervisionScreen(),
+        ),
       // Administration : en ligne seulement (serveur configuré).
       if (profil.peutAdministrer && services.administration != null)
         (
@@ -119,7 +128,9 @@ class _AccueilScreenState extends State<AccueilScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          if (!profil.peutDeclarer && !profil.peutControler)
+          if (!profil.peutDeclarer &&
+              !profil.peutControler &&
+              !(profil.peutSuperviser && services.supervision != null))
             ListTile(
               leading: const Icon(Icons.info_outline),
               title: Text(l10n.aucunModule),

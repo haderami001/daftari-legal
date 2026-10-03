@@ -6,6 +6,7 @@ import 'core/data/depots/reglages_depot.dart';
 import 'core/services/administration.dart';
 import 'core/services/services.dart';
 import 'core/services/session.dart';
+import 'core/services/supervision.dart';
 import 'core/services/synchronisation.dart';
 import 'features/accueil/accueil_screen.dart';
 import 'features/connexion/connexion_screen.dart';
@@ -38,6 +39,9 @@ void main() {
       administration: _apiUrl.isEmpty
           ? null
           : ApiAdministration(Uri.parse(_apiUrl), jeton: session.jetonAcces),
+      supervision: _apiUrl.isEmpty
+          ? null
+          : ApiSupervision(Uri.parse(_apiUrl), jeton: session.jetonAcces),
     ),
   ));
 }
