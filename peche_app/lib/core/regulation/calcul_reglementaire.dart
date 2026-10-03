@@ -124,8 +124,7 @@ class CalculReglementaire {
     ];
   }
 
-  double pourcentagePrisesAccessoires(
-      Licence licence, List<Capture> captures) {
+  double pourcentagePrisesAccessoires(Licence licence, List<Capture> captures) {
     final total = captures.fold<double>(0, (s, c) => s + c.poidsKg);
     if (total == 0) return 0;
     final accessoires = captures

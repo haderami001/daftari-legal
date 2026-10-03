@@ -72,10 +72,12 @@ void main() {
   group('contrôle', () {
     test('maillage : tolérance appliquée', () {
       // chalut de fond : 70 mm, tolérance 5 % -> seuil 66,5 mm.
-      expect(calcul.verifierMaillage(TypeEngin.chalutDemersal, [67, 68]),
-          isEmpty);
       expect(
-          calcul.verifierMaillage(TypeEngin.chalutDemersal, [60, 62]).single
+          calcul.verifierMaillage(TypeEngin.chalutDemersal, [67, 68]), isEmpty);
+      expect(
+          calcul
+              .verifierMaillage(TypeEngin.chalutDemersal, [60, 62])
+              .single
               .code,
           'MAILLAGE');
     });
