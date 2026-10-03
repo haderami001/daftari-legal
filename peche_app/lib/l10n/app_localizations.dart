@@ -1219,7 +1219,7 @@ abstract class AppLocalizations {
   /// No description provided for @confirmerSuppression.
   ///
   /// In fr, this message translates to:
-  /// **'Supprimer « {nom} » ?'**
+  /// **'Supprimer « {nom} » ?'**
   String confirmerSuppression(String nom);
 
   /// No description provided for @suppressionExplication.
@@ -1297,7 +1297,7 @@ abstract class AppLocalizations {
   /// No description provided for @quitterSansEnregistrer.
   ///
   /// In fr, this message translates to:
-  /// **'Quitter sans enregistrer ?'**
+  /// **'Quitter sans enregistrer ?'**
   String get quitterSansEnregistrer;
 
   /// No description provided for @modificationsPerdues.

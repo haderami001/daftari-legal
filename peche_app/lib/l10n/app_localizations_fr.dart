@@ -755,7 +755,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String confirmerSuppression(String nom) {
-    return 'Supprimer « $nom » ?';
+    return 'Supprimer « $nom » ?';
   }
 
   @override
@@ -818,7 +818,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get quitterSansEnregistrer => 'Quitter sans enregistrer ?';
+  String get quitterSansEnregistrer => 'Quitter sans enregistrer ?';
 
   @override
   String get modificationsPerdues =>

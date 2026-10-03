@@ -171,7 +171,7 @@ void main() {
       // Retour avec une saisie non enregistrée : confirmation demandée.
       await tester.tap(find.byType(BackButton));
       await tester.pumpAndSettle();
-      expect(find.text('Quitter sans enregistrer ?'), findsOneWidget);
+      expect(find.text('Quitter sans enregistrer\u00a0?'), findsOneWidget);
       await tester.tap(find.text('Rester'));
       await tester.pumpAndSettle();
       expect(find.text('Copie'), findsOneWidget); // toujours sur le formulaire
@@ -186,7 +186,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byType(BackButton));
       await tester.pumpAndSettle();
-      expect(find.text('Quitter sans enregistrer ?'), findsNothing);
+      expect(find.text('Quitter sans enregistrer\u00a0?'), findsNothing);
       expect(find.text('Ajouter un navire'), findsOneWidget);
 
       // Liste verticale du formulaire (les champs texte ont aussi un
