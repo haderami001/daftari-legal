@@ -88,6 +88,11 @@ En mer il n'y a pas de réseau : tout est enregistré **sur le téléphone**.
   **référentiel** (navires, certificats, licences, quotas) est téléchargé
   depuis `GET {API_URL}/v1/referentiel` s'il a changé (version comparée),
   puis installé dans la base locale en une seule transaction.
+- **Démonstration complète sans réseau** : `flutter run
+  --dart-define=SERVEUR_DEMO=true` fait tourner le vrai serveur du dépôt
+  dans l'application, en mémoire (`lib/core/services/serveur_demo.dart`) :
+  synchronisation, tableau de bord et administration fonctionnent, y
+  compris dans un navigateur (simulation web).
 - **Tableau de bord** (`lib/features/supervision/`) : rôle `superviseur`
   (et admin), serveur requis. Chiffres clés, dernières déclarations et
   derniers contrôles reçus par le serveur (navire, date, infractions,

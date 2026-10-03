@@ -180,10 +180,13 @@ class _Chiffres extends StatelessWidget {
             ),
           ),
         );
-    return Row(children: [
-      tuile('${stats['declarations'] ?? 0}', l10n.ongletDeclarations),
-      tuile('${stats['controles'] ?? 0}', l10n.ongletControles),
-      tuile('$avecInfraction', l10n.avecInfraction),
-    ]);
+    // Même hauteur pour les trois cartes.
+    return IntrinsicHeight(
+      child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        tuile('${stats['declarations'] ?? 0}', l10n.ongletDeclarations),
+        tuile('${stats['controles'] ?? 0}', l10n.ongletControles),
+        tuile('$avecInfraction', l10n.avecInfraction),
+      ]),
+    );
   }
 }
