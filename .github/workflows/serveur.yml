@@ -8,10 +8,12 @@ on:
       - 'serveur/**'
       - '.github/workflows/serveur.yml'
       - 'keycloak/**'
+      - 'deploiement/**'
   pull_request:
     paths:
       - 'serveur/**'
       - 'keycloak/**'
+      - 'deploiement/**'
       - '.github/workflows/serveur.yml'
 
 concurrency:
@@ -82,3 +84,23 @@ jobs:
       - uses: actions/checkout@v4
       - name: Construire l'image
         run: docker build -t peche-serveur serveur
+
+  # Mise en ligne (deploiement/) : configuration Docker Compose et Caddy
+  # valides, script d'installation sans erreur de syntaxe.
+  deploiement:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: deploiement
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vérifier la configuration
+        run: |
+          bash -n installer.sh
+          cp .env.exemple .env
+          sed -i 's/^MOT_DE_PASSE_BASE=$/MOT_DE_PASSE_BASE=x/; s/^MOT_DE_PASSE_ADMIN_KEYCLOAK=$/MOT_DE_PASSE_ADMIN_KEYCLOAK=x/' .env
+          docker compose config --quiet
+          set -a; . ./.env; set +a
+          docker run --rm -e DOMAINE_API -e DOMAINE_AUTH -e EMAIL_ACME \
+            -v "$PWD/Caddyfile:/etc/caddy/Caddyfile:ro" caddy:2.8 \
+            caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
