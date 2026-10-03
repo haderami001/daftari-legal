@@ -621,4 +621,139 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get referentielMisAJour => 'تم تحديث سجل السفن';
+
+  @override
+  String get moduleAdministration => 'السفن والتراخيص';
+
+  @override
+  String get moduleAdministrationDetail => 'إدارة السجل المركزي (المسؤول)';
+
+  @override
+  String get ongletNavires => 'السفن';
+
+  @override
+  String get ongletLicences => 'التراخيص';
+
+  @override
+  String get ajouterNavire => 'إضافة سفينة';
+
+  @override
+  String get ajouterLicence => 'إضافة ترخيص';
+
+  @override
+  String get modifierNavire => 'تعديل السفينة';
+
+  @override
+  String get modifierLicence => 'تعديل الترخيص';
+
+  @override
+  String get actualiser => 'تحديث';
+
+  @override
+  String get champIdentifiant => 'المعرّف (مثال N4)';
+
+  @override
+  String get champNom => 'الاسم';
+
+  @override
+  String get champImmatriculation => 'رقم التسجيل';
+
+  @override
+  String get champPavillon => 'العلم (رمز من 3 أحرف، مثال MRT)';
+
+  @override
+  String get champTypeNavire => 'نوع السفينة';
+
+  @override
+  String get champLongueur => 'الطول (م)';
+
+  @override
+  String get champPuissance => 'القدرة (كيلوواط)';
+
+  @override
+  String get champImo => 'رقم المنظمة البحرية الدولية (اختياري، 7 أرقام)';
+
+  @override
+  String get certificats => 'الشهادات';
+
+  @override
+  String get ajouterCertificat => 'إضافة شهادة';
+
+  @override
+  String get champNumero => 'الرقم';
+
+  @override
+  String get champExpiration => 'تاريخ الانتهاء';
+
+  @override
+  String get champNumeroLicence => 'رقم الترخيص';
+
+  @override
+  String get champNavire => 'السفينة';
+
+  @override
+  String get champSegment => 'القطاع';
+
+  @override
+  String get enginsAutorises => 'المعدات المرخّصة';
+
+  @override
+  String get champEspeces => 'الأنواع المستهدفة (رموز الفاو مفصولة بفواصل)';
+
+  @override
+  String get champDebut => 'البداية';
+
+  @override
+  String get champFin => 'النهاية';
+
+  @override
+  String get quotas => 'الحصص (كغ)';
+
+  @override
+  String get ajouterQuota => 'إضافة حصة';
+
+  @override
+  String get champEspece => 'النوع (رمز الفاو)';
+
+  @override
+  String get champKg => 'كغ';
+
+  @override
+  String get supprimer => 'حذف';
+
+  @override
+  String get enregistrer => 'حفظ';
+
+  @override
+  String get navireEnregistre => 'تم حفظ السفينة';
+
+  @override
+  String get licenceEnregistree => 'تم حفظ الترخيص';
+
+  @override
+  String get champObligatoire => 'إلزامي';
+
+  @override
+  String get nombreInvalide => 'رقم غير صالح';
+
+  @override
+  String get choisirDate => 'اختيار تاريخ';
+
+  @override
+  String get aucunElement => 'لا توجد عناصر حالياً';
+
+  @override
+  String adminRefus(String message) {
+    return 'رفض الخادم: $message';
+  }
+
+  @override
+  String adminChargement(String message) {
+    return 'تعذّر التحميل: $message';
+  }
+
+  @override
+  String licenceDe(String numero, String navire) {
+    return '$numero — السفينة $navire';
+  }
 }

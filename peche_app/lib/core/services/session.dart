@@ -20,6 +20,9 @@ class Profil {
   bool get peutDeclarer => _a('capitaine');
   bool get peutControler => _a('agent');
 
+  /// Gestion du référentiel central (navires, licences).
+  bool get peutAdministrer => roles.contains('admin');
+
   /// Profil du mode démonstration (sans Keycloak) : tous les modules.
   static const demo = Profil(
       identifiant: 'demo', nomComplet: 'Agent GCM-0427', roles: {'admin'});

@@ -5,6 +5,7 @@ import '../data/depots/file_envoi_depot.dart';
 import '../data/depots/flotte_depot.dart';
 import '../data/depots/reglages_depot.dart';
 import '../data/depots/saisie_depot.dart';
+import 'administration.dart';
 import 'position_service.dart';
 import 'session.dart';
 import 'synchronisation.dart';
@@ -19,6 +20,7 @@ class Services {
     this.base, {
     this.position = const PositionGeolocator(),
     ApiSynchro? api,
+    this.administration,
     Session? session,
   })  : session = session ?? SessionDemo(),
         flotte = FlotteDepot(base),
@@ -43,6 +45,9 @@ class Services {
   /// Compte connecté (Keycloak) ou mode démonstration.
   final Session session;
   late final Synchroniseur synchro;
+
+  /// Administration du référentiel sur le serveur (`null` sans serveur).
+  final ApiAdministration? administration;
 }
 
 /// Rend les [Services] accessibles à tous les écrans :

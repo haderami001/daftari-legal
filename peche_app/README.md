@@ -88,6 +88,12 @@ En mer il n'y a pas de réseau : tout est enregistré **sur le téléphone**.
   **référentiel** (navires, certificats, licences, quotas) est téléchargé
   depuis `GET {API_URL}/v1/referentiel` s'il a changé (version comparée),
   puis installé dans la base locale en une seule transaction.
+- **Administration** (`lib/features/administration/`) : réservée au rôle
+  `admin`, visible quand un serveur est configuré. Liste, ajoute et modifie
+  les navires (avec certificats) et les licences (engins, espèces, dates,
+  quotas) directement sur le serveur (`PUT /v1/navires/{id}`,
+  `PUT /v1/licences/{numero}`) ; les refus du serveur s'affichent champ par
+  champ, puis la synchronisation met à jour la copie du téléphone.
 - **Serveur central** : dossier [`../serveur`](../serveur/README.md) (Dart,
   PostgreSQL, Docker). `test/bout_en_bout_test.dart` démarre ce serveur et
   vérifie que les saisies de l'application y arrivent (vraies requêtes HTTP).
