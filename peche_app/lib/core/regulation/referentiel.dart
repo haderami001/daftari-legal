@@ -161,7 +161,9 @@ const referentielDemo = Referentiel(
         maillageMinMm: 20,
         prisesAccessoiresMaxPct: 5),
     TypeEngin.drague: RegleEngin(
-        engin: TypeEngin.drague, maillageMinMm: 80, prisesAccessoiresMaxPct: 10),
+        engin: TypeEngin.drague,
+        maillageMinMm: 80,
+        prisesAccessoiresMaxPct: 10),
   },
   bareme: {
     Gravite.mineure: BaremeSanction(Gravite.mineure, 50000, 200000),

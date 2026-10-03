@@ -51,9 +51,7 @@ class _DeclarationCapitaineScreenState
       body: Stepper(
         currentStep: _etape,
         onStepTapped: (i) => setState(() => _etape = i),
-        onStepContinue: _etape < 3
-            ? () => setState(() => _etape++)
-            : _envoyer,
+        onStepContinue: _etape < 3 ? () => setState(() => _etape++) : _envoyer,
         onStepCancel: _etape > 0 ? () => setState(() => _etape--) : null,
         controlsBuilder: (context, details) => Padding(
           padding: const EdgeInsets.only(top: 12),
@@ -64,8 +62,7 @@ class _DeclarationCapitaineScreenState
             ),
             if (_etape > 0)
               TextButton(
-                  onPressed: details.onStepCancel,
-                  child: const Text('Retour')),
+                  onPressed: details.onStepCancel, child: const Text('Retour')),
           ]),
         ),
         steps: [
@@ -291,8 +288,7 @@ class _DeclarationCapitaineScreenState
   Widget _etapeVerification() {
     final d = _declaration;
     final resultat = _calcul.verifierDeclaration(d);
-    final pctAcc =
-        _calcul.pourcentagePrisesAccessoires(d.licence, d.captures);
+    final pctAcc = _calcul.pourcentagePrisesAccessoires(d.licence, d.captures);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

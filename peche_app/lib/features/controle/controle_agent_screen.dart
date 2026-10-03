@@ -65,8 +65,7 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
               DropdownButtonFormField<Navire>(
                 isExpanded: true,
                 value: c.navire,
-                decoration:
-                    const InputDecoration(labelText: 'Navire inspecté'),
+                decoration: const InputDecoration(labelText: 'Navire inspecté'),
                 items: [
                   for (final n in naviresDemo)
                     DropdownMenuItem(
@@ -109,8 +108,7 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
                     cert.estValideLe(c.date)
                         ? Icons.check_circle
                         : Icons.cancel,
-                    color:
-                        cert.estValideLe(c.date) ? Colors.green : Colors.red,
+                    color: cert.estValideLe(c.date) ? Colors.green : Colors.red,
                   ),
                   title: Text(cert.type.libelle),
                   subtitle: Text('${cert.numero} · expire le '
@@ -204,8 +202,7 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
                             ? Colors.red.withOpacity(0.2)
                             : null,
                     label: Text('${e.especeCode} ${e.valeur}'),
-                    onDeleted: () =>
-                        setState(() => c.echantillons.removeAt(i)),
+                    onDeleted: () => setState(() => c.echantillons.removeAt(i)),
                   ),
               ]),
             ],
@@ -308,8 +305,8 @@ class _Section extends StatelessWidget {
               Icon(icone),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(titre,
-                    style: Theme.of(context).textTheme.titleMedium),
+                child:
+                    Text(titre, style: Theme.of(context).textTheme.titleMedium),
               ),
             ]),
             const SizedBox(height: 8),

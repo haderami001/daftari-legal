@@ -1,0 +1,45 @@
+# Tests automatiques de l'application Flutter « Pêche Conforme ».
+# Se lance à chaque push sur main et à chaque pull request qui touche peche_app/.
+name: peche_app
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'peche_app/**'
+      - '.github/workflows/peche_app.yml'
+  pull_request:
+    paths:
+      - 'peche_app/**'
+      - '.github/workflows/peche_app.yml'
+
+concurrency:
+  group: peche_app-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyse-et-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: peche_app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.5'
+          channel: stable
+          cache: true
+
+      - name: Dépendances
+        run: flutter pub get
+
+      - name: Formatage
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - name: Analyse statique
+        run: flutter analyze
+
+      - name: Tests
+        run: flutter test
