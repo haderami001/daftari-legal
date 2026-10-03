@@ -92,7 +92,8 @@ En mer il n'y a pas de réseau : tout est enregistré **sur le téléphone**.
   `admin`, visible quand un serveur est configuré. Liste, ajoute et modifie
   les navires (avec certificats) et les licences (engins, espèces, dates,
   quotas) directement sur le serveur (`PUT /v1/navires/{id}`,
-  `PUT /v1/licences/{numero}`) ; les refus du serveur s'affichent champ par
+  `PUT /v1/licences/{numero}`), et les supprime après confirmation
+  (`DELETE`, suppression logique : l'historique des saisies est gardé) ; les refus du serveur s'affichent champ par
   champ, puis la synchronisation met à jour la copie du téléphone.
 - **Serveur central** : dossier [`../serveur`](../serveur/README.md) (Dart,
   PostgreSQL, Docker). `test/bout_en_bout_test.dart` démarre ce serveur et

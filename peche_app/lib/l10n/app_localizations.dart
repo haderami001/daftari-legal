@@ -1215,6 +1215,30 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{numero} — navire {navire}'**
   String licenceDe(String numero, String navire);
+
+  /// No description provided for @confirmerSuppression.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer « {nom} » ?'**
+  String confirmerSuppression(String nom);
+
+  /// No description provided for @suppressionExplication.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il disparaîtra des listes et des téléphones à la prochaine synchronisation. Les déclarations et contrôles déjà faits sont conservés.'**
+  String get suppressionExplication;
+
+  /// No description provided for @navireSupprime.
+  ///
+  /// In fr, this message translates to:
+  /// **'Navire supprimé'**
+  String get navireSupprime;
+
+  /// No description provided for @licenceSupprimee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Licence supprimée'**
+  String get licenceSupprimee;
 }
 
 class _AppLocalizationsDelegate

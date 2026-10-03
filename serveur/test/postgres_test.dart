@@ -47,20 +47,51 @@ void main() {
     expect(v1, greaterThan(0));
     expect(((r['navires']! as List).first as Map)['certificats'], hasLength(1));
 
-    final n1 = Map<String, Object?>.from((r['navires']! as List).first as Map)
-      ..['nom'] = 'Imraguen 12 bis';
-    expect(await stockage.enregistrerNavire(n1), EcritureReferentiel.modifie);
+    final n1Modifie =
+        Map<String, Object?>.from((r['navires']! as List).first as Map)
+          ..['nom'] = 'Imraguen 12 bis';
+    expect(await stockage.enregistrerNavire(n1Modifie),
+        EcritureReferentiel.modifie);
     expect(await stockage.versionReferentiel(), greaterThan(v1));
 
     expect(
-        await stockage
-            .enregistrerNavire({...n1, 'id': 'N9'}), // même immatriculation
+        await stockage.enregistrerNavire(
+            {...n1Modifie, 'id': 'N9'}), // même immatriculation
         EcritureReferentiel.immatriculationEnDouble);
     final l = (r['licences']! as List).first as Map;
     expect(
         await stockage.enregistrerLicence(
             {...l.cast<String, Object?>(), 'navire_id': 'INCONNU'}),
         EcritureReferentiel.navireInconnu);
+
+    // Suppression : licence d'abord, puis navire.
+    expect(await stockage.supprimerNavire('N1'),
+        SuppressionReferentiel.licencesActives);
+    expect(await stockage.supprimerLicence('LIC-ART-2026-0091'),
+        SuppressionReferentiel.supprime);
+    expect(await stockage.supprimerLicence('LIC-ART-2026-0091'),
+        SuppressionReferentiel.introuvable);
+    expect(
+        await stockage.supprimerNavire('N1'), SuppressionReferentiel.supprime);
+    final apres = await stockage.referentiel();
+    final n1 = (apres['navires']! as List)
+        .cast<Map>()
+        .firstWhere((n) => n['id'] == 'N1');
+    expect(n1['supprime'], true);
+    expect(n1['nom'], 'Imraguen 12 bis');
+    // Licence sur un navire supprimé : refusée.
+    expect(
+        await stockage.enregistrerLicence(
+            {...l.cast<String, Object?>(), 'navire_id': 'N1'}),
+        EcritureReferentiel.navireInconnu);
+    // Rétabli par un nouvel enregistrement.
+    expect(await stockage.enregistrerNavire(n1Modifie),
+        EcritureReferentiel.modifie);
+    expect(
+        ((await stockage.referentiel())['navires']! as List)
+            .cast<Map>()
+            .firstWhere((n) => n['id'] == 'N1'),
+        isNot(contains('supprime')));
   });
 
   test('les migrations sont appliquées une seule fois', () async {

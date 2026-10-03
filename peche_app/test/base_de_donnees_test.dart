@@ -144,7 +144,7 @@ void main() {
     expect(await depots.envois.nombreEnAttente(), 0);
   });
 
-  test('migration v1 -> v3 : colonne du rapport PDF et table des réglages',
+  test('migration v1 -> v4 : rapport PDF, réglages, suppression logique',
       () async {
     // 1. On fabrique une base « comme sur un téléphone resté en v1 » :
     //    schéma actuel, puis on retire la colonne ajoutée en v2.
@@ -155,6 +155,8 @@ void main() {
     await v1.close();
     brute.execute('ALTER TABLE controles DROP COLUMN rapport_pdf');
     brute.execute('DROP TABLE reglages'); // ajoutée en v3
+    brute.execute('ALTER TABLE navires DROP COLUMN supprime'); // v4
+    brute.execute('ALTER TABLE licences DROP COLUMN supprime'); // v4
     brute.userVersion = 1;
 
     // 2. On la rouvre avec le code actuel : onUpgrade doit s'exécuter.
@@ -177,7 +179,7 @@ void main() {
       rapportPdf: Uint8List.fromList([37, 80, 68, 70]), // « %PDF »
     );
 
-    expect(brute.userVersion, 3);
+    expect(brute.userVersion, 4);
     expect(await saisies.rapportPdf(id), [37, 80, 68, 70]);
     final reglages = Services(v2).reglages;
     await reglages.ecrire('langue', 'ar');

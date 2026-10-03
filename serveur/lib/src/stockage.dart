@@ -80,6 +80,11 @@ abstract class Stockage {
   Future<EcritureReferentiel> enregistrerLicence(Map<String, Object?> licence,
       {Utilisateur? par});
 
+  Future<SuppressionReferentiel> supprimerNavire(String id, {Utilisateur? par});
+
+  Future<SuppressionReferentiel> supprimerLicence(String numero,
+      {Utilisateur? par});
+
   Future<void> fermer();
 }
 
@@ -223,7 +228,8 @@ class StockageMemoire implements Stockage {
   @override
   Future<EcritureReferentiel> enregistrerLicence(Map<String, Object?> licence,
       {Utilisateur? par}) async {
-    if (!_navires.containsKey(licence['navire_id'])) {
+    final navire = _navires[licence['navire_id']];
+    if (navire == null || estSupprime(navire)) {
       return EcritureReferentiel.navireInconnu;
     }
     final numero = licence['numero']! as String;
@@ -231,6 +237,29 @@ class StockageMemoire implements Stockage {
     _licences[numero] = licence;
     _version++;
     return nouveau ? EcritureReferentiel.cree : EcritureReferentiel.modifie;
+  }
+
+  @override
+  Future<SuppressionReferentiel> supprimerNavire(String id,
+      {Utilisateur? par}) async {
+    final n = _navires[id];
+    if (n == null || estSupprime(n)) return SuppressionReferentiel.introuvable;
+    if (_licences.values.any((l) => l['navire_id'] == id && !estSupprime(l))) {
+      return SuppressionReferentiel.licencesActives;
+    }
+    _navires[id] = {...n, 'supprime': true};
+    _version++;
+    return SuppressionReferentiel.supprime;
+  }
+
+  @override
+  Future<SuppressionReferentiel> supprimerLicence(String numero,
+      {Utilisateur? par}) async {
+    final l = _licences[numero];
+    if (l == null || estSupprime(l)) return SuppressionReferentiel.introuvable;
+    _licences[numero] = {...l, 'supprime': true};
+    _version++;
+    return SuppressionReferentiel.supprime;
   }
 
   @override

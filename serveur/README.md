@@ -87,6 +87,8 @@ compte et les rôles du jeton.
 | GET | `/v1/referentiel` | Navires et licences (tout compte connecté ; `ETag`, 304 si inchangé) |
 | PUT | `/v1/navires/{id}` | Crée ou modifie un navire (admin) |
 | PUT | `/v1/licences/{numero}` | Crée ou modifie une licence (admin) |
+| DELETE | `/v1/navires/{id}` | Supprime un navire sans licence active (admin) |
+| DELETE | `/v1/licences/{numero}` | Supprime une licence (admin) |
 
 ### Référentiel (navires, licences)
 
@@ -114,7 +116,14 @@ Valeurs acceptées — `type` : pirogue, chalutier, senneur, dragueur ;
 `segment` : artisanale, cotiere, hauturiere ; certificats : navigabilite,
 jaugeage, hygiene, radio. Réponses : 201 créé, 200 modifié, 400 données
 invalides (`details`), 403 pas admin, 409 immatriculation déjà prise,
-422 licence d'un navire inconnu.
+422 licence d'un navire inconnu ou supprimé.
+
+**Suppression** (`DELETE`) : logique. L'élément reste en base avec
+`"supprime": true` dans le référentiel (les déclarations et contrôles
+passés y font référence) ; les téléphones le masquent à la synchronisation
+suivante. Un navire qui a encore des licences est refusé (409
+`licences_actives`) : supprimer d'abord ses licences. Un nouvel `PUT` le
+rétablit. Réponses : 200 supprimé, 404 introuvable ou déjà supprimé.
 
 ### Réponses de `POST /v1/sync/...`
 

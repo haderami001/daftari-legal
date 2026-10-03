@@ -176,6 +176,50 @@ void main() {
     expect(serveur.versionsDemandees, [null, 7]);
   });
 
+  test('référentiel : un navire supprimé sur le serveur est masqué', () async {
+    final serveur = FauxServeur()
+      ..referentiel = {
+        'version': 9,
+        'navires': [
+          {
+            'id': 'N3',
+            'nom': 'Banc d\'Arguin',
+            'immatriculation': 'NDB-SE-0789',
+            'pavillon': 'MRT',
+            'type': 'senneur',
+            'longueur_m': 28,
+            'puissance_kw': 450,
+            'supprime': true,
+          },
+        ],
+        'licences': [
+          {
+            'numero': 'LIC-COT-2026-0340',
+            'navire_id': 'N3',
+            'segment': 'cotiere',
+            'engins_autorises': ['senneTournante'],
+            'especes_cibles': ['SAA'],
+            'date_debut': '2026-01-01',
+            'date_fin': '2026-12-31',
+            'supprime': true,
+          },
+        ],
+      };
+    final s = Services(base, api: serveur);
+    await s.synchro.synchroniser();
+
+    final ids = [
+      for (final f in await s.flotte.naviresAvecLicence()) f.navire.id
+    ];
+    expect(ids, isNot(contains('N3')));
+    expect(ids, containsAll(['N1', 'N2']));
+    // Toujours en base (les saisies passées y font référence).
+    final n3 = await (base.select(base.navires)
+          ..where((n) => n.id.equals('N3')))
+        .getSingle();
+    expect(n3.supprime, isTrue);
+  });
+
   test('référentiel invalide : rien n\'est modifié', () async {
     final serveur = FauxServeur()
       ..referentiel = {

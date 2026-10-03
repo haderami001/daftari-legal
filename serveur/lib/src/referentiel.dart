@@ -44,6 +44,25 @@ enum EcritureReferentiel {
   immatriculationEnDouble,
 }
 
+/// Résultat d'une suppression.
+///
+/// La suppression est « logique » : l'élément reste en base avec
+/// `"supprime": true` (les déclarations et contrôles passés y font
+/// référence) ; il disparaît des listes et les téléphones le retirent à la
+/// synchronisation suivante. Un nouvel enregistrement (PUT) le rétablit.
+enum SuppressionReferentiel {
+  supprime,
+
+  /// Absent ou déjà supprimé.
+  introuvable,
+
+  /// Navire qui a encore des licences : les supprimer d'abord.
+  licencesActives,
+}
+
+/// `true` si l'élément du référentiel a été supprimé.
+bool estSupprime(Map<Object?, Object?> e) => e['supprime'] == true;
+
 /// Vérifie un navire ; renvoie la liste des erreurs (vide = valide).
 List<String> verifierNavire(String id, Map<String, Object?> d) {
   final e = <String>[];

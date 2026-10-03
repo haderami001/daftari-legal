@@ -752,4 +752,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String licenceDe(String numero, String navire) {
     return '$numero — navire $navire';
   }
+
+  @override
+  String confirmerSuppression(String nom) {
+    return 'Supprimer « $nom » ?';
+  }
+
+  @override
+  String get suppressionExplication =>
+      'Il disparaîtra des listes et des téléphones à la prochaine synchronisation. Les déclarations et contrôles déjà faits sont conservés.';
+
+  @override
+  String get navireSupprime => 'Navire supprimé';
+
+  @override
+  String get licenceSupprimee => 'Licence supprimée';
 }

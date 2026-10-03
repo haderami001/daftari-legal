@@ -22,7 +22,7 @@ const tailleMaxOctets = 5 * 1024 * 1024;
 ///
 /// Droits par rôle : déclarations → capitaine ; contrôles → agent ;
 /// consultation → superviseur ; référentiel : lecture → tout compte,
-/// modification → admin.
+/// modification et suppression → admin.
 Handler construireApi({
   required Stockage stockage,
   required Authentificateur authentificateur,
@@ -62,6 +62,18 @@ Handler construireApi({
             verifier: verifierLicence,
             normaliser: licenceNormalisee,
             enregistrer: stockage.enregistrerLicence))
+    ..delete('/v1/navires/<id>', (Request req, String id) async {
+      final u = utilisateur(req);
+      if (!u.a(Roles.admin)) return _interdit();
+      return _reponseSuppression(
+          await stockage.supprimerNavire(id, par: u), 'Navire', id);
+    })
+    ..delete('/v1/licences/<numero>', (Request req, String numero) async {
+      final u = utilisateur(req);
+      if (!u.a(Roles.admin)) return _interdit();
+      return _reponseSuppression(
+          await stockage.supprimerLicence(numero, par: u), 'Licence', numero);
+    })
     ..post(
         '/v1/sync/<type>/<id>',
         (Request req, String type, String id) =>
@@ -154,6 +166,17 @@ Future<Response> _ecrireReferentiel(
   };
 }
 
+Response _reponseSuppression(
+        SuppressionReferentiel r, String quoi, String id) =>
+    switch (r) {
+      SuppressionReferentiel.supprime =>
+        _json(200, {'statut': 'supprime', 'id': id}),
+      SuppressionReferentiel.introuvable =>
+        _erreur(404, 'introuvable', '$quoi $id introuvable'),
+      SuppressionReferentiel.licencesActives => _erreur(409, 'licences_actives',
+          'Le navire $id a encore des licences : supprimez-les d\'abord'),
+    };
+
 /// Lit un corps JSON objet (≤ 5 Mo). Renvoie l'objet, ou la réponse
 /// d'erreur à renvoyer au client.
 Future<(Map<String, Object?>?, Response?)> _lireObjetJson(Request req) async {
@@ -217,7 +240,7 @@ Middleware _cors(Set<String> origines) => (interne) => (req) async {
       final entetes = {
         if (autorisee) ...{
           'Access-Control-Allow-Origin': origines.contains('*') ? '*' : origine,
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
           'Access-Control-Allow-Headers':
               'Authorization, Content-Type, Idempotency-Key, If-None-Match',
           'Access-Control-Expose-Headers': 'ETag',

@@ -48,6 +48,16 @@ class ApiAdministration {
           String numero, Map<String, Object?> licence) =>
       _put('v1/licences/${Uri.encodeComponent(numero)}', licence);
 
+  /// Suppression logique : l'élément disparaît des listes et des
+  /// téléphones ; les saisies passées le gardent.
+  Future<void> supprimerNavire(String id) => _appeler((entetes) =>
+      _client.delete(base.resolve('v1/navires/${Uri.encodeComponent(id)}'),
+          headers: entetes));
+
+  Future<void> supprimerLicence(String numero) => _appeler((entetes) =>
+      _client.delete(base.resolve('v1/licences/${Uri.encodeComponent(numero)}'),
+          headers: entetes));
+
   Future<Ecriture> _put(String chemin, Map<String, Object?> corps) async {
     final r = await _appeler((entetes) => _client.put(base.resolve(chemin),
         headers: {...entetes, 'Content-Type': 'application/json'},

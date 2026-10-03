@@ -506,5 +506,10 @@
   "adminChargement": "Chargement impossible : {message}",
   "@adminChargement": {"placeholders": {"message": {"type": "String"}}},
   "licenceDe": "{numero} — navire {navire}",
-  "@licenceDe": {"placeholders": {"numero": {"type": "String"}, "navire": {"type": "String"}}}
+  "@licenceDe": {"placeholders": {"numero": {"type": "String"}, "navire": {"type": "String"}}},
+  "confirmerSuppression": "Supprimer « {nom} » ?",
+  "@confirmerSuppression": {"placeholders": {"nom": {"type": "String"}}},
+  "suppressionExplication": "Il disparaîtra des listes et des téléphones à la prochaine synchronisation. Les déclarations et contrôles déjà faits sont conservés.",
+  "navireSupprime": "Navire supprimé",
+  "licenceSupprimee": "Licence supprimée"
 }

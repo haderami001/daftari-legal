@@ -185,5 +185,9 @@
   "aucunElement": "لا توجد عناصر حالياً",
   "adminRefus": "رفض الخادم: {message}",
   "adminChargement": "تعذّر التحميل: {message}",
-  "licenceDe": "{numero} — السفينة {navire}"
+  "licenceDe": "{numero} — السفينة {navire}",
+  "confirmerSuppression": "حذف «{nom}»؟",
+  "suppressionExplication": "سيختفي من القوائم ومن الهواتف عند المزامنة التالية. يتم الاحتفاظ بالتصريحات وعمليات المراقبة السابقة.",
+  "navireSupprime": "تم حذف السفينة",
+  "licenceSupprimee": "تم حذف الترخيص"
 }
