@@ -618,4 +618,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get aucunModule => 'ليس لحسابك دور إدخال (ربّان أو عون).';
+
+  @override
+  String get referentielMisAJour => 'تم تحديث سجل السفن';
 }

@@ -63,6 +63,7 @@ production**) : `capitaine.demo`, `agent.demo`, `superviseur.demo`,
 | `JETON_API` | Sans Keycloak : secret partagé, **développement seulement** |
 | `DATABASE_URL` | `postgres://user:mdp@hote:5432/base` (ajouter `?sslmode=require` en production) |
 | `PORT` | Port d'écoute, 8080 par défaut |
+| `REFERENTIEL_INITIAL` | Fichier JSON importé au démarrage si le référentiel est vide (ex. `donnees/referentiel_demo.json`) |
 | `ORIGINES_AUTORISEES` | Origines web autorisées (CORS), séparées par des virgules ; `*` par défaut |
 
 Les tables sont créées automatiquement au démarrage (migrations
@@ -83,6 +84,37 @@ compte et les rôles du jeton.
 | GET | `/v1/controles?limite=50` | Derniers contrôles reçus |
 | GET | `/v1/controles/{id}/rapport.pdf` | Rapport PDF signé |
 | GET | `/v1/statistiques` | Nombre de saisies reçues |
+| GET | `/v1/referentiel` | Navires et licences (tout compte connecté ; `ETag`, 304 si inchangé) |
+| PUT | `/v1/navires/{id}` | Crée ou modifie un navire (admin) |
+| PUT | `/v1/licences/{numero}` | Crée ou modifie une licence (admin) |
+
+### Référentiel (navires, licences)
+
+L'administrateur tient la flotte à jour sur le serveur ; chaque téléphone
+la télécharge pendant la synchronisation et la garde pour travailler hors
+ligne. Chaque modification augmente la **version** du référentiel : le
+téléphone envoie la sienne (`If-None-Match`) et ne retélécharge que si
+elle a changé.
+
+```bash
+curl -X PUT http://localhost:8080/v1/navires/N4 \
+  -H "Authorization: Bearer $JETON_ADMIN" -H 'Content-Type: application/json' \
+  -d '{"nom":"Tanit","immatriculation":"NKT-SE-0001","pavillon":"MRT",
+       "type":"senneur","longueur_m":30,"puissance_kw":500,
+       "certificats":[{"type":"navigabilite","numero":"NAV-1",
+                       "date_expiration":"2027-12-31"}]}'
+curl -X PUT http://localhost:8080/v1/licences/LIC-COT-2026-0400 \
+  -H "Authorization: Bearer $JETON_ADMIN" -H 'Content-Type: application/json' \
+  -d '{"navire_id":"N4","segment":"cotiere","engins_autorises":["senneTournante"],
+       "especes_cibles":["SAA"],"date_debut":"2026-01-01",
+       "date_fin":"2026-12-31","quotas_kg":{"SAA":80000}}'
+```
+
+Valeurs acceptées — `type` : pirogue, chalutier, senneur, dragueur ;
+`segment` : artisanale, cotiere, hauturiere ; certificats : navigabilite,
+jaugeage, hygiene, radio. Réponses : 201 créé, 200 modifié, 400 données
+invalides (`details`), 403 pas admin, 409 immatriculation déjà prise,
+422 licence d'un navire inconnu.
 
 ### Réponses de `POST /v1/sync/...`
 
@@ -116,7 +148,6 @@ envoie de vraies requêtes HTTP.
 - Créer les vrais comptes dans Keycloak, supprimer les comptes de démo,
   activer HTTPS sur Keycloak.
 - Mettre le serveur derrière **HTTPS** (reverse proxy ou hébergeur).
-- Ajouter les référentiels (navires, licences, quotas) et leur
-  téléchargement par l'application, puis recalculer les infractions côté
-  serveur avec le même moteur Dart.
+- Recalculer les infractions côté serveur avec le même moteur Dart et le
+  référentiel central.
 - Sauvegardes régulières de la base.

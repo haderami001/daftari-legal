@@ -4,6 +4,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 import 'authentification.dart';
+import 'referentiel.dart';
 import 'stockage.dart';
 import 'validation.dart';
 
@@ -20,7 +21,8 @@ const tailleMaxOctets = 5 * 1024 * 1024;
 /// - [originesAutorisees] : pour la version web de l'application (CORS).
 ///
 /// Droits par rôle : déclarations → capitaine ; contrôles → agent ;
-/// consultation → superviseur ; admin → tout.
+/// consultation → superviseur ; référentiel : lecture → tout compte,
+/// modification → admin.
 Handler construireApi({
   required Stockage stockage,
   required Authentificateur authentificateur,
@@ -38,6 +40,28 @@ Handler construireApi({
       final u = utilisateur(req);
       return _json(200, {'id': u.id, 'nom': u.nom, 'roles': u.roles.toList()});
     })
+    ..get('/v1/referentiel', (Request req) async {
+      // Le téléphone envoie la version qu'il a déjà (ETag) : 304 si rien
+      // n'a changé, il ne retélécharge pas tout.
+      final etag = '"${await stockage.versionReferentiel()}"';
+      if (req.headers['if-none-match'] == etag) {
+        return Response.notModified(headers: {'ETag': etag});
+      }
+      final r = await stockage.referentiel();
+      return _json(200, r).change(headers: {'ETag': '"${r['version']}"'});
+    })
+    ..put(
+        '/v1/navires/<id>',
+        (Request req, String id) => _ecrireReferentiel(req, id,
+            verifier: verifierNavire,
+            normaliser: navireNormalise,
+            enregistrer: stockage.enregistrerNavire))
+    ..put(
+        '/v1/licences/<numero>',
+        (Request req, String numero) => _ecrireReferentiel(req, numero,
+            verifier: verifierLicence,
+            normaliser: licenceNormalisee,
+            enregistrer: stockage.enregistrerLicence))
     ..post(
         '/v1/sync/<type>/<id>',
         (Request req, String type, String id) =>
@@ -88,36 +112,11 @@ Future<Response> _recevoir(
     TypeSaisie.controle => Roles.agent,
   };
   if (!u.a(roleRequis)) return _interdit();
-  if (!(req.mimeType ?? '').contains('json')) {
-    return _erreur(415, 'type_media', 'Content-Type: application/json attendu');
-  }
-  final taille = req.contentLength;
-  if (taille != null && taille > tailleMaxOctets) {
-    return _erreur(413, 'trop_volumineux', 'Saisie de plus de 5 Mo');
-  }
+  final (corps, refus) = await _lireObjetJson(req);
+  if (refus != null) return refus;
 
-  final Object? corps;
-  try {
-    final texte = await req.readAsString();
-    if (texte.length > tailleMaxOctets) {
-      return _erreur(413, 'trop_volumineux', 'Saisie de plus de 5 Mo');
-    }
-    corps = jsonDecode(texte);
-  } on FormatException {
-    return _erreur(400, 'json_invalide', 'Le corps n\'est pas du JSON valide');
-  }
-  if (corps is! Map<String, Object?>) {
-    return _erreur(400, 'json_invalide', 'Un objet JSON est attendu');
-  }
-
-  final erreurs = verifierSaisie(type, id, corps);
-  if (erreurs.isNotEmpty) {
-    return _json(400, {
-      'erreur': 'donnees_invalides',
-      'message': 'La saisie contient ${erreurs.length} erreur(s).',
-      'details': erreurs,
-    });
-  }
+  final erreurs = verifierSaisie(type, id, corps!);
+  if (erreurs.isNotEmpty) return _invalide(erreurs);
 
   return switch (await stockage.enregistrer(type, id, corps, par: u)) {
     Enregistrement.cree => _json(201, {'statut': 'cree', 'id': id}),
@@ -126,6 +125,72 @@ Future<Response> _recevoir(
         'Une saisie différente existe déjà avec l\'identifiant $id'),
   };
 }
+
+/// `PUT /v1/navires/{id}` et `PUT /v1/licences/{numero}` (admin).
+Future<Response> _ecrireReferentiel(
+  Request req,
+  String id, {
+  required List<String> Function(String, Map<String, Object?>) verifier,
+  required Map<String, Object?> Function(String, Map<String, Object?>)
+      normaliser,
+  required Future<EcritureReferentiel> Function(Map<String, Object?>,
+          {Utilisateur? par})
+      enregistrer,
+}) async {
+  final u = utilisateur(req);
+  if (!u.a(Roles.admin)) return _interdit();
+  final (corps, refus) = await _lireObjetJson(req);
+  if (refus != null) return refus;
+  final erreurs = verifier(id, corps!);
+  if (erreurs.isNotEmpty) return _invalide(erreurs);
+
+  return switch (await enregistrer(normaliser(id, corps), par: u)) {
+    EcritureReferentiel.cree => _json(201, {'statut': 'cree', 'id': id}),
+    EcritureReferentiel.modifie => _json(200, {'statut': 'modifie', 'id': id}),
+    EcritureReferentiel.navireInconnu => _erreur(422, 'navire_inconnu',
+        'Navire ${corps['navire_id']} absent du référentiel'),
+    EcritureReferentiel.immatriculationEnDouble => _erreur(409, 'conflit',
+        'Immatriculation ${corps['immatriculation']} déjà utilisée'),
+  };
+}
+
+/// Lit un corps JSON objet (≤ 5 Mo). Renvoie l'objet, ou la réponse
+/// d'erreur à renvoyer au client.
+Future<(Map<String, Object?>?, Response?)> _lireObjetJson(Request req) async {
+  if (!(req.mimeType ?? '').contains('json')) {
+    return (
+      null,
+      _erreur(415, 'type_media', 'Content-Type: application/json attendu')
+    );
+  }
+  final taille = req.contentLength;
+  if (taille != null && taille > tailleMaxOctets) {
+    return (null, _erreur(413, 'trop_volumineux', 'Corps de plus de 5 Mo'));
+  }
+  final Object? corps;
+  try {
+    final texte = await req.readAsString();
+    if (texte.length > tailleMaxOctets) {
+      return (null, _erreur(413, 'trop_volumineux', 'Corps de plus de 5 Mo'));
+    }
+    corps = jsonDecode(texte);
+  } on FormatException {
+    return (
+      null,
+      _erreur(400, 'json_invalide', 'Le corps n\'est pas du JSON valide')
+    );
+  }
+  if (corps is! Map<String, Object?>) {
+    return (null, _erreur(400, 'json_invalide', 'Un objet JSON est attendu'));
+  }
+  return (corps, null);
+}
+
+Response _invalide(List<String> erreurs) => _json(400, {
+      'erreur': 'donnees_invalides',
+      'message': 'Les données contiennent ${erreurs.length} erreur(s).',
+      'details': erreurs,
+    });
 
 Response _json(int code, Object? corps) => Response(code,
     body: jsonEncode(corps),
@@ -152,9 +217,10 @@ Middleware _cors(Set<String> origines) => (interne) => (req) async {
       final entetes = {
         if (autorisee) ...{
           'Access-Control-Allow-Origin': origines.contains('*') ? '*' : origine,
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
           'Access-Control-Allow-Headers':
-              'Authorization, Content-Type, Idempotency-Key',
+              'Authorization, Content-Type, Idempotency-Key, If-None-Match',
+          'Access-Control-Expose-Headers': 'ETag',
           'Access-Control-Max-Age': '86400',
           'Vary': 'Origin',
         },

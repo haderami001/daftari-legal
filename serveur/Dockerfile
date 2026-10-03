@@ -11,6 +11,7 @@ RUN dart compile exe bin/serveur.dart -o /app/serveur
 FROM scratch
 COPY --from=construction /runtime/ /
 COPY --from=construction /app/serveur /app/serveur
+COPY --from=construction /app/donnees /app/donnees
 EXPOSE 8080
 USER 65534
 ENTRYPOINT ["/app/serveur"]

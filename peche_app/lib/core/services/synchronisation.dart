@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 
 import '../data/base/tables.dart';
 import '../data/depots/file_envoi_depot.dart';
+import '../data/depots/flotte_depot.dart';
+import '../data/depots/reglages_depot.dart';
 import '../data/depots/saisie_depot.dart';
 
 /// Erreur d'envoi au serveur (réseau coupé, serveur en erreur...).
@@ -20,6 +22,10 @@ abstract class ApiSynchro {
   /// Envoie une saisie. Doit être **idempotent** côté serveur : recevoir
   /// deux fois le même [id] ne crée pas de doublon.
   Future<void> envoyer(TypeEnvoi type, String id, Map<String, Object?> donnees);
+
+  /// Référentiel (navires, licences) du serveur, ou `null` s'il n'a pas
+  /// changé depuis [versionConnue].
+  Future<Map<String, Object?>?> telechargerReferentiel({int? versionConnue});
 }
 
 /// Client HTTP réel : `POST {base}/v1/sync/{declarations|controles}/{id}`.
@@ -71,6 +77,28 @@ class ApiHttp implements ApiSynchro {
       throw ErreurSynchro('Serveur : HTTP ${reponse.statusCode}');
     }
   }
+
+  /// `GET {base}/v1/referentiel` avec `If-None-Match` : le serveur répond
+  /// 304 (rien à télécharger) si la version n'a pas changé.
+  @override
+  Future<Map<String, Object?>?> telechargerReferentiel(
+      {int? versionConnue}) async {
+    final cle = await jeton?.call();
+    final http.Response reponse;
+    try {
+      reponse = await _client.get(base.resolve('v1/referentiel'), headers: {
+        if (cle != null) 'Authorization': 'Bearer $cle',
+        if (versionConnue != null) 'If-None-Match': '"$versionConnue"',
+      }).timeout(const Duration(seconds: 60));
+    } catch (e) {
+      throw ErreurSynchro('Réseau indisponible ($e)');
+    }
+    if (reponse.statusCode == 304) return null;
+    if (reponse.statusCode != 200) {
+      throw ErreurSynchro('Serveur : HTTP ${reponse.statusCode}');
+    }
+    return jsonDecode(utf8.decode(reponse.bodyBytes)) as Map<String, Object?>;
+  }
 }
 
 enum StatutSynchro {
@@ -89,11 +117,20 @@ class ResultatSynchro {
     this.statut = StatutSynchro.termine,
     this.envoyes = 0,
     this.echecs = 0,
+    this.referentielVersion,
+    this.erreurReferentiel,
   });
 
   final StatutSynchro statut;
   final int envoyes;
   final int echecs;
+
+  /// Nouvelle version du référentiel installée sur le téléphone, ou `null`
+  /// s'il était déjà à jour (ou non téléchargé).
+  final int? referentielVersion;
+
+  /// Échec du téléchargement du référentiel (l'ancien reste utilisé).
+  final String? erreurReferentiel;
 
   /// Résumé en français (journaux, tests). L'interface utilise [statut]
   /// pour afficher un message traduit.
@@ -106,7 +143,8 @@ class ResultatSynchro {
       };
 }
 
-/// Vide la file d'envoi vers le serveur.
+/// Vide la file d'envoi vers le serveur, puis met à jour le référentiel
+/// (navires, licences) stocké sur le téléphone.
 ///
 /// Chaque saisie est envoyée séparément : un échec n'empêche pas les
 /// suivantes, et la saisie en échec reste dans la file (avec le nombre de
@@ -116,10 +154,16 @@ class Synchroniseur {
     required this.saisies,
     required this.file,
     required this.api,
+    this.flotte,
+    this.reglages,
   });
 
   final SaisieDepot saisies;
   final FileEnvoiDepot file;
+
+  /// Pour la mise à jour du référentiel (`null` = pas de mise à jour).
+  final FlotteDepot? flotte;
+  final ReglagesDepot? reglages;
 
   /// `null` tant qu'aucun serveur n'est configuré.
   final ApiSynchro? api;
@@ -156,9 +200,33 @@ class Synchroniseur {
           echecs++;
         }
       }
+      final (version, erreur) = await _mettreAJourReferentiel(api);
+      return ResultatSynchro(
+        envoyes: envoyes,
+        echecs: echecs,
+        referentielVersion: version,
+        erreurReferentiel: erreur,
+      );
     } finally {
       _enCours = false;
     }
-    return ResultatSynchro(envoyes: envoyes, echecs: echecs);
+  }
+
+  /// Télécharge le référentiel s'il a changé. Un échec n'empêche rien :
+  /// le téléphone garde le référentiel qu'il a déjà.
+  Future<(int?, String?)> _mettreAJourReferentiel(ApiSynchro api) async {
+    final flotte = this.flotte, reglages = this.reglages;
+    if (flotte == null || reglages == null) return (null, null);
+    try {
+      final connue = int.tryParse(
+          await reglages.lire(ReglagesDepot.cleVersionReferentiel) ?? '');
+      final ref = await api.telechargerReferentiel(versionConnue: connue);
+      if (ref == null) return (null, null);
+      final version = await flotte.appliquerReferentiel(ref);
+      await reglages.ecrire(ReglagesDepot.cleVersionReferentiel, '$version');
+      return (version, null);
+    } catch (e) {
+      return (null, '$e');
+    }
   }
 }

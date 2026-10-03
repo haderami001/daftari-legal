@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:serveur_peche/serveur_peche.dart';
@@ -16,6 +17,7 @@ import 'package:shelf/shelf_io.dart' as shelf_io;
 /// | `DATABASE_URL`        | `postgres://user:mdp@hote:5432/base` ; absent =   |
 /// |                       | stockage en mémoire (démo, perdu à l'arrêt)       |
 /// | `PORT`                | port d'écoute (8080 par défaut)                   |
+/// | `REFERENTIEL_INITIAL` | fichier JSON importé si le référentiel est vide |
 /// | `ORIGINES_AUTORISEES` | origines web autorisées, séparées par des         |
 /// |                       | virgules (`*` par défaut)                         |
 Future<void> main() async {
@@ -52,6 +54,13 @@ Future<void> main() async {
   } else {
     stockage = await StockagePostgres.ouvrir(Uri.parse(url));
     stdout.writeln('Base PostgreSQL prête (migrations appliquées).');
+  }
+
+  final initial = env['REFERENTIEL_INITIAL'] ?? '';
+  if (initial.isNotEmpty && await stockage.versionReferentiel() == 0) {
+    await importerReferentiel(stockage,
+        jsonDecode(await File(initial).readAsString()) as Map<String, Object?>);
+    stdout.writeln('Référentiel initial importé : $initial');
   }
 
   final api = construireApi(

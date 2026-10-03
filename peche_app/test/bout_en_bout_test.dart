@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/native.dart';
@@ -116,6 +117,64 @@ void main() {
     // Plus rien à envoyer.
     final r2 = await s.synchro.synchroniser();
     expect((r2.envoyes, r2.echecs), (0, 0));
+  });
+
+  test('le référentiel du serveur arrive sur le téléphone', () async {
+    // L'administrateur ajoute un navire et sa licence sur le serveur.
+    Future<int> put(String chemin, Map<String, Object?> corps) async {
+      final r =
+          await HttpClient().putUrl(adresse().resolve(chemin)).then((req) {
+        req.headers
+          ..set('authorization', 'Bearer $jeton')
+          ..contentType = ContentType.json;
+        req.write(jsonEncode(corps));
+        return req.close();
+      });
+      await r.drain<void>();
+      return r.statusCode;
+    }
+
+    expect(
+        await put('/v1/navires/N7', {
+          'nom': 'El Bahr',
+          'immatriculation': 'NDB-PA-7777',
+          'pavillon': 'MRT',
+          'type': 'pirogue',
+          'longueur_m': 11,
+          'puissance_kw': 20,
+          'certificats': [
+            {
+              'type': 'navigabilite',
+              'numero': 'NAV-7',
+              'date_expiration': '2027-12-31',
+            },
+          ],
+        }),
+        201);
+    expect(
+        await put('/v1/licences/LIC-ART-2026-0777', {
+          'navire_id': 'N7',
+          'segment': 'artisanale',
+          'engins_autorises': ['ligne', 'casier'],
+          'especes_cibles': ['OCC'],
+          'date_debut': '2026-01-01',
+          'date_fin': '2026-12-31',
+          'quotas_kg': {'OCC': 2000},
+        }),
+        201);
+
+    final s = Services(base, api: ApiHttp(adresse(), jeton: () async => jeton));
+    final r = await s.synchro.synchroniser();
+    expect(r.referentielVersion, 2);
+
+    final n7 = (await s.flotte.naviresAvecLicence())
+        .firstWhere((f) => f.navire.id == 'N7');
+    expect(n7.navire.nom, 'El Bahr');
+    expect(n7.licence.enginsAutorises, {TypeEngin.ligne, TypeEngin.casier});
+    expect(n7.licence.quotasKg, {'OCC': 2000});
+
+    // Rien de neuf : réponse 304, pas de nouveau téléchargement.
+    expect((await s.synchro.synchroniser()).referentielVersion, isNull);
   });
 
   test('mauvais jeton : refus, les saisies restent sur le téléphone', () async {

@@ -1,0 +1,48 @@
+{
+  "navires": [
+    {
+      "id": "N1", "nom": "Imraguen 12", "immatriculation": "NDB-PA-1234",
+      "pavillon": "MRT", "type": "pirogue", "longueur_m": 14, "puissance_kw": 30,
+      "numero_imo": null,
+      "certificats": [
+        {"type": "navigabilite", "numero": "NAV-2025-118", "date_expiration": "2027-03-31"}
+      ]
+    },
+    {
+      "id": "N2", "nom": "Atlantic Star", "immatriculation": "NKT-CH-0456",
+      "pavillon": "ESP", "type": "chalutier", "longueur_m": 42, "puissance_kw": 1100,
+      "numero_imo": "9123456",
+      "certificats": [
+        {"type": "navigabilite", "numero": "NAV-ES-7781", "date_expiration": "2027-01-15"},
+        {"type": "hygiene", "numero": "SAN-2024-33", "date_expiration": "2026-06-30"},
+        {"type": "radio", "numero": "VMS-ES-0091", "date_expiration": "2027-12-31"}
+      ]
+    },
+    {
+      "id": "N3", "nom": "Banc d'Arguin", "immatriculation": "NDB-SE-0789",
+      "pavillon": "MRT", "type": "senneur", "longueur_m": 28, "puissance_kw": 450,
+      "numero_imo": null,
+      "certificats": [
+        {"type": "navigabilite", "numero": "NAV-2026-020", "date_expiration": "2028-02-01"}
+      ]
+    }
+  ],
+  "licences": [
+    {
+      "numero": "LIC-ART-2026-0091", "navire_id": "N1", "segment": "artisanale",
+      "engins_autorises": ["casier", "ligne"], "especes_cibles": ["OCC"],
+      "date_debut": "2026-01-01", "date_fin": "2026-12-31", "quotas_kg": {"OCC": 3000}
+    },
+    {
+      "numero": "LIC-UE-2026-0012", "navire_id": "N2", "segment": "hauturiere",
+      "engins_autorises": ["chalutDemersal"], "especes_cibles": ["SOL", "CTC"],
+      "date_debut": "2026-07-01", "date_fin": "2026-12-31",
+      "quotas_kg": {"SOL": 20000, "CTC": 15000}
+    },
+    {
+      "numero": "LIC-COT-2026-0340", "navire_id": "N3", "segment": "cotiere",
+      "engins_autorises": ["senneTournante"], "especes_cibles": ["SAA"],
+      "date_debut": "2026-01-01", "date_fin": "2026-12-31", "quotas_kg": {"SAA": 150000}
+    }
+  ]
+}

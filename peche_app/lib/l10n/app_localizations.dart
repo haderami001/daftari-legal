@@ -951,6 +951,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Votre compte n\'a pas de rôle de saisie (capitaine ou agent).'**
   String get aucunModule;
+
+  /// No description provided for @referentielMisAJour.
+  ///
+  /// In fr, this message translates to:
+  /// **'Référentiel des navires mis à jour'**
+  String get referentielMisAJour;
 }
 
 class _AppLocalizationsDelegate

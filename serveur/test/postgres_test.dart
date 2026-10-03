@@ -1,6 +1,7 @@
 @Tags(['postgres'])
 library;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:postgres/postgres.dart';
@@ -26,11 +27,41 @@ void main() {
     final c = await Connection.open(_endpoint(Uri.parse(url)),
         settings: const ConnectionSettings(sslMode: SslMode.disable));
     await c.execute('DROP TABLE IF EXISTS declarations, controles, '
-        'schema_version CASCADE');
+        'licences, navires, schema_version CASCADE');
+    await c.execute('DROP SEQUENCE IF EXISTS referentiel_version_seq');
     await c.close();
     stockage = await StockagePostgres.ouvrir(Uri.parse(url));
   });
   tearDown(() => stockage.fermer());
+
+  test('référentiel : import, versions, contraintes', () async {
+    expect(await stockage.versionReferentiel(), 0);
+    await importerReferentiel(
+        stockage,
+        jsonDecode(File('donnees/referentiel_demo.json').readAsStringSync())
+            as Map<String, Object?>);
+    final r = await stockage.referentiel();
+    expect((r['navires']! as List).length, 3);
+    expect((r['licences']! as List).length, 3);
+    final v1 = r['version']! as int;
+    expect(v1, greaterThan(0));
+    expect(((r['navires']! as List).first as Map)['certificats'], hasLength(1));
+
+    final n1 = Map<String, Object?>.from((r['navires']! as List).first as Map)
+      ..['nom'] = 'Imraguen 12 bis';
+    expect(await stockage.enregistrerNavire(n1), EcritureReferentiel.modifie);
+    expect(await stockage.versionReferentiel(), greaterThan(v1));
+
+    expect(
+        await stockage
+            .enregistrerNavire({...n1, 'id': 'N9'}), // même immatriculation
+        EcritureReferentiel.immatriculationEnDouble);
+    final l = (r['licences']! as List).first as Map;
+    expect(
+        await stockage.enregistrerLicence(
+            {...l.cast<String, Object?>(), 'navire_id': 'INCONNU'}),
+        EcritureReferentiel.navireInconnu);
+  });
 
   test('les migrations sont appliquées une seule fois', () async {
     await stockage.fermer();

@@ -47,6 +47,8 @@ services:
       # Clés lues par le réseau Docker interne.
       OIDC_JWKS_URL: http://keycloak:8080/realms/peche/protocol/openid-connect/certs
       PORT: "8080"
+      # Flotte de démonstration, importée si le référentiel est vide.
+      REFERENTIEL_INITIAL: /app/donnees/referentiel_demo.json
     ports:
       - "8080:8080"
 
