@@ -826,4 +826,17 @@ class AppLocalizationsAr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get quitterSansEnregistrer => 'الخروج دون حفظ؟';
+
+  @override
+  String get modificationsPerdues =>
+      'ستضيع التعديلات التي أجريتها على هذا النموذج.';
+
+  @override
+  String get rester => 'البقاء';
+
+  @override
+  String get quitter => 'خروج';
 }

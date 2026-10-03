@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import '../../core/models/enums.dart';
@@ -199,6 +201,57 @@ mixin _Enregistrement<T extends StatefulWidget> on State<T> {
   bool enCours = false;
   ErreurAdministration? refus;
 
+  /// Contenu du formulaire en texte (tous les champs). Comparé à sa valeur
+  /// à l'ouverture pour savoir si l'utilisateur a modifié quelque chose.
+  String signature();
+  late final String _signatureInitiale;
+
+  @override
+  void initState() {
+    super.initState();
+    _signatureInitiale = signature();
+  }
+
+  /// Flèche retour (barre du haut, bouton Android) : si le formulaire a été
+  /// modifié, on demande confirmation avant de perdre la saisie.
+  ///
+  /// `canPop: false` bloque la fermeture demandée par l'utilisateur ;
+  /// `onPopInvokedWithResult` décide alors. Les fermetures faites par le
+  /// code (`Navigator.pop(true)` après enregistrement) ne sont pas
+  /// bloquées : PopScope ne concerne que les demandes de l'utilisateur.
+  Widget protegerSortie(Widget ecran) => PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (dejaFerme, _) async {
+          if (dejaFerme) return;
+          final quitter =
+              signature() == _signatureInitiale || await _confirmerSortie();
+          if (quitter && mounted) Navigator.of(context).pop();
+        },
+        child: ecran,
+      );
+
+  Future<bool> _confirmerSortie() async {
+    final l10n = context.l10n;
+    final reponse = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.quitterSansEnregistrer),
+        content: Text(l10n.modificationsPerdues),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.rester),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.quitter),
+          ),
+        ],
+      ),
+    );
+    return reponse ?? false; // clic à côté de la fenêtre = rester
+  }
+
   Future<void> enregistrer(
       Future<Object?> Function(ApiAdministration api) ecrire,
       String confirmation,
@@ -372,6 +425,16 @@ class _NavireFormScreenState extends State<NavireFormScreen>
 
   bool get _nouveau => widget.navire == null;
 
+  @override
+  String signature() => jsonEncode([
+        id.text, nom.text, immat.text, pavillon.text, type.name, //
+        longueur.text, puissance.text, imo.text,
+        [
+          for (final c in certificats)
+            [c.type.name, c.numero.text, c.expiration?.toIso8601String()],
+        ],
+      ]);
+
   Map<String, Object?> _donnees() => {
         'nom': nom.text.trim(),
         'immatriculation': immat.text.trim(),
@@ -393,7 +456,7 @@ class _NavireFormScreenState extends State<NavireFormScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Scaffold(
+    return protegerSortie(Scaffold(
       appBar: AppBar(
         title: Text(_nouveau ? l10n.ajouterNavire : l10n.modifierNavire),
         actions: [
@@ -513,7 +576,7 @@ class _NavireFormScreenState extends State<NavireFormScreen>
           ],
         ),
       ),
-    );
+    ));
   }
 }
 
@@ -563,6 +626,19 @@ class _LicenceFormScreenState extends State<LicenceFormScreen>
 
   bool get _nouvelle => widget.licence == null;
 
+  @override
+  String signature() => jsonEncode([
+        numero.text, navireId, segment.name, //
+        [
+          for (final e in TypeEngin.values)
+            if (engins.contains(e)) e.name
+        ],
+        especes.text, debut?.toIso8601String(), fin?.toIso8601String(),
+        [
+          for (final q in quotas) [q.code.text, q.kg.text]
+        ],
+      ]);
+
   Map<String, Object?> _donnees() => {
         'navire_id': navireId,
         'segment': segment.name,
@@ -585,7 +661,7 @@ class _LicenceFormScreenState extends State<LicenceFormScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Scaffold(
+    return protegerSortie(Scaffold(
       appBar: AppBar(
         title: Text(_nouvelle ? l10n.ajouterLicence : l10n.modifierLicence),
         actions: [
@@ -693,6 +769,6 @@ class _LicenceFormScreenState extends State<LicenceFormScreen>
           ],
         ),
       ),
-    );
+    ));
   }
 }

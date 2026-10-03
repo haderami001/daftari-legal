@@ -1219,7 +1219,7 @@ abstract class AppLocalizations {
   /// No description provided for @confirmerSuppression.
   ///
   /// In fr, this message translates to:
-  /// **'Supprimer « {nom} » ?'**
+  /// **'Supprimer « {nom} » ?'**
   String confirmerSuppression(String nom);
 
   /// No description provided for @suppressionExplication.
@@ -1293,6 +1293,30 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{n, plural, =1{1 modification enregistrée} other{{n} modifications enregistrées}}'**
   String modificationsEnregistrees(int n);
+
+  /// No description provided for @quitterSansEnregistrer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quitter sans enregistrer ?'**
+  String get quitterSansEnregistrer;
+
+  /// No description provided for @modificationsPerdues.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les modifications de ce formulaire seront perdues.'**
+  String get modificationsPerdues;
+
+  /// No description provided for @rester.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rester'**
+  String get rester;
+
+  /// No description provided for @quitter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quitter'**
+  String get quitter;
 }
 
 class _AppLocalizationsDelegate

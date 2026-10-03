@@ -507,7 +507,7 @@
   "@adminChargement": {"placeholders": {"message": {"type": "String"}}},
   "licenceDe": "{numero} — navire {navire}",
   "@licenceDe": {"placeholders": {"numero": {"type": "String"}, "navire": {"type": "String"}}},
-  "confirmerSuppression": "Supprimer « {nom} » ?",
+  "confirmerSuppression": "Supprimer « {nom} » ?",
   "@confirmerSuppression": {"placeholders": {"nom": {"type": "String"}}},
   "suppressionExplication": "Il disparaîtra des listes et des téléphones à la prochaine synchronisation. Les déclarations et contrôles déjà faits sont conservés.",
   "navireSupprime": "Navire supprimé",
@@ -524,5 +524,9 @@
   "@envoyePar": {"placeholders": {"compte": {"type": "String"}}},
   "avecInfraction": "avec infraction(s)",
   "modificationsEnregistrees": "{n, plural, =1{1 modification enregistrée} other{{n} modifications enregistrées}}",
-  "@modificationsEnregistrees": {"placeholders": {"n": {"type": "int"}}}
+  "@modificationsEnregistrees": {"placeholders": {"n": {"type": "int"}}},
+  "quitterSansEnregistrer": "Quitter sans enregistrer ?",
+  "modificationsPerdues": "Les modifications de ce formulaire seront perdues.",
+  "rester": "Rester",
+  "quitter": "Quitter"
 }

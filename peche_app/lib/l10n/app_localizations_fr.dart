@@ -755,7 +755,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String confirmerSuppression(String nom) {
-    return 'Supprimer « $nom » ?';
+    return 'Supprimer « $nom » ?';
   }
 
   @override
@@ -816,4 +816,17 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get quitterSansEnregistrer => 'Quitter sans enregistrer ?';
+
+  @override
+  String get modificationsPerdues =>
+      'Les modifications de ce formulaire seront perdues.';
+
+  @override
+  String get rester => 'Rester';
+
+  @override
+  String get quitter => 'Quitter';
 }
