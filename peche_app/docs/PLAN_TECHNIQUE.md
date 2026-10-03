@@ -23,7 +23,7 @@ réglementaire et guide juridique. Stack : **Dart / Flutter**.
 | HTTP | `dio` + `retrofit` | Intercepteurs (jeton, reprise), client généré depuis OpenAPI. |
 | Sérialisation | `freezed` + `json_serializable` | Modèles immuables, `copyWith`, JSON. |
 | Traduction | `flutter_localizations` + ARB | **Français, arabe (RTL), anglais**, + pictogrammes pour les pêcheurs peu alphabétisés. |
-| Back-end | **Dart Frog** (ou NestJS/Django si l'équipe le connaît déjà) | Le moteur de règles Dart est **partagé** entre app et serveur. |
+| Back-end | **Dart** (`shelf` + `postgres`), dossier `serveur/` du dépôt | Même langage que l'app : le moteur de règles Dart pourra être **partagé** entre app et serveur. |
 | Base centrale | **PostgreSQL 16 + PostGIS** | Relations fortes, requêtes spatiales (navire dans une zone interdite ?). |
 | Fichiers | Stockage objet S3-compatible (MinIO) | Scans de certificats, photos, rapports PDF. |
 | Auth | **Keycloak** (OpenID Connect) | Rôles, comptes agents, révocation d'appareil. |
@@ -44,7 +44,7 @@ GET  /licences/{numero}/quotas         → quota consommé / restant
 POST /controles                        → rapport d'inspection + mesures + infractions
 POST /controles/{id}/pieces            → photos, PDF (multipart)
 GET  /guide/textes                     → textes juridiques et fiches de formation
-POST /sync                             → envoi groupé de la file hors ligne
+POST /v1/sync/{declarations|controles}/{id} → envoi de la file hors ligne (implémenté : serveur/)
 ```
 
 Règles d'API : versionnée (`/v1`), **idempotente** (l'UUID est créé sur le
@@ -82,7 +82,7 @@ flowchart TB
   end
 
   subgraph Serveur["☁️ Back-end"]
-    API[API REST v1<br/>Dart Frog]
+    API[API REST v1<br/>Dart shelf]
     REG2["Moteur réglementaire<br/>(même package Dart)"]
     PG[(PostgreSQL + PostGIS)]
     S3[(Stockage objet)]
@@ -134,8 +134,9 @@ garantit que l'app et le back-office appliquent **les mêmes règles**.
    licences de la zone de l'agent.
 2. En mer : tout est écrit dans SQLite. Chaque enregistrement reçoit un UUID et
    entre dans une **file d'envoi**.
-3. Au retour du réseau : `POST /sync` envoie la file, le serveur **recalcule**
-   les infractions avec la même version du référentiel, puis confirme.
+3. Au retour du réseau : `POST /v1/sync/...` envoie la file ; le serveur
+   vérifie, enregistre et confirme (fait). Étape suivante : qu'il **recalcule**
+   les infractions avec la même version du référentiel.
 4. Conflits : le serveur fait foi pour les licences/quotas ; les déclarations
    et contrôles ne sont jamais écrasés (ajout seulement + journal d'audit).
 

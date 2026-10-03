@@ -7,10 +7,14 @@ on:
     branches: [main]
     paths:
       - 'peche_app/**'
+      # Le test de bout en bout de l'application démarre le serveur.
+      - 'serveur/**'
       - '.github/workflows/peche_app.yml'
   pull_request:
     paths:
       - 'peche_app/**'
+      # Le test de bout en bout de l'application démarre le serveur.
+      - 'serveur/**'
       - '.github/workflows/peche_app.yml'
 
 concurrency:
