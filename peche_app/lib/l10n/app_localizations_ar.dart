@@ -812,4 +812,18 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get avecInfraction => 'بها مخالفات';
+
+  @override
+  String modificationsEnregistrees(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'تم حفظ $n تعديل',
+      many: 'تم حفظ $n تعديلًا',
+      few: 'تم حفظ $n تعديلات',
+      two: 'تم حفظ تعديلين',
+      one: 'تم حفظ تعديل واحد',
+    );
+    return '$_temp0';
+  }
 }

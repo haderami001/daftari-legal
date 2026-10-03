@@ -144,6 +144,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Tanit'), findsOneWidget);
+      // Retour à l'accueil : il reçoit le nombre de modifications (1).
+      await tester.tap(find.byType(BackButton));
+      await tester.pumpAndSettle();
+      expect(find.text('1 modification enregistrée'), findsOneWidget);
+      await tester.tap(find.text('Navires et licences'));
+      await tester.pumpAndSettle();
       final navire =
           ((await stockage.referentiel())['navires']! as List).single as Map;
       expect(navire['longueur_m'], 30.5);

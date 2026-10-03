@@ -805,4 +805,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get avecInfraction => 'avec infraction(s)';
+
+  @override
+  String modificationsEnregistrees(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n modifications enregistrées',
+      one: '1 modification enregistrée',
+    );
+    return '$_temp0';
+  }
 }

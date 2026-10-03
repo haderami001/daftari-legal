@@ -52,9 +52,21 @@ class _AccueilScreenState extends State<AccueilScreen> {
   }
 
   /// Ouvre un module puis, au retour, met à jour le compteur d'envois.
+  ///
+  /// `await push(...)` attend la fermeture de l'écran et reçoit la valeur
+  /// passée à `Navigator.pop(context, valeur)` : l'administration renvoie
+  /// le nombre de modifications enregistrées (les autres écrans, rien).
   Future<void> _ouvrir(Widget ecran) async {
-    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => ecran));
-    if (mounted) await _synchroniserPuisCompter();
+    final resultat = await Navigator.of(context)
+        .push<Object?>(MaterialPageRoute(builder: (_) => ecran));
+    if (!mounted) return;
+    if (resultat is int && resultat > 0) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar() // remplace « Navire enregistré » éventuel
+        ..showSnackBar(SnackBar(
+            content: Text(context.l10n.modificationsEnregistrees(resultat))));
+    }
+    await _synchroniserPuisCompter();
   }
 
   @override

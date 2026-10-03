@@ -197,5 +197,6 @@
   "navireLe": "السفينة {navire} — {date}",
   "nbInfractions": "{n, plural, =0{لا توجد مخالفة} =1{مخالفة واحدة} =2{مخالفتان} few{{n} مخالفات} many{{n} مخالفةً} other{{n} مخالفة}}",
   "envoyePar": "أرسله {compte}",
-  "avecInfraction": "بها مخالفات"
+  "avecInfraction": "بها مخالفات",
+  "modificationsEnregistrees": "{n, plural, =1{تم حفظ تعديل واحد} =2{تم حفظ تعديلين} few{تم حفظ {n} تعديلات} many{تم حفظ {n} تعديلًا} other{تم حفظ {n} تعديل}}"
 }
