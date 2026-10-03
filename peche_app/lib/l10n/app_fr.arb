@@ -522,5 +522,7 @@
   "@nbInfractions": {"placeholders": {"n": {"type": "int"}}},
   "envoyePar": "envoyé par {compte}",
   "@envoyePar": {"placeholders": {"compte": {"type": "String"}}},
-  "avecInfraction": "avec infraction(s)"
+  "avecInfraction": "avec infraction(s)",
+  "modificationsEnregistrees": "{n, plural, =1{1 modification enregistrée} other{{n} modifications enregistrées}}",
+  "@modificationsEnregistrees": {"placeholders": {"n": {"type": "int"}}}
 }

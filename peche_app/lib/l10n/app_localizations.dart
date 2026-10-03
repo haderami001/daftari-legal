@@ -1287,6 +1287,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'avec infraction(s)'**
   String get avecInfraction;
+
+  /// No description provided for @modificationsEnregistrees.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n, plural, =1{1 modification enregistrée} other{{n} modifications enregistrées}}'**
+  String modificationsEnregistrees(int n);
 }
 
 class _AppLocalizationsDelegate

@@ -10,6 +10,9 @@ import '../../l10n/libelles.dart';
 /// Réservé au rôle `admin` (le serveur le vérifie aussi). Les données sont
 /// lues et écrites directement sur le serveur ; après chaque
 /// enregistrement, la synchronisation met à jour la copie du téléphone.
+///
+/// En se fermant, l'écran renvoie à l'accueil le nombre de modifications
+/// enregistrées : `Navigator.pop(context, nombre)`.
 class AdministrationScreen extends StatefulWidget {
   const AdministrationScreen({super.key});
 
@@ -19,6 +22,9 @@ class AdministrationScreen extends StatefulWidget {
 
 class _AdministrationScreenState extends State<AdministrationScreen> {
   Future<Map<String, Object?>>? _referentiel;
+
+  /// Enregistrements et suppressions faits pendant cette visite.
+  int _modifications = 0;
 
   @override
   void didChangeDependencies() {
@@ -38,6 +44,7 @@ class _AdministrationScreenState extends State<AdministrationScreen> {
     final enregistre = await Navigator.of(context)
         .push<bool>(MaterialPageRoute(builder: (_) => formulaire));
     if (enregistre != true || !mounted) return;
+    _modifications++;
     _actualiser();
     // Copie locale du référentiel (pour les écrans hors ligne).
     services.synchro.synchroniser();
@@ -46,78 +53,86 @@ class _AdministrationScreenState extends State<AdministrationScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.moduleAdministration),
-          actions: [
-            IconButton(
-              tooltip: l10n.actualiser,
-              onPressed: _actualiser,
-              icon: const Icon(Icons.refresh),
-            ),
-          ],
-          bottom: TabBar(tabs: [
-            Tab(
-                icon: const Icon(Icons.directions_boat),
-                text: l10n.ongletNavires),
-            Tab(icon: const Icon(Icons.badge), text: l10n.ongletLicences),
-          ]),
-        ),
-        body: FutureBuilder(
-          future: _referentiel,
-          builder: (context, etat) {
-            if (etat.hasError) {
-              return _Message(
-                  icone: Icons.cloud_off,
-                  texte: l10n.adminChargement('${etat.error}'));
-            }
-            if (!etat.hasData) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            // Les éléments supprimés restent sur le serveur (marqués) mais
-            // ne sont plus affichés.
-            List<Map<String, Object?>> actifs(String cle) => [
-                  for (final e in (etat.data![cle]! as List)
-                      .cast<Map<String, Object?>>())
-                    if (e['supprime'] != true) e,
-                ];
-            final navires = actifs('navires');
-            final licences = actifs('licences');
-            return TabBarView(children: [
-              _Liste(
-                elements: navires,
-                ajouter: l10n.ajouterNavire,
-                onAjouter: () => _ouvrir(const NavireFormScreen()),
-                ligne: (n) => ListTile(
-                  leading: const Icon(Icons.directions_boat),
-                  title: Text('${n['nom']}'),
-                  subtitle: Text('${n['id']} · ${n['immatriculation']} · '
-                      '${l10n.libelleTypeNavire(TypeNavire.values.byName('${n['type']}'))}'
-                      ' · ${n['pavillon']}'),
-                  trailing: const Icon(Icons.edit),
-                  onTap: () => _ouvrir(NavireFormScreen(navire: n)),
-                ),
+    // Flèche retour (barre du haut ou bouton Android) : on ferme nous-mêmes
+    // l'écran pour renvoyer le nombre de modifications à l'accueil.
+    return PopScope<int>(
+      canPop: false,
+      onPopInvokedWithResult: (dejaFerme, _) {
+        if (!dejaFerme) Navigator.of(context).pop(_modifications);
+      },
+      child: DefaultTabController(
+        length: 2,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(l10n.moduleAdministration),
+            actions: [
+              IconButton(
+                tooltip: l10n.actualiser,
+                onPressed: _actualiser,
+                icon: const Icon(Icons.refresh),
               ),
-              _Liste(
-                elements: licences,
-                ajouter: l10n.ajouterLicence,
-                onAjouter: () => _ouvrir(LicenceFormScreen(navires: navires)),
-                ligne: (l) => ListTile(
-                  leading: const Icon(Icons.badge),
-                  title: Text(l10n.licenceDe('${l['numero']}',
-                      '${navires.where((n) => n['id'] == l['navire_id']).firstOrNull?['nom'] ?? l['navire_id']}')),
-                  subtitle: Text(
-                      '${l10n.libelleSegment(TypePeche.values.byName('${l['segment']}'))}'
-                      ' · ${l['date_debut']} → ${l['date_fin']}'),
-                  trailing: const Icon(Icons.edit),
-                  onTap: () =>
-                      _ouvrir(LicenceFormScreen(licence: l, navires: navires)),
+            ],
+            bottom: TabBar(tabs: [
+              Tab(
+                  icon: const Icon(Icons.directions_boat),
+                  text: l10n.ongletNavires),
+              Tab(icon: const Icon(Icons.badge), text: l10n.ongletLicences),
+            ]),
+          ),
+          body: FutureBuilder(
+            future: _referentiel,
+            builder: (context, etat) {
+              if (etat.hasError) {
+                return _Message(
+                    icone: Icons.cloud_off,
+                    texte: l10n.adminChargement('${etat.error}'));
+              }
+              if (!etat.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              // Les éléments supprimés restent sur le serveur (marqués) mais
+              // ne sont plus affichés.
+              List<Map<String, Object?>> actifs(String cle) => [
+                    for (final e in (etat.data![cle]! as List)
+                        .cast<Map<String, Object?>>())
+                      if (e['supprime'] != true) e,
+                  ];
+              final navires = actifs('navires');
+              final licences = actifs('licences');
+              return TabBarView(children: [
+                _Liste(
+                  elements: navires,
+                  ajouter: l10n.ajouterNavire,
+                  onAjouter: () => _ouvrir(const NavireFormScreen()),
+                  ligne: (n) => ListTile(
+                    leading: const Icon(Icons.directions_boat),
+                    title: Text('${n['nom']}'),
+                    subtitle: Text('${n['id']} · ${n['immatriculation']} · '
+                        '${l10n.libelleTypeNavire(TypeNavire.values.byName('${n['type']}'))}'
+                        ' · ${n['pavillon']}'),
+                    trailing: const Icon(Icons.edit),
+                    onTap: () => _ouvrir(NavireFormScreen(navire: n)),
+                  ),
                 ),
-              ),
-            ]);
-          },
+                _Liste(
+                  elements: licences,
+                  ajouter: l10n.ajouterLicence,
+                  onAjouter: () => _ouvrir(LicenceFormScreen(navires: navires)),
+                  ligne: (l) => ListTile(
+                    leading: const Icon(Icons.badge),
+                    title: Text(l10n.licenceDe('${l['numero']}',
+                        '${navires.where((n) => n['id'] == l['navire_id']).firstOrNull?['nom'] ?? l['navire_id']}')),
+                    subtitle: Text(
+                        '${l10n.libelleSegment(TypePeche.values.byName('${l['segment']}'))}'
+                        ' · ${l['date_debut']} → ${l['date_fin']}'),
+                    trailing: const Icon(Icons.edit),
+                    onTap: () => _ouvrir(
+                        LicenceFormScreen(licence: l, navires: navires)),
+                  ),
+                ),
+              ]);
+            },
+          ),
         ),
       ),
     );
