@@ -1,0 +1,89 @@
+# Mise en production du serveur « Pêche Conforme » avec HTTPS automatique.
+#
+#   Internet ──HTTPS──► Caddy ──► serveur (API)   https://${DOMAINE_API}
+#                             └─► Keycloak        https://${DOMAINE_AUTH}
+#                       PostgreSQL : bases « peche » et « keycloak »
+#
+# Caddy obtient et renouvelle seul les certificats Let's Encrypt.
+# Lancement : ./installer.sh (voir README.md).
+name: peche-conforme
+
+services:
+  caddy:
+    image: caddy:2.8
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAINE_API: ${DOMAINE_API:?}
+      DOMAINE_AUTH: ${DOMAINE_AUTH:?}
+      EMAIL_ACME: ${EMAIL_ACME:-}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_donnees:/data
+      - caddy_config:/config
+    depends_on:
+      - serveur
+      - keycloak
+
+  base:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: peche
+      POSTGRES_PASSWORD: ${MOT_DE_PASSE_BASE:?}
+      POSTGRES_DB: peche
+    volumes:
+      - base_donnees:/var/lib/postgresql/data
+      # Crée la base « keycloak » au premier démarrage.
+      - ./postgres:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U peche -d peche"]
+      interval: 5s
+      retries: 20
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.7
+    restart: unless-stopped
+    command: start --import-realm
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://base:5432/keycloak
+      KC_DB_USERNAME: peche
+      KC_DB_PASSWORD: ${MOT_DE_PASSE_BASE:?}
+      # Adresse publique : c'est l'« iss » des jetons.
+      KC_HOSTNAME: https://${DOMAINE_AUTH:?}
+      # Derrière Caddy : HTTP en interne, en-têtes X-Forwarded-* de confiance.
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY_HEADERS: xforwarded
+      KC_HEALTH_ENABLED: "true"
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${MOT_DE_PASSE_ADMIN_KEYCLOAK:?}
+    volumes:
+      # Domaine « peche » préparé par installer.sh (sans les comptes de démo).
+      - ./keycloak:/opt/keycloak/data/import:ro
+    depends_on:
+      base:
+        condition: service_healthy
+
+  serveur:
+    build: ../serveur
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://peche:${MOT_DE_PASSE_BASE:?}@base:5432/peche
+      OIDC_EMETTEUR: https://${DOMAINE_AUTH}/realms/peche
+      # Clés de signature lues directement sur le réseau Docker interne.
+      OIDC_JWKS_URL: http://keycloak:8080/realms/peche/protocol/openid-connect/certs
+      ORIGINES_AUTORISEES: ${ORIGINES_AUTORISEES:-*}
+      REFERENTIEL_INITIAL: ${REFERENTIEL_INITIAL:-}
+      PORT: "8080"
+    depends_on:
+      base:
+        condition: service_healthy
+
+volumes:
+  base_donnees:
+  caddy_donnees:
+  caddy_config:

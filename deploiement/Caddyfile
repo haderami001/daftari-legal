@@ -1,0 +1,29 @@
+# Certificats HTTPS automatiques (Let's Encrypt) pour les deux adresses.
+{
+	email {$EMAIL_ACME}
+}
+
+(securite) {
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options nosniff
+		Referrer-Policy no-referrer
+		-Server
+	}
+	encode gzip
+}
+
+# API du serveur central (application mobile et web).
+{$DOMAINE_API} {
+	import securite
+	request_body {
+		max_size 6MB
+	}
+	reverse_proxy serveur:8080
+}
+
+# Keycloak : connexion des comptes.
+{$DOMAINE_AUTH} {
+	import securite
+	reverse_proxy keycloak:8080
+}

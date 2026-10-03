@@ -152,11 +152,15 @@ L'application a aussi un test de bout en bout
 (`peche_app/test/bout_en_bout_test.dart`) qui démarre ce serveur et lui
 envoie de vraies requêtes HTTP.
 
+## Mise en ligne (HTTPS)
+
+Voir [`../deploiement/README.md`](../deploiement/README.md) : une commande
+installe l'API, Keycloak et PostgreSQL derrière Caddy (certificats
+Let's Encrypt automatiques), sans les comptes de démonstration.
+
 ## À faire pour la production
 
-- Créer les vrais comptes dans Keycloak, supprimer les comptes de démo,
-  activer HTTPS sur Keycloak.
-- Mettre le serveur derrière **HTTPS** (reverse proxy ou hébergeur).
+- Créer les vrais comptes dans Keycloak (console d'administration).
 - Recalculer les infractions côté serveur avec le même moteur Dart et le
   référentiel central.
 - Sauvegardes régulières de la base.
