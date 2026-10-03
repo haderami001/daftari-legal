@@ -583,4 +583,39 @@ class AppLocalizationsAr extends AppLocalizations {
       String unite, String organisme) {
     return '$espece: $sous من $total دون $min $unite ($organisme).';
   }
+
+  @override
+  String get connexionSousTitre => 'سجّل الدخول بحسابك';
+
+  @override
+  String get identifiant => 'اسم المستخدم';
+
+  @override
+  String get motDePasse => 'كلمة المرور';
+
+  @override
+  String get seConnecter => 'تسجيل الدخول';
+
+  @override
+  String get connexionChampsVides => 'أدخل اسم المستخدم وكلمة المرور.';
+
+  @override
+  String get connexionIdentifiants => 'اسم المستخدم أو كلمة المرور غير صحيحة.';
+
+  @override
+  String get connexionReseau =>
+      'لا توجد شبكة: يجب أن يتم تسجيل الدخول الأول على اليابسة.';
+
+  @override
+  String get connexionServeur =>
+      'خادم تسجيل الدخول لا يستجيب. أعد المحاولة لاحقًا.';
+
+  @override
+  String get deconnexion => 'تسجيل الخروج';
+
+  @override
+  String get compte => 'الحساب';
+
+  @override
+  String get aucunModule => 'ليس لحسابك دور إدخال (ربّان أو عون).';
 }

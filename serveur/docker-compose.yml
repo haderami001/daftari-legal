@@ -1,8 +1,10 @@
 # Lancer le serveur et sa base PostgreSQL sur un poste de développement :
 #     cd serveur && docker compose up --build
-# Puis l'application :
+# Puis l'application (comptes de démo : capitaine.demo, agent.demo,
+# superviseur.demo, admin.demo — mot de passe Demo-Peche-2026) :
 #     flutter run --dart-define=API_URL=http://<ip-du-poste>:8080 \
-#                 --dart-define=API_JETON=jeton-de-developpement-a-changer
+#       --dart-define=OIDC_EMETTEUR=http://<ip-du-poste>:8180/realms/peche
+# Console Keycloak : http://localhost:8180 (admin / admin-dev-a-changer)
 # ⚠ Valeurs de développement : changez le jeton et le mot de passe en production.
 services:
   base:
@@ -18,14 +20,32 @@ services:
       interval: 5s
       retries: 10
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.7
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin-dev-a-changer
+      # Adresse publique fixe : c'est l'« iss » des jetons, le même pour
+      # le téléphone et pour le serveur.
+      KC_HOSTNAME: http://localhost:8180
+    volumes:
+      - ../keycloak:/opt/keycloak/data/import:ro
+    ports:
+      - "8180:8080"
+
   serveur:
     build: .
     depends_on:
       base:
         condition: service_healthy
+      keycloak:
+        condition: service_started
     environment:
       DATABASE_URL: postgres://peche:peche-dev@base:5432/peche
-      JETON_API: jeton-de-developpement-a-changer
+      OIDC_EMETTEUR: http://localhost:8180/realms/peche
+      # Clés lues par le réseau Docker interne.
+      OIDC_JWKS_URL: http://keycloak:8080/realms/peche/protocol/openid-connect/certs
       PORT: "8080"
     ports:
       - "8080:8080"

@@ -27,10 +27,10 @@ flutter pub get
 
 # 3. Lancer sur un téléphone Android branché ou un émulateur
 flutter run
-#    … avec le serveur central du dossier ../serveur (sinon les saisies
-#    restent en file d'envoi sur le téléphone) :
+#    … avec le serveur central (../serveur) et les comptes Keycloak :
 flutter run --dart-define=API_URL=http://<adresse-du-serveur>:8080 \
-            --dart-define=API_JETON=<JETON_API du serveur>
+            --dart-define=OIDC_EMETTEUR=http://<adresse>:8180/realms/peche
+#    Sans OIDC_EMETTEUR : mode démonstration (pas de connexion).
 
 # 4. Vérifier le code et lancer les tests
 flutter analyze
@@ -111,6 +111,19 @@ En mer il n'y a pas de réseau : tout est enregistré **sur le téléphone**.
   `test/bidi_test.dart`).
 - Polices embarquées **Noto Sans** et **Noto Sans Arabic** (licence OFL,
   `assets/fonts/`) : même rendu sur tous les appareils, sans réseau.
+
+## Comptes utilisateurs (Keycloak)
+
+- Écran de **connexion** (identifiant + mot de passe Keycloak). La session
+  est gardée chiffrée sur le téléphone (`flutter_secure_storage`) avec un
+  jeton « hors ligne » valable 30 jours : l'agent se connecte une fois à
+  terre, travaille en mer sans réseau, et ses saisies partent au retour.
+- L'accueil n'affiche que les modules du **rôle** : capitaine → déclaration,
+  agent → contrôle, admin → tout. Le rapport porte le nom de l'agent connecté.
+- Menu **Compte** : nom, identifiant, déconnexion (session révoquée).
+- Code : `lib/core/services/session.dart`, `lib/features/connexion/`.
+- Évolution recommandée : connexion par le navigateur (Authorization Code +
+  PKCE, déjà autorisée côté Keycloak) au lieu du formulaire.
 
 ## Rapport PDF et GPS
 

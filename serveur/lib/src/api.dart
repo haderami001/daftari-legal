@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
+import 'authentification.dart';
 import 'stockage.dart';
 import 'validation.dart';
 
@@ -13,12 +14,16 @@ const tailleMaxOctets = 5 * 1024 * 1024;
 
 /// Construit le serveur HTTP complet (routes + protections).
 ///
-/// - [jeton] : secret partagé attendu dans `Authorization: Bearer <jeton>`
-///   (à remplacer par Keycloak / OpenID Connect en production).
+/// - [authentificateur] : vérifie `Authorization: Bearer <jeton>` — jetons
+///   Keycloak ([AuthOidc]) en production, secret partagé
+///   ([AuthJetonPartage]) en développement.
 /// - [originesAutorisees] : pour la version web de l'application (CORS).
+///
+/// Droits par rôle : déclarations → capitaine ; contrôles → agent ;
+/// consultation → superviseur ; admin → tout.
 Handler construireApi({
   required Stockage stockage,
-  required String jeton,
+  required Authentificateur authentificateur,
   Set<String> originesAutorisees = const {'*'},
   void Function(String)? journal,
 }) {
@@ -29,13 +34,20 @@ Handler construireApi({
               'statut': 'ok',
               'version': versionApi,
             }))
+    ..get('/v1/moi', (Request req) {
+      final u = utilisateur(req);
+      return _json(200, {'id': u.id, 'nom': u.nom, 'roles': u.roles.toList()});
+    })
     ..post(
         '/v1/sync/<type>/<id>',
         (Request req, String type, String id) =>
             _recevoir(req, stockage, type, id))
-    ..get('/v1/statistiques',
-        (Request _) async => _json(200, await stockage.compter()))
+    ..get('/v1/statistiques', (Request req) async {
+      if (!utilisateur(req).a(Roles.superviseur)) return _interdit();
+      return _json(200, await stockage.compter());
+    })
     ..get('/v1/<type>', (Request req, String type) async {
+      if (!utilisateur(req).a(Roles.superviseur)) return _interdit();
       final t = TypeSaisie.depuisSegment(type);
       if (t == null) return _erreur(404, 'introuvable', 'Type inconnu : $type');
       final limite =
@@ -44,7 +56,8 @@ Handler construireApi({
       final lignes = await stockage.lister(t, limite: limite);
       return _json(200, [for (final l in lignes) l.versJson()]);
     })
-    ..get('/v1/controles/<id>/rapport.pdf', (Request _, String id) async {
+    ..get('/v1/controles/<id>/rapport.pdf', (Request req, String id) async {
+      if (!utilisateur(req).a(Roles.superviseur)) return _interdit();
       final pdf = estUuid(id) ? await stockage.rapportPdf(id) : null;
       if (pdf == null) {
         return _erreur(404, 'introuvable', 'Aucun rapport PDF pour $id');
@@ -58,7 +71,7 @@ Handler construireApi({
   return const Pipeline()
       .addMiddleware(_journaliser(journal))
       .addMiddleware(_cors(originesAutorisees))
-      .addMiddleware(_authentifier(jeton))
+      .addMiddleware(_authentifier(authentificateur, journal))
       .addMiddleware(_attraperErreurs(journal))
       .addHandler(routes.call);
 }
@@ -69,6 +82,12 @@ Future<Response> _recevoir(
   if (type == null) {
     return _erreur(404, 'introuvable', 'Type de saisie inconnu : $segment');
   }
+  final u = utilisateur(req);
+  final roleRequis = switch (type) {
+    TypeSaisie.declaration => Roles.capitaine,
+    TypeSaisie.controle => Roles.agent,
+  };
+  if (!u.a(roleRequis)) return _interdit();
   if (!(req.mimeType ?? '').contains('json')) {
     return _erreur(415, 'type_media', 'Content-Type: application/json attendu');
   }
@@ -100,7 +119,7 @@ Future<Response> _recevoir(
     });
   }
 
-  return switch (await stockage.enregistrer(type, id, corps)) {
+  return switch (await stockage.enregistrer(type, id, corps, par: u)) {
     Enregistrement.cree => _json(201, {'statut': 'cree', 'id': id}),
     Enregistrement.dejaRecu => _json(200, {'statut': 'deja_recu', 'id': id}),
     Enregistrement.conflit => _erreur(409, 'conflit',
@@ -145,25 +164,37 @@ Middleware _cors(Set<String> origines) => (interne) => (req) async {
       return rep.change(headers: entetes);
     };
 
-/// Toutes les routes sauf /v1/sante exigent le jeton.
-Middleware _authentifier(String jeton) => (interne) => (req) {
-      if (req.url.path == 'v1/sante') return interne(req);
-      final entete = req.headers['authorization'] ?? '';
-      if (!_egaliteConstante(entete, 'Bearer $jeton')) {
-        return _erreur(401, 'non_autorise', 'Jeton absent ou invalide');
-      }
-      return interne(req);
-    };
+/// L'utilisateur authentifié de la requête (posé par [_authentifier]).
+Utilisateur utilisateur(Request req) =>
+    req.context['utilisateur']! as Utilisateur;
 
-/// Comparaison en temps constant (ne révèle pas le jeton par la durée).
-bool _egaliteConstante(String a, String b) {
-  final x = utf8.encode(a), y = utf8.encode(b);
-  var diff = x.length ^ y.length;
-  for (var i = 0; i < x.length && i < y.length; i++) {
-    diff |= x[i] ^ y[i];
-  }
-  return diff == 0;
-}
+Response _interdit() =>
+    _erreur(403, 'interdit', 'Votre rôle ne permet pas cette action');
+
+/// Toutes les routes sauf /v1/sante exigent un jeton valide.
+Middleware _authentifier(
+        Authentificateur auth, void Function(String)? journal) =>
+    (interne) => (req) async {
+          if (req.url.path == 'v1/sante') return interne(req);
+          final entete = req.headers['authorization'] ?? '';
+          if (!entete.startsWith('Bearer ')) {
+            return _erreur(401, 'non_autorise', 'Jeton absent ou invalide');
+          }
+          final Utilisateur? u;
+          try {
+            u = await auth.verifier(entete.substring(7).trim());
+          } catch (e) {
+            // Keycloak injoignable (clés publiques) : ce n'est pas la faute
+            // du client, il réessaiera.
+            journal?.call('Authentification indisponible : $e');
+            return _erreur(503, 'authentification_indisponible',
+                'Vérification du jeton impossible pour le moment');
+          }
+          if (u == null) {
+            return _erreur(401, 'non_autorise', 'Jeton absent ou invalide');
+          }
+          return interne(req.change(context: {'utilisateur': u}));
+        };
 
 Middleware _attraperErreurs(void Function(String)? journal) =>
     (interne) => (req) async {

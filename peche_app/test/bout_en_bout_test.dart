@@ -11,6 +11,7 @@ import 'package:peche_app/core/regulation/rapport.dart';
 import 'package:peche_app/core/regulation/rapport_pdf.dart';
 import 'package:peche_app/core/regulation/referentiel.dart';
 import 'package:peche_app/core/services/services.dart';
+import 'package:peche_app/core/services/session.dart';
 import 'package:peche_app/core/services/synchronisation.dart';
 import 'package:serveur_peche/serveur_peche.dart' as serveur;
 import 'package:shelf/shelf_io.dart' as shelf_io;
@@ -29,7 +30,9 @@ void main() {
   setUp(() async {
     stockageServeur = serveur.StockageMemoire();
     http = await shelf_io.serve(
-      serveur.construireApi(stockage: stockageServeur, jeton: jeton),
+      serveur.construireApi(
+          stockage: stockageServeur,
+          authentificateur: serveur.AuthJetonPartage(jeton)),
       InternetAddress.loopbackIPv4,
       0,
     );
@@ -85,7 +88,7 @@ void main() {
   }
 
   test('les saisies du téléphone arrivent au serveur, sans doublon', () async {
-    final s = Services(base, api: ApiHttp(adresse(), jeton: jeton));
+    final s = Services(base, api: ApiHttp(adresse(), jeton: () async => jeton));
     final (idDecl, idCtrl) = await saisir(s);
 
     final r1 = await s.synchro.synchroniser();
@@ -103,8 +106,10 @@ void main() {
         await s.saisies.rapportPdf(idCtrl));
 
     // Le téléphone renvoie (réponse perdue) : accepté, pas de doublon.
-    await ApiHttp(adresse(), jeton: jeton).envoyer(TypeEnvoi.declaration,
-        idDecl, await s.saisies.exporterDeclaration(idDecl));
+    await ApiHttp(adresse(), jeton: () async => jeton).envoyer(
+        TypeEnvoi.declaration,
+        idDecl,
+        await s.saisies.exporterDeclaration(idDecl));
     expect(
         await stockageServeur.compter(), {'declarations': 1, 'controles': 1});
 
@@ -115,7 +120,7 @@ void main() {
 
   test('mauvais jeton : refus, les saisies restent sur le téléphone', () async {
     final s = Services(base,
-        api: ApiHttp(adresse(), jeton: 'mauvais-jeton-000000000'));
+        api: ApiHttp(adresse(), jeton: () async => 'mauvais-jeton-000000000'));
     await saisir(s);
 
     final r = await s.synchro.synchroniser();
@@ -131,7 +136,8 @@ void main() {
       () async {
     final adresseEteinte = adresse();
     await http.close(force: true);
-    final s = Services(base, api: ApiHttp(adresseEteinte, jeton: jeton));
+    final s =
+        Services(base, api: ApiHttp(adresseEteinte, jeton: () async => jeton));
     await saisir(s);
 
     final r1 = await s.synchro.synchroniser();
@@ -141,12 +147,79 @@ void main() {
 
     // Le serveur revient (nouveau port) : tout part.
     http = await shelf_io.serve(
-      serveur.construireApi(stockage: stockageServeur, jeton: jeton),
+      serveur.construireApi(
+          stockage: stockageServeur,
+          authentificateur: serveur.AuthJetonPartage(jeton)),
       InternetAddress.loopbackIPv4,
       0,
     );
-    final s2 = Services(base, api: ApiHttp(adresse(), jeton: jeton));
+    final s2 =
+        Services(base, api: ApiHttp(adresse(), jeton: () async => jeton));
     final r2 = await s2.synchro.synchroniser();
     expect((r2.envoyes, r2.echecs), (2, 0));
   });
+
+  // Parcours complet avec le VRAI Keycloak (keycloak/realm-peche.json) :
+  //   KEYCLOAK_URL_TEST=http://localhost:8180 flutter test test/session_test.dart
+  final keycloak = Platform.environment['KEYCLOAK_URL_TEST'];
+  test(
+      'vrai Keycloak : un agent se connecte et ses contrôles arrivent au '
+      'serveur ; ses déclarations sont refusées', () async {
+    final iss = '$keycloak/realms/peche';
+    final stockage = serveur.StockageMemoire();
+    final http = await shelf_io.serve(
+      serveur.construireApi(
+        stockage: stockage,
+        authentificateur: serveur.AuthOidc(
+          emetteur: iss,
+          audience: 'peche-api',
+          cles:
+              serveur.ClesJwks(Uri.parse('$iss/protocol/openid-connect/certs')),
+        ),
+      ),
+      InternetAddress.loopbackIPv4,
+      0,
+    );
+    addTearDown(() => http.close(force: true));
+    final base = BaseDeDonnees.avec(NativeDatabase.memory());
+    addTearDown(base.close);
+
+    final session =
+        SessionKeycloak(emetteur: Uri.parse(iss), coffre: CoffreMemoire());
+    await session.connecter('agent.demo', 'Demo-Peche-2026');
+    expect(session.profil!.nomComplet, 'Mariem Cheikh');
+
+    final s = Services(base,
+        session: session,
+        api: ApiHttp(Uri.parse('http://localhost:${http.port}'),
+            jeton: session.jetonAcces));
+    final flotte = await s.flotte.naviresAvecLicence();
+    const calcul = CalculReglementaire(referentielDemo);
+    final c = Controle(
+      navire: flotte.first.navire,
+      agent: session.profil!.nomComplet,
+      date: DateTime.utc(2026, 10, 3, 9),
+      position: PositionGps(20.6, -17.3, DateTime.utc(2026, 10, 3, 9)),
+      engin: TypeEngin.chalutDemersal,
+    );
+    await s.saisies
+        .enregistrerControle(c, calcul.verifierControle(c), 'RAPPORT');
+    final d = DeclarationCapitaine(
+      navire: flotte.first.navire,
+      licence: flotte.first.licence,
+      engin: TypeEngin.chalutDemersal,
+      position: PositionGps(20, -17, DateTime.utc(2026, 10, 3)),
+    );
+    await s.saisies.enregistrerDeclaration(d, calcul.verifierDeclaration(d));
+
+    final r = await s.synchro.synchroniser();
+    expect((r.envoyes, r.echecs), (1, 1));
+    expect(await stockage.compter(), {'declarations': 0, 'controles': 1});
+    final refus = (await s.envois.enAttente()).single;
+    expect(refus.derniereErreur, 'Serveur : HTTP 403');
+    final recu = (await stockage.lister(serveur.TypeSaisie.controle)).single;
+    expect(recu.envoyePar, 'agent.demo');
+
+    await session.deconnecter();
+  }, skip: keycloak == null ? 'KEYCLOAK_URL_TEST non défini' : false);
 }

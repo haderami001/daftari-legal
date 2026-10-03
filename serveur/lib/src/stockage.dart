@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 
+import 'authentification.dart';
 import 'validation.dart';
 
 /// Résultat d'un enregistrement, qui garantit l'idempotence :
@@ -26,6 +27,7 @@ class ResumeSaisie {
     required this.date,
     required this.nbInfractions,
     required this.recuLe,
+    this.envoyePar,
   });
 
   final String id;
@@ -34,20 +36,26 @@ class ResumeSaisie {
   final int nbInfractions;
   final DateTime recuLe;
 
+  /// Compte qui a envoyé la saisie (identifiant de connexion).
+  final String? envoyePar;
+
   Map<String, Object?> versJson() => {
         'id': id,
         'navire_id': navireId,
         'date': date.toUtc().toIso8601String(),
         'nb_infractions': nbInfractions,
         'recu_le': recuLe.toUtc().toIso8601String(),
+        'envoye_par': envoyePar,
       };
 }
 
 /// Où le serveur range les saisies. Deux implémentations :
 /// [StockageMemoire] (tests, démo) et `StockagePostgres` (production).
 abstract class Stockage {
+  /// [par] : compte authentifié qui envoie (conservé avec la saisie).
   Future<Enregistrement> enregistrer(
-      TypeSaisie type, String id, Map<String, Object?> donnees);
+      TypeSaisie type, String id, Map<String, Object?> donnees,
+      {Utilisateur? par});
 
   Future<List<ResumeSaisie>> lister(TypeSaisie type, {int limite = 50});
 
@@ -71,21 +79,23 @@ DateTime dateSaisie(TypeSaisie type, Map<String, Object?> d) =>
       TypeSaisie.controle => d['date']! as String,
     });
 
+typedef _SaisieMemoire = ({
+  Map<String, Object?> donnees,
+  String empreinte,
+  DateTime recuLe,
+  String? envoyePar,
+});
+
 /// Stockage en mémoire : perdu à l'arrêt du serveur.
 class StockageMemoire implements Stockage {
   final _saisies = {
-    for (final t in TypeSaisie.values)
-      t: <String,
-          ({
-        Map<String, Object?> donnees,
-        String empreinte,
-        DateTime recuLe
-      })>{},
+    for (final t in TypeSaisie.values) t: <String, _SaisieMemoire>{},
   };
 
   @override
   Future<Enregistrement> enregistrer(
-      TypeSaisie type, String id, Map<String, Object?> donnees) async {
+      TypeSaisie type, String id, Map<String, Object?> donnees,
+      {Utilisateur? par}) async {
     final table = _saisies[type]!;
     final e = empreinte(donnees);
     final existant = table[id];
@@ -94,7 +104,12 @@ class StockageMemoire implements Stockage {
           ? Enregistrement.dejaRecu
           : Enregistrement.conflit;
     }
-    table[id] = (donnees: donnees, empreinte: e, recuLe: DateTime.now());
+    table[id] = (
+      donnees: donnees,
+      empreinte: e,
+      recuLe: DateTime.now(),
+      envoyePar: par?.nom,
+    );
     return Enregistrement.cree;
   }
 
@@ -108,6 +123,7 @@ class StockageMemoire implements Stockage {
           date: dateSaisie(type, s.donnees),
           nbInfractions: s.donnees['nb_infractions']! as int,
           recuLe: s.recuLe,
+          envoyePar: s.envoyePar,
         ),
     ]..sort((a, b) => b.recuLe.compareTo(a.recuLe));
     return lignes.take(limite).toList();

@@ -58,19 +58,24 @@ class _AccueilScreenState extends State<AccueilScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final session = ServicesScope.of(context).session;
+    final profil = session.profil!;
+    // Chaque compte ne voit que les modules de son rôle.
     final modules = <(IconData, String, String, Widget)>[
-      (
-        Icons.sailing,
-        l10n.moduleDeclaration,
-        l10n.moduleDeclarationDetail,
-        const DeclarationCapitaineScreen(),
-      ),
-      (
-        Icons.shield,
-        l10n.moduleControle,
-        l10n.moduleControleDetail,
-        const ControleAgentScreen(),
-      ),
+      if (profil.peutDeclarer)
+        (
+          Icons.sailing,
+          l10n.moduleDeclaration,
+          l10n.moduleDeclarationDetail,
+          const DeclarationCapitaineScreen(),
+        ),
+      if (profil.peutControler)
+        (
+          Icons.shield,
+          l10n.moduleControle,
+          l10n.moduleControleDetail,
+          const ControleAgentScreen(),
+        ),
       (
         Icons.menu_book,
         l10n.moduleGuide,
@@ -82,11 +87,33 @@ class _AccueilScreenState extends State<AccueilScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.appTitle),
-        actions: const [_ChoixLangue()],
+        actions: [
+          const _ChoixLangue(),
+          if (session.exigeConnexion)
+            PopupMenuButton<void>(
+              tooltip: l10n.compte,
+              icon: const Icon(Icons.account_circle),
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  enabled: false,
+                  child: Text('${profil.nomComplet}\n${profil.identifiant}'),
+                ),
+                PopupMenuItem(
+                  onTap: session.deconnecter,
+                  child: Text(l10n.deconnexion),
+                ),
+              ],
+            ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          if (!profil.peutDeclarer && !profil.peutControler)
+            ListTile(
+              leading: const Icon(Icons.info_outline),
+              title: Text(l10n.aucunModule),
+            ),
           for (final (icone, titre, sousTitre, ecran) in modules)
             Card(
               child: ListTile(
