@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../models/enums.dart';
 import '../../models/navire.dart';
 import '../base/base_de_donnees.dart';
 
@@ -65,4 +66,67 @@ class FlotteDepot {
     }
     return resultat;
   }
+
+  /// Installe le référentiel téléchargé du serveur (`GET /v1/referentiel`)
+  /// et renvoie sa version. Tout ou rien : en cas d'erreur, l'ancien
+  /// référentiel reste intact.
+  ///
+  /// Les navires et licences sont mis à jour ou ajoutés (jamais supprimés :
+  /// les saisies déjà faites y font référence) ; leurs certificats et
+  /// quotas sont remplacés.
+  Future<int> appliquerReferentiel(Map<String, Object?> ref) =>
+      _db.transaction(() async {
+        for (final n in (ref['navires']! as List).cast<Map>()) {
+          final id = n['id'] as String;
+          await _db.into(_db.navires).insertOnConflictUpdate(NavireLigne(
+                id: id,
+                nom: n['nom'] as String,
+                immatriculation: n['immatriculation'] as String,
+                pavillon: n['pavillon'] as String,
+                type: TypeNavire.values.byName(n['type'] as String),
+                longueurM: (n['longueur_m'] as num).toDouble(),
+                puissanceKw: (n['puissance_kw'] as num).toDouble(),
+                numeroImo: n['numero_imo'] as String?,
+              ));
+          await (_db.delete(_db.certificats)
+                ..where((c) => c.navireId.equals(id)))
+              .go();
+          for (final c in (n['certificats'] as List? ?? []).cast<Map>()) {
+            await _db.into(_db.certificats).insert(CertificatsCompanion.insert(
+                  navireId: id,
+                  type: TypeCertificat.values.byName(c['type'] as String),
+                  numero: c['numero'] as String,
+                  dateExpiration:
+                      DateTime.parse(c['date_expiration'] as String),
+                ));
+          }
+        }
+        for (final l in (ref['licences']! as List).cast<Map>()) {
+          final numero = l['numero'] as String;
+          await _db.into(_db.licences).insertOnConflictUpdate(LicenceLigne(
+                numero: numero,
+                navireId: l['navire_id'] as String,
+                segment: TypePeche.values.byName(l['segment'] as String),
+                enginsAutorises: {
+                  for (final e in l['engins_autorises'] as List)
+                    TypeEngin.values.byName(e as String),
+                },
+                especesCibles:
+                    (l['especes_cibles'] as List).cast<String>().toSet(),
+                dateDebut: DateTime.parse(l['date_debut'] as String),
+                dateFin: DateTime.parse(l['date_fin'] as String),
+              ));
+          await (_db.delete(_db.quotas)
+                ..where((q) => q.licenceNumero.equals(numero)))
+              .go();
+          for (final MapEntry(:key, :value)
+              in (l['quotas_kg'] as Map? ?? {}).entries) {
+            await _db.into(_db.quotas).insert(QuotaLigne(
+                licenceNumero: numero,
+                especeCode: key as String,
+                quotaKg: (value as num).toDouble()));
+          }
+        }
+        return ref['version']! as int;
+      });
 }

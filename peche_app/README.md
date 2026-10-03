@@ -84,7 +84,10 @@ En mer il n'y a pas de réseau : tout est enregistré **sur le téléphone**.
   maintenant », chaque saisie part en JSON vers
   `POST {API_URL}/v1/sync/{declarations|controles}/{id}` avec l'en-tête
   `Idempotency-Key` (pas de doublon si on renvoie). Un échec laisse la saisie
-  en file avec le nombre de tentatives et l'erreur.
+  en file avec le nombre de tentatives et l'erreur. Ensuite, le
+  **référentiel** (navires, certificats, licences, quotas) est téléchargé
+  depuis `GET {API_URL}/v1/referentiel` s'il a changé (version comparée),
+  puis installé dans la base locale en une seule transaction.
 - **Serveur central** : dossier [`../serveur`](../serveur/README.md) (Dart,
   PostgreSQL, Docker). `test/bout_en_bout_test.dart` démarre ce serveur et
   vérifie que les saisies de l'application y arrivent (vraies requêtes HTTP).
@@ -156,7 +159,7 @@ En mer il n'y a pas de réseau : tout est enregistré **sur le téléphone**.
 | `lib/features/envois/` | Écran **envois en attente** |
 | `lib/l10n/` | Traductions français / arabe et libellés traduits |
 | `tool/preparer_web.sh` | Prépare la version navigateur |
-| `test/` | 37 tests : moteur (8), base (6), PDF (1), synchronisation (5), écrans (5), traduction (7), texte bidirectionnel (2), bout en bout avec le serveur (3) |
+| `test/` | Tests : moteur, base, PDF, synchronisation et référentiel, connexion, écrans, traduction, texte bidirectionnel, bout en bout avec le serveur |
 
 ## Pour apprendre (parcours conseillé)
 

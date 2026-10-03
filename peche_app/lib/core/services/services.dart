@@ -25,7 +25,12 @@ class Services {
         saisies = SaisieDepot(base),
         envois = FileEnvoiDepot(base),
         reglages = ReglagesDepot(base) {
-    synchro = Synchroniseur(saisies: saisies, file: envois, api: api);
+    synchro = Synchroniseur(
+        saisies: saisies,
+        file: envois,
+        api: api,
+        flotte: flotte,
+        reglages: reglages);
   }
 
   final BaseDeDonnees base;

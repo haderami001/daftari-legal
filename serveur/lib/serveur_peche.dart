@@ -7,6 +7,7 @@ library;
 
 export 'src/api.dart';
 export 'src/authentification.dart';
+export 'src/referentiel.dart';
 export 'src/stockage.dart';
 export 'src/stockage_postgres.dart';
 export 'src/validation.dart';

@@ -53,8 +53,10 @@ class _EnvoisScreenState extends State<EnvoisScreen> {
     final l10n = context.l10n;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(switch (resultat.statut) {
-      StatutSynchro.termine =>
-        l10n.resultatEnvoi(resultat.envoyes, resultat.echecs),
+      StatutSynchro.termine => [
+          l10n.resultatEnvoi(resultat.envoyes, resultat.echecs),
+          if (resultat.referentielVersion != null) l10n.referentielMisAJour,
+        ].join(' · '),
       StatutSynchro.nonConfigure => l10n.serveurNonConfigure,
       StatutSynchro.dejaEnCours => l10n.envoiDejaEnCours,
     })));

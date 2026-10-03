@@ -55,7 +55,8 @@ class BaseDeDonnees extends _$BaseDeDonnees {
         onCreate: (m) async {
           await m.createAll();
           // Prototype : on remplit la base avec la flotte de démo.
-          // En production : téléchargement depuis l'API (GET /navires...).
+          // Ensuite, la synchronisation la met à jour depuis le serveur
+          // (GET /v1/referentiel).
           await insererDonneesDemo();
         },
         // Mise à jour d'une base existante, étape par étape : un téléphone

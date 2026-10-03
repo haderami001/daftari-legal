@@ -108,6 +108,100 @@ void main() {
     expect(await s.envois.nombreEnAttente(), 0);
   });
 
+  test('référentiel : téléchargé, installé, puis plus retéléchargé', () async {
+    final serveur = FauxServeur()
+      ..referentiel = {
+        'version': 7,
+        'navires': [
+          {
+            'id': 'N1', // navire existant, modifié
+            'nom': 'Imraguen 12 (renommé)',
+            'immatriculation': 'NDB-PA-1234',
+            'pavillon': 'MRT',
+            'type': 'pirogue',
+            'longueur_m': 14.5,
+            'puissance_kw': 30,
+            'numero_imo': null,
+            'certificats': [
+              {
+                'type': 'navigabilite',
+                'numero': 'NAV-2026-500',
+                'date_expiration': '2028-01-31',
+              },
+            ],
+          },
+          {
+            'id': 'N4', // nouveau navire
+            'nom': 'Tanit',
+            'immatriculation': 'NKT-SE-0001',
+            'pavillon': 'MRT',
+            'type': 'senneur',
+            'longueur_m': 30,
+            'puissance_kw': 500,
+            'numero_imo': null,
+            'certificats': <Object>[],
+          },
+        ],
+        'licences': [
+          {
+            'numero': 'LIC-COT-2026-0400',
+            'navire_id': 'N4',
+            'segment': 'cotiere',
+            'engins_autorises': ['senneTournante'],
+            'especes_cibles': ['SAA', 'SAE'],
+            'date_debut': '2026-01-01',
+            'date_fin': '2026-12-31',
+            'quotas_kg': {'SAA': 80000},
+          },
+        ],
+      };
+    final s = Services(base, api: serveur);
+
+    final r1 = await s.synchro.synchroniser();
+    expect(r1.referentielVersion, 7);
+    expect(r1.erreurReferentiel, isNull);
+
+    final flotte = {
+      for (final f in await s.flotte.naviresAvecLicence()) f.navire.id: f
+    };
+    expect(flotte.keys, containsAll(['N1', 'N2', 'N3', 'N4']));
+    expect(flotte['N1']!.navire.nom, 'Imraguen 12 (renommé)');
+    expect(flotte['N1']!.navire.certificats.single.numero, 'NAV-2026-500');
+    expect(flotte['N4']!.licence.quotasKg, {'SAA': 80000});
+    expect(flotte['N4']!.licence.especesCibles, {'SAA', 'SAE'});
+
+    // Deuxième synchronisation : le téléphone annonce sa version (7).
+    final r2 = await s.synchro.synchroniser();
+    expect(r2.referentielVersion, isNull);
+    expect(serveur.versionsDemandees, [null, 7]);
+  });
+
+  test('référentiel invalide : rien n\'est modifié', () async {
+    final serveur = FauxServeur()
+      ..referentiel = {
+        'version': 8,
+        'navires': [
+          {
+            'id': 'N1',
+            'nom': 'Modifié',
+            'immatriculation': 'NDB-PA-1234',
+            'pavillon': 'MRT',
+            'type': 'sousmarin', // inconnu de cette version de l'app
+            'longueur_m': 14,
+            'puissance_kw': 30,
+          },
+        ],
+        'licences': <Object>[],
+      };
+    final s = Services(base, api: serveur);
+    final r = await s.synchro.synchroniser();
+    expect(r.erreurReferentiel, isNotNull);
+    final n1 = (await s.flotte.naviresAvecLicence())
+        .firstWhere((f) => f.navire.id == 'N1');
+    expect(n1.navire.nom, 'Imraguen 12');
+    expect(await s.reglages.lire('referentiel_version'), isNull);
+  });
+
   group('ApiHttp', () {
     test('POST idempotent vers /v1/sync/... avec le JSON', () async {
       late http.Request requete;
@@ -128,6 +222,24 @@ void main() {
       expect(requete.headers['Idempotency-Key'], 'id-42');
       expect(requete.headers['Authorization'], 'Bearer abc');
       expect(jsonDecode(requete.body), {'agent': 'A'});
+    });
+
+    test('référentiel : If-None-Match, 304 = rien à faire', () async {
+      final entetes = <Map<String, String>>[];
+      final api = ApiHttp(
+        Uri.parse('https://api.exemple.mr'),
+        jeton: () async => 'abc',
+        client: MockClient((r) async {
+          entetes.add(r.headers);
+          expect(r.url.path, '/v1/referentiel');
+          return r.headers['If-None-Match'] == '"3"'
+              ? http.Response('', 304)
+              : http.Response('{"version":3,"navires":[],"licences":[]}', 200);
+        }),
+      );
+      expect((await api.telechargerReferentiel())!['version'], 3);
+      expect(await api.telechargerReferentiel(versionConnue: 3), isNull);
+      expect(entetes.first['Authorization'], 'Bearer abc');
     });
 
     test('une réponse d\'erreur du serveur lève ErreurSynchro', () async {

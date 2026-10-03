@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:postgres/postgres.dart';
 
 import 'authentification.dart';
+import 'referentiel.dart';
 import 'stockage.dart';
 import 'validation.dart';
 
@@ -59,6 +60,28 @@ const migrations = <String>[
   ALTER TABLE declarations ADD COLUMN envoye_par_nom TEXT;
   ALTER TABLE controles ADD COLUMN envoye_par TEXT;
   ALTER TABLE controles ADD COLUMN envoye_par_nom TEXT;
+  ''',
+  // 3 — référentiel (navires, licences). Chaque modification prend un
+  // numéro de version croissant : le téléphone compare avec le sien.
+  '''
+  CREATE SEQUENCE referentiel_version_seq;
+  CREATE TABLE navires (
+      id               TEXT PRIMARY KEY,
+      immatriculation  TEXT NOT NULL UNIQUE,
+      donnees          JSONB NOT NULL,
+      version          BIGINT NOT NULL,
+      modifie_le       TIMESTAMPTZ NOT NULL DEFAULT now(),
+      modifie_par      TEXT
+  );
+  CREATE TABLE licences (
+      numero       TEXT PRIMARY KEY,
+      navire_id    TEXT NOT NULL REFERENCES navires (id),
+      donnees      JSONB NOT NULL,
+      version      BIGINT NOT NULL,
+      modifie_le   TIMESTAMPTZ NOT NULL DEFAULT now(),
+      modifie_par  TEXT
+  );
+  CREATE INDEX licences_navire_idx ON licences (navire_id);
   ''',
 ];
 
@@ -253,6 +276,89 @@ class StockagePostgres implements Stockage {
       TypeSaisie.declaration.segment: r.first[0]! as int,
       TypeSaisie.controle.segment: r.first[1]! as int,
     };
+  }
+
+  @override
+  Future<Map<String, Object?>> referentiel() => _pool.runTx((tx) async {
+        // Instantané cohérent : version et données lues ensemble.
+        final v = await _version(tx);
+        final n = await tx.execute('SELECT donnees FROM navires ORDER BY id');
+        final l =
+            await tx.execute('SELECT donnees FROM licences ORDER BY numero');
+        return {
+          'version': v,
+          'navires': [for (final r in n) r.first],
+          'licences': [for (final r in l) r.first],
+        };
+      },
+          settings: TransactionSettings(
+              isolationLevel: IsolationLevel.repeatableRead,
+              accessMode: AccessMode.readOnly));
+
+  @override
+  Future<int> versionReferentiel() => _version(_pool);
+
+  Future<int> _version(Session s) async {
+    final r = await s.execute('SELECT greatest('
+        '(SELECT coalesce(max(version), 0) FROM navires), '
+        '(SELECT coalesce(max(version), 0) FROM licences))::int');
+    return r.first.first! as int;
+  }
+
+  @override
+  Future<EcritureReferentiel> enregistrerNavire(Map<String, Object?> navire,
+          {Utilisateur? par}) =>
+      _ecrire('''
+          INSERT INTO navires (id, immatriculation, donnees, version,
+              modifie_par)
+          VALUES (@id, @cle, @d:jsonb, nextval('referentiel_version_seq'),
+              @par:text)
+          ON CONFLICT (id) DO UPDATE SET
+              immatriculation = EXCLUDED.immatriculation,
+              donnees = EXCLUDED.donnees, version = EXCLUDED.version,
+              modifie_le = now(), modifie_par = EXCLUDED.modifie_par
+          RETURNING (xmax = 0)''', {
+        'id': navire['id'],
+        'cle': navire['immatriculation'],
+        'd': navire,
+        'par': par?.id,
+      });
+
+  @override
+  Future<EcritureReferentiel> enregistrerLicence(Map<String, Object?> licence,
+          {Utilisateur? par}) =>
+      _ecrire('''
+          INSERT INTO licences (numero, navire_id, donnees, version,
+              modifie_par)
+          VALUES (@id, @cle, @d:jsonb, nextval('referentiel_version_seq'),
+              @par:text)
+          ON CONFLICT (numero) DO UPDATE SET
+              navire_id = EXCLUDED.navire_id,
+              donnees = EXCLUDED.donnees, version = EXCLUDED.version,
+              modifie_le = now(), modifie_par = EXCLUDED.modifie_par
+          RETURNING (xmax = 0)''', {
+        'id': licence['numero'],
+        'cle': licence['navire_id'],
+        'd': licence,
+        'par': par?.id,
+      });
+
+  /// `RETURNING (xmax = 0)` : vrai pour une insertion, faux pour une mise
+  /// à jour.
+  Future<EcritureReferentiel> _ecrire(
+      String sql, Map<String, Object?> parametres) async {
+    try {
+      final r = await _pool.execute(Sql.named(sql), parameters: parametres);
+      return r.first.first == true
+          ? EcritureReferentiel.cree
+          : EcritureReferentiel.modifie;
+    } on ServerException catch (e) {
+      if (e.code == '23505') {
+        return EcritureReferentiel.immatriculationEnDouble; // unique
+      }
+      if (e.code == '23503') return EcritureReferentiel.navireInconnu;
+      rethrow;
+    }
   }
 
   @override

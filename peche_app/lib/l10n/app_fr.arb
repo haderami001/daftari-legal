@@ -459,5 +459,6 @@
   "connexionServeur": "Le serveur de connexion ne répond pas. Réessayez plus tard.",
   "deconnexion": "Se déconnecter",
   "compte": "Compte",
-  "aucunModule": "Votre compte n'a pas de rôle de saisie (capitaine ou agent)."
+  "aucunModule": "Votre compte n'a pas de rôle de saisie (capitaine ou agent).",
+  "referentielMisAJour": "Référentiel des navires mis à jour"
 }

@@ -8,6 +8,9 @@ class ReglagesDepot {
 
   static const cleLangue = 'langue';
 
+  /// Version du référentiel (navires, licences) téléchargé du serveur.
+  static const cleVersionReferentiel = 'referentiel_version';
+
   Future<String?> lire(String cle) async =>
       (await (_db.select(_db.reglages)..where((r) => r.cle.equals(cle)))
               .getSingleOrNull())

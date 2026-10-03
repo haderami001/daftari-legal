@@ -612,4 +612,7 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get aucunModule =>
       'Votre compte n\'a pas de rôle de saisie (capitaine ou agent).';
+
+  @override
+  String get referentielMisAJour => 'Référentiel des navires mis à jour';
 }
