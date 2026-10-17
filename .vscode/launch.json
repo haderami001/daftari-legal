@@ -8,7 +8,11 @@
       "cwd": "peche_app",
       "program": "lib/main.dart",
       "deviceId": "web-server",
-      "args": ["--web-port", "8686", "--dart-define=SERVEUR_DEMO=true"]
+      "args": [
+        "--web-port",
+        "8686",
+        "--dart-define=SERVEUR_DEMO=true"
+      ]
     },
     {
       "name": "Pêche Conforme (navigateur Chrome)",
@@ -17,14 +21,19 @@
       "cwd": "peche_app",
       "program": "lib/main.dart",
       "deviceId": "chrome",
-      "args": ["--dart-define=SERVEUR_DEMO=true"]
+      "args": [
+        "--dart-define=SERVEUR_DEMO=true"
+      ]
     },
     {
-      "name": "Pêche Conforme (téléphone / émulateur)",
+      "name": "Pêche Conforme (téléphone / émulateur, démo complète)",
       "request": "launch",
       "type": "dart",
       "cwd": "peche_app",
-      "program": "lib/main.dart"
+      "program": "lib/main.dart",
+      "args": [
+        "--dart-define=SERVEUR_DEMO=true"
+      ]
     }
   ]
 }
