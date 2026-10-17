@@ -102,8 +102,9 @@ List<String> verifierSaisie(
           }
         }
       }
-      if (d.containsKey('photos_base64'))
+      if (d.containsKey('photos_base64')) {
         verifierPhotos(d['photos_base64'], v.erreurs);
+      }
   }
   return v.erreurs;
 }
@@ -143,7 +144,9 @@ void verifierPhotos(Object? photos, List<String> erreurs) {
         octets[1] == 0x50 &&
         octets[2] == 0x4E &&
         octets[3] == 0x47;
-    if (!jpeg && !png) erreurs.add('$nom : n\'est pas une image JPEG ou PNG');
+    if (!jpeg && !png) {
+      erreurs.add('$nom : n\'est pas une image JPEG ou PNG');
+    }
     if (octets.length > maxOctetsPhoto) {
       erreurs.add('$nom : plus de ${maxOctetsPhoto ~/ (1024 * 1024)} Mo');
     }
