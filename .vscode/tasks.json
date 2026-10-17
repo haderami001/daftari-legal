@@ -36,6 +36,16 @@
       "type": "shell",
       "command": "mkdir -p peche_app/build; { export PATH=\"$HOME/development/flutter/bin:$PATH\"; echo '== macOS'; sw_vers; uname -m; echo '== Disque'; df -h / | tail -1; echo '== Python'; which -a python3; python3 --version; python3 -m pip --version; echo '== Java'; /usr/libexec/java_home -V 2>&1 | head -5; echo '== Xcode'; xcode-select -p; xcodebuild -version 2>&1 | head -2; echo '== CocoaPods'; pod --version 2>&1 | head -1; echo '== Ruby'; ruby -v; echo '== Node'; node -v 2>&1; echo '== Git'; git --version; echo '== Flutter doctor'; flutter doctor -v; } 2>&1 | tee peche_app/build/etat-environnement.txt",
       "problemMatcher": []
+    },
+    {
+      "label": "Mac : installer l'environnement (Android Studio, émulateur, iOS, Node, Python)",
+      "detail": "Long (30 à 60 min, ~15 Go). Journal : peche_app/build/installation.log",
+      "type": "shell",
+      "command": "/bin/bash outils/installer_environnement_mac.sh",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
     }
   ]
 }
