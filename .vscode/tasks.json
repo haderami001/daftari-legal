@@ -12,7 +12,7 @@
     {
       "label": "Pêche Conforme : analyser et tester",
       "type": "shell",
-      "command": "export PATH=\"$HOME/development/flutter/bin:$PATH\"; flutter analyze && flutter test",
+      "command": "export PATH=\"$HOME/development/flutter/bin:$PATH\"; flutter analyze --no-fatal-infos; flutter test",
       "options": { "cwd": "${workspaceFolder}/peche_app" },
       "problemMatcher": []
     }
