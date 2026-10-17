@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:drift/drift.dart';
 
 import '../base/base_de_donnees.dart';
@@ -23,6 +25,34 @@ class FileEnvoiDepot {
       ..addColumns([nombre])
       ..where(_db.fileEnvois.envoyeLe.isNull());
     return (await requete.getSingle()).read(nombre) ?? 0;
+  }
+
+  /// Nombre de saisies en attente, **en continu** : le flux (Stream) émet
+  /// la valeur actuelle, puis une nouvelle valeur chaque fois que la table
+  /// `file_envois` change (nouvelle saisie, envoi réussi…).
+  ///
+  /// Un `StreamController` fabrique le flux à la main : `onListen` démarre
+  /// la surveillance quand un écran s'abonne, `onCancel` l'arrête quand
+  /// l'écran se ferme.
+  Stream<int> surveillerNombreEnAttente() {
+    StreamSubscription<void>? changements;
+    var arrete = false;
+    late final StreamController<int> flux;
+    flux = StreamController<int>(
+      onListen: () async {
+        flux.add(await nombreEnAttente());
+        if (arrete) return;
+        changements = _db
+            .tableUpdates(TableUpdateQuery.onTable(_db.fileEnvois))
+            .asyncMap((_) => nombreEnAttente())
+            .listen(flux.add, onError: flux.addError);
+      },
+      onCancel: () {
+        arrete = true;
+        changements?.cancel(); // sans attendre : la fermeture reste immédiate
+      },
+    );
+    return flux.stream;
   }
 
   Future<void> marquerEnvoye(int id, {DateTime? le}) =>

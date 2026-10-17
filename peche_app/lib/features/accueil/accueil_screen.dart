@@ -21,37 +21,28 @@ class AccueilScreen extends StatefulWidget {
 }
 
 class _AccueilScreenState extends State<AccueilScreen> {
-  int? _enAttente;
-
-  bool _demarre = false;
+  /// Nombre de saisies en attente, mis à jour tout seul par la base
+  /// (Drift) : plus besoin de recompter après chaque écran. Créé une seule
+  /// fois, comme le Future d'un FutureBuilder.
+  Stream<int>? _enAttente;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_demarre) {
-      _demarre = true;
-      _synchroniserPuisCompter();
+    if (_enAttente == null) {
+      _enAttente = ServicesScope.of(context).envois.surveillerNombreEnAttente();
+      _synchroniser();
     }
   }
 
   /// Si un serveur est configuré, envoie la file en arrière-plan (sans
-  /// bloquer l'écran), puis met à jour le compteur.
-  Future<void> _synchroniserPuisCompter() async {
-    await _compterEnvois();
-    if (!mounted) return;
+  /// bloquer l'écran). Le compteur suit seul, grâce au flux.
+  Future<void> _synchroniser() async {
     final synchro = ServicesScope.of(context).synchro;
-    if (synchro.estConfigure) {
-      await synchro.synchroniser();
-      if (mounted) await _compterEnvois();
-    }
+    if (synchro.estConfigure) await synchro.synchroniser();
   }
 
-  Future<void> _compterEnvois() async {
-    final n = await ServicesScope.of(context).envois.nombreEnAttente();
-    if (mounted) setState(() => _enAttente = n);
-  }
-
-  /// Ouvre un module puis, au retour, met à jour le compteur d'envois.
+  /// Ouvre un module puis, au retour, relance la synchronisation.
   ///
   /// `await push(...)` attend la fermeture de l'écran et reçoit la valeur
   /// passée à `Navigator.pop(context, valeur)` : l'administration renvoie
@@ -66,7 +57,7 @@ class _AccueilScreenState extends State<AccueilScreen> {
         ..showSnackBar(SnackBar(
             content: Text(context.l10n.modificationsEnregistrees(resultat))));
     }
-    await _synchroniserPuisCompter();
+    await _synchroniser();
   }
 
   @override
@@ -158,23 +149,31 @@ class _AccueilScreenState extends State<AccueilScreen> {
                 onTap: () => _ouvrir(ecran),
               ),
             ),
-          Card(
-            child: ListTile(
-              contentPadding: const EdgeInsets.all(12),
-              leading: Badge(
-                isLabelVisible: (_enAttente ?? 0) > 0,
-                label: Text('${_enAttente ?? 0}'),
-                child: const Icon(Icons.cloud_upload, size: 36),
-              ),
-              title: Text(l10n.moduleEnvois),
-              subtitle: Text(switch (_enAttente) {
-                null => l10n.envoisLecture,
-                0 => l10n.envoisToutSynchronise,
-                final n => l10n.envoisAEnvoyer(n),
-              }),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => _ouvrir(const EnvoisScreen()),
-            ),
+          // StreamBuilder : redessine la carte à chaque nouvelle valeur
+          // du flux (comme FutureBuilder, mais pour plusieurs valeurs).
+          StreamBuilder<int>(
+            stream: _enAttente,
+            builder: (context, etat) {
+              final n = etat.data; // null tant que rien n'est arrivé
+              return Card(
+                child: ListTile(
+                  contentPadding: const EdgeInsets.all(12),
+                  leading: Badge(
+                    isLabelVisible: (n ?? 0) > 0,
+                    label: Text('${n ?? 0}'),
+                    child: const Icon(Icons.cloud_upload, size: 36),
+                  ),
+                  title: Text(l10n.moduleEnvois),
+                  subtitle: Text(switch (n) {
+                    null => l10n.envoisLecture,
+                    0 => l10n.envoisToutSynchronise,
+                    final n => l10n.envoisAEnvoyer(n),
+                  }),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _ouvrir(const EnvoisScreen()),
+                ),
+              );
+            },
           ),
         ],
       ),
