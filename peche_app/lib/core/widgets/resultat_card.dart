@@ -17,7 +17,7 @@ class ResultatCard extends StatelessWidget {
     final l10n = context.l10n;
     if (resultat.conforme) {
       return Card(
-        color: Colors.green.withOpacity(0.15),
+        color: Colors.green.withValues(alpha: 0.15),
         child: ListTile(
           leading: const Icon(Icons.verified, color: Colors.green),
           title: Text(l10n.conforme),

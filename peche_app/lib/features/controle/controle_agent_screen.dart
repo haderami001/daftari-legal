@@ -278,7 +278,7 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
                   InputChip(
                     backgroundColor:
                         e.valeur < referentielDemo.espece(e.especeCode)!.minimum
-                            ? Colors.red.withOpacity(0.2)
+                            ? Colors.red.withValues(alpha: 0.2)
                             : null,
                     label: Text('${e.especeCode} ${e.valeur}'),
                     onDeleted: () => setState(() => c.echantillons.removeAt(i)),
