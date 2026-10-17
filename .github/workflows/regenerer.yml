@@ -40,6 +40,7 @@ jobs:
         working-directory: serveur
         run: dart format lib bin test
       - name: Commit
+        working-directory: .
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
