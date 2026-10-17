@@ -34,8 +34,8 @@ class _ScannerLicenceScreenState extends State<ScannerLicenceScreen> {
       // seule fois et on continue de viser.
       if (brut != _dernierInconnu) {
         _dernierInconnu = brut;
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.l10n.qrInconnu)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(context.l10n.qrInconnu)));
       }
     }
   }

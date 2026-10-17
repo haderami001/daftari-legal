@@ -532,6 +532,10 @@ class AppLocalizationsAr extends AppLocalizations {
         'SOL': 'سمك موسى',
         'YFT': 'التونة صفراء الزعانف',
         'BFT': 'التونة الحمراء',
+        'GPW': 'الهامور الأبيض',
+        'MGR': 'الكوربين',
+        'MUF': 'البوري',
+        'SOP': 'الروبيان الوردي',
         'other': '$code',
       },
     );
@@ -839,4 +843,111 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get quitter => 'خروج';
+
+  @override
+  String get portDebarquement => 'ميناء الإنزال';
+
+  @override
+  String get portNonPrecise => 'غير محدد';
+
+  @override
+  String nomPort(String code) {
+    String _temp0 = intl.Intl.selectLogic(
+      code,
+      {
+        'NDB': 'نواذيبو',
+        'NKC': 'نواكشوط',
+        'TAN': 'تانيت',
+        'NDG': 'انجاكو',
+        'MHJ': 'امحيجرات',
+        'IWK': 'إيويك',
+        'other': '$code',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get lieuControle => 'مكان المراقبة';
+
+  @override
+  String get enMer => 'في البحر';
+
+  @override
+  String aQuai(String port) {
+    return 'في الرصيف: $port';
+  }
+
+  @override
+  String get sectionPhotos => 'صور الإثبات';
+
+  @override
+  String get prendrePhoto => 'التقاط صورة';
+
+  @override
+  String photosMax(int n) {
+    return '$n صور كحد أقصى';
+  }
+
+  @override
+  String get aucunePhoto => 'لا توجد صور (المصطادات، الشباك، الوثائق…)';
+
+  @override
+  String photoIndisponible(String erreur) {
+    return 'تعذر التقاط الصورة: $erreur';
+  }
+
+  @override
+  String get supprimerPhoto => 'حذف الصورة';
+
+  @override
+  String get scannerQr => 'مسح رمز QR للرخصة';
+
+  @override
+  String get qrLicence => 'رمز QR للرخصة';
+
+  @override
+  String get qrLicenceAide =>
+      'اعرض هذا الرمز على عون خفر السواحل: يحدد السفينة والرخصة حتى دون شبكة.';
+
+  @override
+  String get qrInconnu => 'رمز QR غير معروف';
+
+  @override
+  String qrLicenceAbsente(String numero) {
+    return 'الرخصة $numero غير موجودة في القاعدة المحلية';
+  }
+
+  @override
+  String qrLicenceValide(String numero, String date) {
+    return 'الرخصة $numero سارية حتى $date';
+  }
+
+  @override
+  String qrLicenceExpiree(String numero, String date) {
+    return 'الرخصة $numero منتهية أو غير سارية بعد (النهاية: $date)';
+  }
+
+  @override
+  String get qrSaisieManuelle => 'إدخال رقم الرخصة';
+
+  @override
+  String get qrViser => 'ضع رمز QR داخل الإطار';
+
+  @override
+  String get valider => 'تأكيد';
+
+  @override
+  String get ongletCarte => 'الخريطة';
+
+  @override
+  String get carteLegende =>
+      'أزرق: تصريحات · أخضر: مراقبات مطابقة · أحمر: مع مخالفة';
+
+  @override
+  String get carteSansPosition => 'لا توجد مواقع للعرض';
+
+  @override
+  String get carteHorsLigne =>
+      'تحتاج الخريطة إلى الإنترنت لعرض الخلفية (OpenStreetMap).';
 }

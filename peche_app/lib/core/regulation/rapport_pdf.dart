@@ -186,8 +186,8 @@ Future<Uint8List> genererRapportPdf(
                     decoration: pw.BoxDecoration(
                         border: pw.Border.all(
                             width: 0.5, color: PdfColors.grey600)),
-                    child: pw.Image(pw.MemoryImage(photo),
-                        fit: pw.BoxFit.contain),
+                    child:
+                        pw.Image(pw.MemoryImage(photo), fit: pw.BoxFit.contain),
                   ),
                   pw.Text('Photo ${i + 1}',
                       style: const pw.TextStyle(fontSize: 9)),

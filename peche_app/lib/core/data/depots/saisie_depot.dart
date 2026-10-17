@@ -99,8 +99,9 @@ class SaisieDepot {
             portDebarquement: Value(c.portDebarquement),
           ));
       for (final (i, photo) in c.photos.indexed) {
-        await _db.into(_db.controlePhotos).insert(ControlePhotosCompanion.insert(
-            controleId: id, ordre: i, octets: photo));
+        await _db.into(_db.controlePhotos).insert(
+            ControlePhotosCompanion.insert(
+                controleId: id, ordre: i, octets: photo));
       }
       for (final m in c.maillagesMm) {
         await _db.into(_db.controleMaillages).insert(

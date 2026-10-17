@@ -144,9 +144,9 @@ void main() {
     expect(await depots.envois.nombreEnAttente(), 0);
   });
 
-  test('migration v1 -> v5 : rapport PDF, réglages, suppression logique, '
-      'port et photos',
-      () async {
+  test(
+      'migration v1 -> v5 : rapport PDF, réglages, suppression logique, '
+      'port et photos', () async {
     // 1. On fabrique une base « comme sur un téléphone resté en v1 » :
     //    schéma actuel, puis on retire la colonne ajoutée en v2.
     final brute = sqlite3.openInMemory();

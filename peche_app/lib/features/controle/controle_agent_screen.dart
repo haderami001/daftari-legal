@@ -354,8 +354,7 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
                           visualDensity: VisualDensity.compact,
                           tooltip: l10n.supprimerPhoto,
                           icon: const Icon(Icons.close, size: 16),
-                          onPressed: () =>
-                              setState(() => c.photos.removeAt(i)),
+                          onPressed: () => setState(() => c.photos.removeAt(i)),
                         ),
                       ),
                     ]),
@@ -366,9 +365,8 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
                 label: Text(c.photos.length < Controle.maxPhotos
                     ? l10n.prendrePhoto
                     : l10n.photosMax(Controle.maxPhotos)),
-                onPressed: c.photos.length < Controle.maxPhotos
-                    ? _prendrePhoto
-                    : null,
+                onPressed:
+                    c.photos.length < Controle.maxPhotos ? _prendrePhoto : null,
               ),
             ],
           ),
@@ -396,8 +394,8 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
       setState(() => _controle.photos.add(photo));
     } catch (e) {
       // Permission refusée, pas d'appareil photo…
-      messager.showSnackBar(
-          SnackBar(content: Text(l10n.photoIndisponible('$e'))));
+      messager
+          .showSnackBar(SnackBar(content: Text(l10n.photoIndisponible('$e'))));
     }
   }
 
@@ -413,8 +411,8 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
         .firstOrNull;
     final messager = ScaffoldMessenger.of(context);
     if (trouve == null) {
-      messager.showSnackBar(
-          SnackBar(content: Text(l10n.qrLicenceAbsente(numero))));
+      messager
+          .showSnackBar(SnackBar(content: Text(l10n.qrLicenceAbsente(numero))));
       return;
     }
     setState(() => _nouveauControle(trouve));

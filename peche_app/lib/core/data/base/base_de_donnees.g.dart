@@ -1548,6 +1548,12 @@ class $DeclarationsTable extends Declarations
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
+  static const VerificationMeta _portDebarquementMeta =
+      const VerificationMeta('portDebarquement');
+  @override
+  late final GeneratedColumn<String> portDebarquement = GeneratedColumn<String>(
+      'port_debarquement', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _creeLeMeta = const VerificationMeta('creeLe');
   @override
   late final GeneratedColumn<DateTime> creeLe = GeneratedColumn<DateTime>(
@@ -1565,6 +1571,7 @@ class $DeclarationsTable extends Declarations
         longitude,
         horodatage,
         nbInfractions,
+        portDebarquement,
         creeLe
       ];
   @override
@@ -1622,6 +1629,12 @@ class $DeclarationsTable extends Declarations
           nbInfractions.isAcceptableOrUnknown(
               data['nb_infractions']!, _nbInfractionsMeta));
     }
+    if (data.containsKey('port_debarquement')) {
+      context.handle(
+          _portDebarquementMeta,
+          portDebarquement.isAcceptableOrUnknown(
+              data['port_debarquement']!, _portDebarquementMeta));
+    }
     if (data.containsKey('cree_le')) {
       context.handle(_creeLeMeta,
           creeLe.isAcceptableOrUnknown(data['cree_le']!, _creeLeMeta));
@@ -1652,6 +1665,8 @@ class $DeclarationsTable extends Declarations
           .read(DriftSqlType.dateTime, data['${effectivePrefix}horodatage'])!,
       nbInfractions: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}nb_infractions'])!,
+      portDebarquement: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}port_debarquement']),
       creeLe: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}cree_le'])!,
     );
@@ -1676,6 +1691,9 @@ class DeclarationLigne extends DataClass
   final double longitude;
   final DateTime horodatage;
   final int nbInfractions;
+
+  /// Code du port de débarquement prévu (v5, voir `ports.dart`).
+  final String? portDebarquement;
   final DateTime creeLe;
   const DeclarationLigne(
       {required this.id,
@@ -1686,6 +1704,7 @@ class DeclarationLigne extends DataClass
       required this.longitude,
       required this.horodatage,
       required this.nbInfractions,
+      this.portDebarquement,
       required this.creeLe});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1701,6 +1720,9 @@ class DeclarationLigne extends DataClass
     map['longitude'] = Variable<double>(longitude);
     map['horodatage'] = Variable<DateTime>(horodatage);
     map['nb_infractions'] = Variable<int>(nbInfractions);
+    if (!nullToAbsent || portDebarquement != null) {
+      map['port_debarquement'] = Variable<String>(portDebarquement);
+    }
     map['cree_le'] = Variable<DateTime>(creeLe);
     return map;
   }
@@ -1715,6 +1737,9 @@ class DeclarationLigne extends DataClass
       longitude: Value(longitude),
       horodatage: Value(horodatage),
       nbInfractions: Value(nbInfractions),
+      portDebarquement: portDebarquement == null && nullToAbsent
+          ? const Value.absent()
+          : Value(portDebarquement),
       creeLe: Value(creeLe),
     );
   }
@@ -1732,6 +1757,7 @@ class DeclarationLigne extends DataClass
       longitude: serializer.fromJson<double>(json['longitude']),
       horodatage: serializer.fromJson<DateTime>(json['horodatage']),
       nbInfractions: serializer.fromJson<int>(json['nbInfractions']),
+      portDebarquement: serializer.fromJson<String?>(json['portDebarquement']),
       creeLe: serializer.fromJson<DateTime>(json['creeLe']),
     );
   }
@@ -1748,6 +1774,7 @@ class DeclarationLigne extends DataClass
       'longitude': serializer.toJson<double>(longitude),
       'horodatage': serializer.toJson<DateTime>(horodatage),
       'nbInfractions': serializer.toJson<int>(nbInfractions),
+      'portDebarquement': serializer.toJson<String?>(portDebarquement),
       'creeLe': serializer.toJson<DateTime>(creeLe),
     };
   }
@@ -1761,6 +1788,7 @@ class DeclarationLigne extends DataClass
           double? longitude,
           DateTime? horodatage,
           int? nbInfractions,
+          Value<String?> portDebarquement = const Value.absent(),
           DateTime? creeLe}) =>
       DeclarationLigne(
         id: id ?? this.id,
@@ -1771,6 +1799,9 @@ class DeclarationLigne extends DataClass
         longitude: longitude ?? this.longitude,
         horodatage: horodatage ?? this.horodatage,
         nbInfractions: nbInfractions ?? this.nbInfractions,
+        portDebarquement: portDebarquement.present
+            ? portDebarquement.value
+            : this.portDebarquement,
         creeLe: creeLe ?? this.creeLe,
       );
   DeclarationLigne copyWithCompanion(DeclarationsCompanion data) {
@@ -1788,6 +1819,9 @@ class DeclarationLigne extends DataClass
       nbInfractions: data.nbInfractions.present
           ? data.nbInfractions.value
           : this.nbInfractions,
+      portDebarquement: data.portDebarquement.present
+          ? data.portDebarquement.value
+          : this.portDebarquement,
       creeLe: data.creeLe.present ? data.creeLe.value : this.creeLe,
     );
   }
@@ -1803,6 +1837,7 @@ class DeclarationLigne extends DataClass
           ..write('longitude: $longitude, ')
           ..write('horodatage: $horodatage, ')
           ..write('nbInfractions: $nbInfractions, ')
+          ..write('portDebarquement: $portDebarquement, ')
           ..write('creeLe: $creeLe')
           ..write(')'))
         .toString();
@@ -1810,7 +1845,7 @@ class DeclarationLigne extends DataClass
 
   @override
   int get hashCode => Object.hash(id, navireId, licenceNumero, engin, latitude,
-      longitude, horodatage, nbInfractions, creeLe);
+      longitude, horodatage, nbInfractions, portDebarquement, creeLe);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1823,6 +1858,7 @@ class DeclarationLigne extends DataClass
           other.longitude == this.longitude &&
           other.horodatage == this.horodatage &&
           other.nbInfractions == this.nbInfractions &&
+          other.portDebarquement == this.portDebarquement &&
           other.creeLe == this.creeLe);
 }
 
@@ -1835,6 +1871,7 @@ class DeclarationsCompanion extends UpdateCompanion<DeclarationLigne> {
   final Value<double> longitude;
   final Value<DateTime> horodatage;
   final Value<int> nbInfractions;
+  final Value<String?> portDebarquement;
   final Value<DateTime> creeLe;
   final Value<int> rowid;
   const DeclarationsCompanion({
@@ -1846,6 +1883,7 @@ class DeclarationsCompanion extends UpdateCompanion<DeclarationLigne> {
     this.longitude = const Value.absent(),
     this.horodatage = const Value.absent(),
     this.nbInfractions = const Value.absent(),
+    this.portDebarquement = const Value.absent(),
     this.creeLe = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -1858,6 +1896,7 @@ class DeclarationsCompanion extends UpdateCompanion<DeclarationLigne> {
     required double longitude,
     required DateTime horodatage,
     this.nbInfractions = const Value.absent(),
+    this.portDebarquement = const Value.absent(),
     this.creeLe = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
@@ -1876,6 +1915,7 @@ class DeclarationsCompanion extends UpdateCompanion<DeclarationLigne> {
     Expression<double>? longitude,
     Expression<DateTime>? horodatage,
     Expression<int>? nbInfractions,
+    Expression<String>? portDebarquement,
     Expression<DateTime>? creeLe,
     Expression<int>? rowid,
   }) {
@@ -1888,6 +1928,7 @@ class DeclarationsCompanion extends UpdateCompanion<DeclarationLigne> {
       if (longitude != null) 'longitude': longitude,
       if (horodatage != null) 'horodatage': horodatage,
       if (nbInfractions != null) 'nb_infractions': nbInfractions,
+      if (portDebarquement != null) 'port_debarquement': portDebarquement,
       if (creeLe != null) 'cree_le': creeLe,
       if (rowid != null) 'rowid': rowid,
     });
@@ -1902,6 +1943,7 @@ class DeclarationsCompanion extends UpdateCompanion<DeclarationLigne> {
       Value<double>? longitude,
       Value<DateTime>? horodatage,
       Value<int>? nbInfractions,
+      Value<String?>? portDebarquement,
       Value<DateTime>? creeLe,
       Value<int>? rowid}) {
     return DeclarationsCompanion(
@@ -1913,6 +1955,7 @@ class DeclarationsCompanion extends UpdateCompanion<DeclarationLigne> {
       longitude: longitude ?? this.longitude,
       horodatage: horodatage ?? this.horodatage,
       nbInfractions: nbInfractions ?? this.nbInfractions,
+      portDebarquement: portDebarquement ?? this.portDebarquement,
       creeLe: creeLe ?? this.creeLe,
       rowid: rowid ?? this.rowid,
     );
@@ -1946,6 +1989,9 @@ class DeclarationsCompanion extends UpdateCompanion<DeclarationLigne> {
     if (nbInfractions.present) {
       map['nb_infractions'] = Variable<int>(nbInfractions.value);
     }
+    if (portDebarquement.present) {
+      map['port_debarquement'] = Variable<String>(portDebarquement.value);
+    }
     if (creeLe.present) {
       map['cree_le'] = Variable<DateTime>(creeLe.value);
     }
@@ -1966,6 +2012,7 @@ class DeclarationsCompanion extends UpdateCompanion<DeclarationLigne> {
           ..write('longitude: $longitude, ')
           ..write('horodatage: $horodatage, ')
           ..write('nbInfractions: $nbInfractions, ')
+          ..write('portDebarquement: $portDebarquement, ')
           ..write('creeLe: $creeLe, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -2671,6 +2718,12 @@ class $ControlesTable extends Controles
   late final GeneratedColumn<Uint8List> rapportPdf = GeneratedColumn<Uint8List>(
       'rapport_pdf', aliasedName, true,
       type: DriftSqlType.blob, requiredDuringInsert: false);
+  static const VerificationMeta _portDebarquementMeta =
+      const VerificationMeta('portDebarquement');
+  @override
+  late final GeneratedColumn<String> portDebarquement = GeneratedColumn<String>(
+      'port_debarquement', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _creeLeMeta = const VerificationMeta('creeLe');
   @override
   late final GeneratedColumn<DateTime> creeLe = GeneratedColumn<DateTime>(
@@ -2696,6 +2749,7 @@ class $ControlesTable extends Controles
         amendeMax,
         rapport,
         rapportPdf,
+        portDebarquement,
         creeLe
       ];
   @override
@@ -2805,6 +2859,12 @@ class $ControlesTable extends Controles
           rapportPdf.isAcceptableOrUnknown(
               data['rapport_pdf']!, _rapportPdfMeta));
     }
+    if (data.containsKey('port_debarquement')) {
+      context.handle(
+          _portDebarquementMeta,
+          portDebarquement.isAcceptableOrUnknown(
+              data['port_debarquement']!, _portDebarquementMeta));
+    }
     if (data.containsKey('cree_le')) {
       context.handle(_creeLeMeta,
           creeLe.isAcceptableOrUnknown(data['cree_le']!, _creeLeMeta));
@@ -2851,6 +2911,8 @@ class $ControlesTable extends Controles
           .read(DriftSqlType.string, data['${effectivePrefix}rapport'])!,
       rapportPdf: attachedDatabase.typeMapping
           .read(DriftSqlType.blob, data['${effectivePrefix}rapport_pdf']),
+      portDebarquement: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}port_debarquement']),
       creeLe: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}cree_le'])!,
     );
@@ -2886,6 +2948,9 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
 
   /// Rapport PDF tel que signé (ajouté dans la version 2 du schéma).
   final Uint8List? rapportPdf;
+
+  /// Contrôle à quai : code du port (v5). `null` = contrôle en mer.
+  final String? portDebarquement;
   final DateTime creeLe;
   const ControleLigne(
       {required this.id,
@@ -2904,6 +2969,7 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
       required this.amendeMax,
       required this.rapport,
       this.rapportPdf,
+      this.portDebarquement,
       required this.creeLe});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2929,6 +2995,9 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
     if (!nullToAbsent || rapportPdf != null) {
       map['rapport_pdf'] = Variable<Uint8List>(rapportPdf);
     }
+    if (!nullToAbsent || portDebarquement != null) {
+      map['port_debarquement'] = Variable<String>(portDebarquement);
+    }
     map['cree_le'] = Variable<DateTime>(creeLe);
     return map;
   }
@@ -2953,6 +3022,9 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
       rapportPdf: rapportPdf == null && nullToAbsent
           ? const Value.absent()
           : Value(rapportPdf),
+      portDebarquement: portDebarquement == null && nullToAbsent
+          ? const Value.absent()
+          : Value(portDebarquement),
       creeLe: Value(creeLe),
     );
   }
@@ -2979,6 +3051,7 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
       amendeMax: serializer.fromJson<double>(json['amendeMax']),
       rapport: serializer.fromJson<String>(json['rapport']),
       rapportPdf: serializer.fromJson<Uint8List?>(json['rapportPdf']),
+      portDebarquement: serializer.fromJson<String?>(json['portDebarquement']),
       creeLe: serializer.fromJson<DateTime>(json['creeLe']),
     );
   }
@@ -3003,6 +3076,7 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
       'amendeMax': serializer.toJson<double>(amendeMax),
       'rapport': serializer.toJson<String>(rapport),
       'rapportPdf': serializer.toJson<Uint8List?>(rapportPdf),
+      'portDebarquement': serializer.toJson<String?>(portDebarquement),
       'creeLe': serializer.toJson<DateTime>(creeLe),
     };
   }
@@ -3024,6 +3098,7 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
           double? amendeMax,
           String? rapport,
           Value<Uint8List?> rapportPdf = const Value.absent(),
+          Value<String?> portDebarquement = const Value.absent(),
           DateTime? creeLe}) =>
       ControleLigne(
         id: id ?? this.id,
@@ -3042,6 +3117,9 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
         amendeMax: amendeMax ?? this.amendeMax,
         rapport: rapport ?? this.rapport,
         rapportPdf: rapportPdf.present ? rapportPdf.value : this.rapportPdf,
+        portDebarquement: portDebarquement.present
+            ? portDebarquement.value
+            : this.portDebarquement,
         creeLe: creeLe ?? this.creeLe,
       );
   ControleLigne copyWithCompanion(ControlesCompanion data) {
@@ -3073,6 +3151,9 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
       rapport: data.rapport.present ? data.rapport.value : this.rapport,
       rapportPdf:
           data.rapportPdf.present ? data.rapportPdf.value : this.rapportPdf,
+      portDebarquement: data.portDebarquement.present
+          ? data.portDebarquement.value
+          : this.portDebarquement,
       creeLe: data.creeLe.present ? data.creeLe.value : this.creeLe,
     );
   }
@@ -3096,6 +3177,7 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
           ..write('amendeMax: $amendeMax, ')
           ..write('rapport: $rapport, ')
           ..write('rapportPdf: $rapportPdf, ')
+          ..write('portDebarquement: $portDebarquement, ')
           ..write('creeLe: $creeLe')
           ..write(')'))
         .toString();
@@ -3119,6 +3201,7 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
       amendeMax,
       rapport,
       $driftBlobEquality.hash(rapportPdf),
+      portDebarquement,
       creeLe);
   @override
   bool operator ==(Object other) =>
@@ -3140,6 +3223,7 @@ class ControleLigne extends DataClass implements Insertable<ControleLigne> {
           other.amendeMax == this.amendeMax &&
           other.rapport == this.rapport &&
           $driftBlobEquality.equals(other.rapportPdf, this.rapportPdf) &&
+          other.portDebarquement == this.portDebarquement &&
           other.creeLe == this.creeLe);
 }
 
@@ -3160,6 +3244,7 @@ class ControlesCompanion extends UpdateCompanion<ControleLigne> {
   final Value<double> amendeMax;
   final Value<String> rapport;
   final Value<Uint8List?> rapportPdf;
+  final Value<String?> portDebarquement;
   final Value<DateTime> creeLe;
   final Value<int> rowid;
   const ControlesCompanion({
@@ -3179,6 +3264,7 @@ class ControlesCompanion extends UpdateCompanion<ControleLigne> {
     this.amendeMax = const Value.absent(),
     this.rapport = const Value.absent(),
     this.rapportPdf = const Value.absent(),
+    this.portDebarquement = const Value.absent(),
     this.creeLe = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -3199,6 +3285,7 @@ class ControlesCompanion extends UpdateCompanion<ControleLigne> {
     required double amendeMax,
     required String rapport,
     this.rapportPdf = const Value.absent(),
+    this.portDebarquement = const Value.absent(),
     this.creeLe = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
@@ -3232,6 +3319,7 @@ class ControlesCompanion extends UpdateCompanion<ControleLigne> {
     Expression<double>? amendeMax,
     Expression<String>? rapport,
     Expression<Uint8List>? rapportPdf,
+    Expression<String>? portDebarquement,
     Expression<DateTime>? creeLe,
     Expression<int>? rowid,
   }) {
@@ -3253,6 +3341,7 @@ class ControlesCompanion extends UpdateCompanion<ControleLigne> {
       if (amendeMax != null) 'amende_max': amendeMax,
       if (rapport != null) 'rapport': rapport,
       if (rapportPdf != null) 'rapport_pdf': rapportPdf,
+      if (portDebarquement != null) 'port_debarquement': portDebarquement,
       if (creeLe != null) 'cree_le': creeLe,
       if (rowid != null) 'rowid': rowid,
     });
@@ -3275,6 +3364,7 @@ class ControlesCompanion extends UpdateCompanion<ControleLigne> {
       Value<double>? amendeMax,
       Value<String>? rapport,
       Value<Uint8List?>? rapportPdf,
+      Value<String?>? portDebarquement,
       Value<DateTime>? creeLe,
       Value<int>? rowid}) {
     return ControlesCompanion(
@@ -3294,6 +3384,7 @@ class ControlesCompanion extends UpdateCompanion<ControleLigne> {
       amendeMax: amendeMax ?? this.amendeMax,
       rapport: rapport ?? this.rapport,
       rapportPdf: rapportPdf ?? this.rapportPdf,
+      portDebarquement: portDebarquement ?? this.portDebarquement,
       creeLe: creeLe ?? this.creeLe,
       rowid: rowid ?? this.rowid,
     );
@@ -3352,6 +3443,9 @@ class ControlesCompanion extends UpdateCompanion<ControleLigne> {
     if (rapportPdf.present) {
       map['rapport_pdf'] = Variable<Uint8List>(rapportPdf.value);
     }
+    if (portDebarquement.present) {
+      map['port_debarquement'] = Variable<String>(portDebarquement.value);
+    }
     if (creeLe.present) {
       map['cree_le'] = Variable<DateTime>(creeLe.value);
     }
@@ -3380,6 +3474,7 @@ class ControlesCompanion extends UpdateCompanion<ControleLigne> {
           ..write('amendeMax: $amendeMax, ')
           ..write('rapport: $rapport, ')
           ..write('rapportPdf: $rapportPdf, ')
+          ..write('portDebarquement: $portDebarquement, ')
           ..write('creeLe: $creeLe, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -3875,6 +3970,271 @@ class ControleEchantillonsCompanion extends UpdateCompanion<EchantillonLigne> {
           ..write('controleId: $controleId, ')
           ..write('especeCode: $especeCode, ')
           ..write('valeur: $valeur')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ControlePhotosTable extends ControlePhotos
+    with TableInfo<$ControlePhotosTable, PhotoLigne> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ControlePhotosTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _controleIdMeta =
+      const VerificationMeta('controleId');
+  @override
+  late final GeneratedColumn<String> controleId = GeneratedColumn<String>(
+      'controle_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES controles (id) ON DELETE CASCADE'));
+  static const VerificationMeta _ordreMeta = const VerificationMeta('ordre');
+  @override
+  late final GeneratedColumn<int> ordre = GeneratedColumn<int>(
+      'ordre', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _octetsMeta = const VerificationMeta('octets');
+  @override
+  late final GeneratedColumn<Uint8List> octets = GeneratedColumn<Uint8List>(
+      'octets', aliasedName, false,
+      type: DriftSqlType.blob, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [id, controleId, ordre, octets];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'controle_photos';
+  @override
+  VerificationContext validateIntegrity(Insertable<PhotoLigne> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('controle_id')) {
+      context.handle(
+          _controleIdMeta,
+          controleId.isAcceptableOrUnknown(
+              data['controle_id']!, _controleIdMeta));
+    } else if (isInserting) {
+      context.missing(_controleIdMeta);
+    }
+    if (data.containsKey('ordre')) {
+      context.handle(
+          _ordreMeta, ordre.isAcceptableOrUnknown(data['ordre']!, _ordreMeta));
+    } else if (isInserting) {
+      context.missing(_ordreMeta);
+    }
+    if (data.containsKey('octets')) {
+      context.handle(_octetsMeta,
+          octets.isAcceptableOrUnknown(data['octets']!, _octetsMeta));
+    } else if (isInserting) {
+      context.missing(_octetsMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PhotoLigne map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PhotoLigne(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      controleId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}controle_id'])!,
+      ordre: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}ordre'])!,
+      octets: attachedDatabase.typeMapping
+          .read(DriftSqlType.blob, data['${effectivePrefix}octets'])!,
+    );
+  }
+
+  @override
+  $ControlePhotosTable createAlias(String alias) {
+    return $ControlePhotosTable(attachedDatabase, alias);
+  }
+}
+
+class PhotoLigne extends DataClass implements Insertable<PhotoLigne> {
+  final int id;
+  final String controleId;
+
+  /// Ordre d'affichage (0, 1, 2…), le même que dans le rapport PDF.
+  final int ordre;
+  final Uint8List octets;
+  const PhotoLigne(
+      {required this.id,
+      required this.controleId,
+      required this.ordre,
+      required this.octets});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['controle_id'] = Variable<String>(controleId);
+    map['ordre'] = Variable<int>(ordre);
+    map['octets'] = Variable<Uint8List>(octets);
+    return map;
+  }
+
+  ControlePhotosCompanion toCompanion(bool nullToAbsent) {
+    return ControlePhotosCompanion(
+      id: Value(id),
+      controleId: Value(controleId),
+      ordre: Value(ordre),
+      octets: Value(octets),
+    );
+  }
+
+  factory PhotoLigne.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PhotoLigne(
+      id: serializer.fromJson<int>(json['id']),
+      controleId: serializer.fromJson<String>(json['controleId']),
+      ordre: serializer.fromJson<int>(json['ordre']),
+      octets: serializer.fromJson<Uint8List>(json['octets']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'controleId': serializer.toJson<String>(controleId),
+      'ordre': serializer.toJson<int>(ordre),
+      'octets': serializer.toJson<Uint8List>(octets),
+    };
+  }
+
+  PhotoLigne copyWith(
+          {int? id, String? controleId, int? ordre, Uint8List? octets}) =>
+      PhotoLigne(
+        id: id ?? this.id,
+        controleId: controleId ?? this.controleId,
+        ordre: ordre ?? this.ordre,
+        octets: octets ?? this.octets,
+      );
+  PhotoLigne copyWithCompanion(ControlePhotosCompanion data) {
+    return PhotoLigne(
+      id: data.id.present ? data.id.value : this.id,
+      controleId:
+          data.controleId.present ? data.controleId.value : this.controleId,
+      ordre: data.ordre.present ? data.ordre.value : this.ordre,
+      octets: data.octets.present ? data.octets.value : this.octets,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PhotoLigne(')
+          ..write('id: $id, ')
+          ..write('controleId: $controleId, ')
+          ..write('ordre: $ordre, ')
+          ..write('octets: $octets')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, controleId, ordre, $driftBlobEquality.hash(octets));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PhotoLigne &&
+          other.id == this.id &&
+          other.controleId == this.controleId &&
+          other.ordre == this.ordre &&
+          $driftBlobEquality.equals(other.octets, this.octets));
+}
+
+class ControlePhotosCompanion extends UpdateCompanion<PhotoLigne> {
+  final Value<int> id;
+  final Value<String> controleId;
+  final Value<int> ordre;
+  final Value<Uint8List> octets;
+  const ControlePhotosCompanion({
+    this.id = const Value.absent(),
+    this.controleId = const Value.absent(),
+    this.ordre = const Value.absent(),
+    this.octets = const Value.absent(),
+  });
+  ControlePhotosCompanion.insert({
+    this.id = const Value.absent(),
+    required String controleId,
+    required int ordre,
+    required Uint8List octets,
+  })  : controleId = Value(controleId),
+        ordre = Value(ordre),
+        octets = Value(octets);
+  static Insertable<PhotoLigne> custom({
+    Expression<int>? id,
+    Expression<String>? controleId,
+    Expression<int>? ordre,
+    Expression<Uint8List>? octets,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (controleId != null) 'controle_id': controleId,
+      if (ordre != null) 'ordre': ordre,
+      if (octets != null) 'octets': octets,
+    });
+  }
+
+  ControlePhotosCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? controleId,
+      Value<int>? ordre,
+      Value<Uint8List>? octets}) {
+    return ControlePhotosCompanion(
+      id: id ?? this.id,
+      controleId: controleId ?? this.controleId,
+      ordre: ordre ?? this.ordre,
+      octets: octets ?? this.octets,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (controleId.present) {
+      map['controle_id'] = Variable<String>(controleId.value);
+    }
+    if (ordre.present) {
+      map['ordre'] = Variable<int>(ordre.value);
+    }
+    if (octets.present) {
+      map['octets'] = Variable<Uint8List>(octets.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ControlePhotosCompanion(')
+          ..write('id: $id, ')
+          ..write('controleId: $controleId, ')
+          ..write('ordre: $ordre, ')
+          ..write('octets: $octets')
           ..write(')'))
         .toString();
   }
@@ -4516,6 +4876,7 @@ abstract class _$BaseDeDonnees extends GeneratedDatabase {
       $ControleMaillagesTable(this);
   late final $ControleEchantillonsTable controleEchantillons =
       $ControleEchantillonsTable(this);
+  late final $ControlePhotosTable controlePhotos = $ControlePhotosTable(this);
   late final $FileEnvoisTable fileEnvois = $FileEnvoisTable(this);
   late final $ReglagesTable reglages = $ReglagesTable(this);
   @override
@@ -4533,6 +4894,7 @@ abstract class _$BaseDeDonnees extends GeneratedDatabase {
         controles,
         controleMaillages,
         controleEchantillons,
+        controlePhotos,
         fileEnvois,
         reglages
       ];
@@ -4579,6 +4941,13 @@ abstract class _$BaseDeDonnees extends GeneratedDatabase {
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('controle_echantillons', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('controles',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('controle_photos', kind: UpdateKind.delete),
             ],
           ),
         ],
@@ -6123,6 +6492,7 @@ typedef $$DeclarationsTableCreateCompanionBuilder = DeclarationsCompanion
   required double longitude,
   required DateTime horodatage,
   Value<int> nbInfractions,
+  Value<String?> portDebarquement,
   Value<DateTime> creeLe,
   Value<int> rowid,
 });
@@ -6136,6 +6506,7 @@ typedef $$DeclarationsTableUpdateCompanionBuilder = DeclarationsCompanion
   Value<double> longitude,
   Value<DateTime> horodatage,
   Value<int> nbInfractions,
+  Value<String?> portDebarquement,
   Value<DateTime> creeLe,
   Value<int> rowid,
 });
@@ -6233,6 +6604,10 @@ class $$DeclarationsTableFilterComposer
 
   ColumnFilters<int> get nbInfractions => $composableBuilder(
       column: $table.nbInfractions, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get portDebarquement => $composableBuilder(
+      column: $table.portDebarquement,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get creeLe => $composableBuilder(
       column: $table.creeLe, builder: (column) => ColumnFilters(column));
@@ -6348,6 +6723,10 @@ class $$DeclarationsTableOrderingComposer
       column: $table.nbInfractions,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get portDebarquement => $composableBuilder(
+      column: $table.portDebarquement,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get creeLe => $composableBuilder(
       column: $table.creeLe, builder: (column) => ColumnOrderings(column));
 
@@ -6418,6 +6797,9 @@ class $$DeclarationsTableAnnotationComposer
 
   GeneratedColumn<int> get nbInfractions => $composableBuilder(
       column: $table.nbInfractions, builder: (column) => column);
+
+  GeneratedColumn<String> get portDebarquement => $composableBuilder(
+      column: $table.portDebarquement, builder: (column) => column);
 
   GeneratedColumn<DateTime> get creeLe =>
       $composableBuilder(column: $table.creeLe, builder: (column) => column);
@@ -6540,6 +6922,7 @@ class $$DeclarationsTableTableManager extends RootTableManager<
             Value<double> longitude = const Value.absent(),
             Value<DateTime> horodatage = const Value.absent(),
             Value<int> nbInfractions = const Value.absent(),
+            Value<String?> portDebarquement = const Value.absent(),
             Value<DateTime> creeLe = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -6552,6 +6935,7 @@ class $$DeclarationsTableTableManager extends RootTableManager<
             longitude: longitude,
             horodatage: horodatage,
             nbInfractions: nbInfractions,
+            portDebarquement: portDebarquement,
             creeLe: creeLe,
             rowid: rowid,
           ),
@@ -6564,6 +6948,7 @@ class $$DeclarationsTableTableManager extends RootTableManager<
             required double longitude,
             required DateTime horodatage,
             Value<int> nbInfractions = const Value.absent(),
+            Value<String?> portDebarquement = const Value.absent(),
             Value<DateTime> creeLe = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -6576,6 +6961,7 @@ class $$DeclarationsTableTableManager extends RootTableManager<
             longitude: longitude,
             horodatage: horodatage,
             nbInfractions: nbInfractions,
+            portDebarquement: portDebarquement,
             creeLe: creeLe,
             rowid: rowid,
           ),
@@ -7218,6 +7604,7 @@ typedef $$ControlesTableCreateCompanionBuilder = ControlesCompanion Function({
   required double amendeMax,
   required String rapport,
   Value<Uint8List?> rapportPdf,
+  Value<String?> portDebarquement,
   Value<DateTime> creeLe,
   Value<int> rowid,
 });
@@ -7238,6 +7625,7 @@ typedef $$ControlesTableUpdateCompanionBuilder = ControlesCompanion Function({
   Value<double> amendeMax,
   Value<String> rapport,
   Value<Uint8List?> rapportPdf,
+  Value<String?> portDebarquement,
   Value<DateTime> creeLe,
   Value<int> rowid,
 });
@@ -7291,6 +7679,21 @@ final class $$ControlesTableReferences
 
     final cache =
         $_typedResult.readTableOrNull(_controleEchantillonsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$ControlePhotosTable, List<PhotoLigne>>
+      _controlePhotosRefsTable(_$BaseDeDonnees db) =>
+          MultiTypedResultKey.fromTable(db.controlePhotos,
+              aliasName: $_aliasNameGenerator(
+                  db.controles.id, db.controlePhotos.controleId));
+
+  $$ControlePhotosTableProcessedTableManager get controlePhotosRefs {
+    final manager = $$ControlePhotosTableTableManager($_db, $_db.controlePhotos)
+        .filter((f) => f.controleId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_controlePhotosRefsTable($_db));
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
@@ -7355,6 +7758,10 @@ class $$ControlesTableFilterComposer
   ColumnFilters<Uint8List> get rapportPdf => $composableBuilder(
       column: $table.rapportPdf, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<String> get portDebarquement => $composableBuilder(
+      column: $table.portDebarquement,
+      builder: (column) => ColumnFilters(column));
+
   ColumnFilters<DateTime> get creeLe => $composableBuilder(
       column: $table.creeLe, builder: (column) => ColumnFilters(column));
 
@@ -7413,6 +7820,27 @@ class $$ControlesTableFilterComposer
             $$ControleEchantillonsTableFilterComposer(
               $db: $db,
               $table: $db.controleEchantillons,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> controlePhotosRefs(
+      Expression<bool> Function($$ControlePhotosTableFilterComposer f) f) {
+    final $$ControlePhotosTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.controlePhotos,
+        getReferencedColumn: (t) => t.controleId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ControlePhotosTableFilterComposer(
+              $db: $db,
+              $table: $db.controlePhotos,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -7480,6 +7908,10 @@ class $$ControlesTableOrderingComposer
 
   ColumnOrderings<Uint8List> get rapportPdf => $composableBuilder(
       column: $table.rapportPdf, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get portDebarquement => $composableBuilder(
+      column: $table.portDebarquement,
+      builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<DateTime> get creeLe => $composableBuilder(
       column: $table.creeLe, builder: (column) => ColumnOrderings(column));
@@ -7559,6 +7991,9 @@ class $$ControlesTableAnnotationComposer
   GeneratedColumn<Uint8List> get rapportPdf => $composableBuilder(
       column: $table.rapportPdf, builder: (column) => column);
 
+  GeneratedColumn<String> get portDebarquement => $composableBuilder(
+      column: $table.portDebarquement, builder: (column) => column);
+
   GeneratedColumn<DateTime> get creeLe =>
       $composableBuilder(column: $table.creeLe, builder: (column) => column);
 
@@ -7626,6 +8061,27 @@ class $$ControlesTableAnnotationComposer
                 ));
     return f(composer);
   }
+
+  Expression<T> controlePhotosRefs<T extends Object>(
+      Expression<T> Function($$ControlePhotosTableAnnotationComposer a) f) {
+    final $$ControlePhotosTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.controlePhotos,
+        getReferencedColumn: (t) => t.controleId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ControlePhotosTableAnnotationComposer(
+              $db: $db,
+              $table: $db.controlePhotos,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$ControlesTableTableManager extends RootTableManager<
@@ -7642,7 +8098,8 @@ class $$ControlesTableTableManager extends RootTableManager<
     PrefetchHooks Function(
         {bool navireId,
         bool controleMaillagesRefs,
-        bool controleEchantillonsRefs})> {
+        bool controleEchantillonsRefs,
+        bool controlePhotosRefs})> {
   $$ControlesTableTableManager(_$BaseDeDonnees db, $ControlesTable table)
       : super(TableManagerState(
           db: db,
@@ -7670,6 +8127,7 @@ class $$ControlesTableTableManager extends RootTableManager<
             Value<double> amendeMax = const Value.absent(),
             Value<String> rapport = const Value.absent(),
             Value<Uint8List?> rapportPdf = const Value.absent(),
+            Value<String?> portDebarquement = const Value.absent(),
             Value<DateTime> creeLe = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -7690,6 +8148,7 @@ class $$ControlesTableTableManager extends RootTableManager<
             amendeMax: amendeMax,
             rapport: rapport,
             rapportPdf: rapportPdf,
+            portDebarquement: portDebarquement,
             creeLe: creeLe,
             rowid: rowid,
           ),
@@ -7710,6 +8169,7 @@ class $$ControlesTableTableManager extends RootTableManager<
             required double amendeMax,
             required String rapport,
             Value<Uint8List?> rapportPdf = const Value.absent(),
+            Value<String?> portDebarquement = const Value.absent(),
             Value<DateTime> creeLe = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -7730,6 +8190,7 @@ class $$ControlesTableTableManager extends RootTableManager<
             amendeMax: amendeMax,
             rapport: rapport,
             rapportPdf: rapportPdf,
+            portDebarquement: portDebarquement,
             creeLe: creeLe,
             rowid: rowid,
           ),
@@ -7742,12 +8203,14 @@ class $$ControlesTableTableManager extends RootTableManager<
           prefetchHooksCallback: (
               {navireId = false,
               controleMaillagesRefs = false,
-              controleEchantillonsRefs = false}) {
+              controleEchantillonsRefs = false,
+              controlePhotosRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
                 if (controleMaillagesRefs) db.controleMaillages,
-                if (controleEchantillonsRefs) db.controleEchantillons
+                if (controleEchantillonsRefs) db.controleEchantillons,
+                if (controlePhotosRefs) db.controlePhotos
               ],
               addJoins: <
                   T extends TableManagerState<
@@ -7802,6 +8265,19 @@ class $$ControlesTableTableManager extends RootTableManager<
                         referencedItemsForCurrentItem:
                             (item, referencedItems) => referencedItems
                                 .where((e) => e.controleId == item.id),
+                        typedResults: items),
+                  if (controlePhotosRefs)
+                    await $_getPrefetchedData<ControleLigne, $ControlesTable,
+                            PhotoLigne>(
+                        currentTable: table,
+                        referencedTable: $$ControlesTableReferences
+                            ._controlePhotosRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$ControlesTableReferences(db, table, p0)
+                                .controlePhotosRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.controleId == item.id),
                         typedResults: items)
                 ];
               },
@@ -7824,7 +8300,8 @@ typedef $$ControlesTableProcessedTableManager = ProcessedTableManager<
     PrefetchHooks Function(
         {bool navireId,
         bool controleMaillagesRefs,
-        bool controleEchantillonsRefs})>;
+        bool controleEchantillonsRefs,
+        bool controlePhotosRefs})>;
 typedef $$ControleMaillagesTableCreateCompanionBuilder
     = ControleMaillagesCompanion Function({
   Value<int> id,
@@ -8328,6 +8805,262 @@ typedef $$ControleEchantillonsTableProcessedTableManager
         (EchantillonLigne, $$ControleEchantillonsTableReferences),
         EchantillonLigne,
         PrefetchHooks Function({bool controleId})>;
+typedef $$ControlePhotosTableCreateCompanionBuilder = ControlePhotosCompanion
+    Function({
+  Value<int> id,
+  required String controleId,
+  required int ordre,
+  required Uint8List octets,
+});
+typedef $$ControlePhotosTableUpdateCompanionBuilder = ControlePhotosCompanion
+    Function({
+  Value<int> id,
+  Value<String> controleId,
+  Value<int> ordre,
+  Value<Uint8List> octets,
+});
+
+final class $$ControlePhotosTableReferences
+    extends BaseReferences<_$BaseDeDonnees, $ControlePhotosTable, PhotoLigne> {
+  $$ControlePhotosTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $ControlesTable _controleIdTable(_$BaseDeDonnees db) =>
+      db.controles.createAlias(
+          $_aliasNameGenerator(db.controlePhotos.controleId, db.controles.id));
+
+  $$ControlesTableProcessedTableManager get controleId {
+    final $_column = $_itemColumn<String>('controle_id')!;
+
+    final manager = $$ControlesTableTableManager($_db, $_db.controles)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_controleIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$ControlePhotosTableFilterComposer
+    extends Composer<_$BaseDeDonnees, $ControlePhotosTable> {
+  $$ControlePhotosTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get ordre => $composableBuilder(
+      column: $table.ordre, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<Uint8List> get octets => $composableBuilder(
+      column: $table.octets, builder: (column) => ColumnFilters(column));
+
+  $$ControlesTableFilterComposer get controleId {
+    final $$ControlesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.controleId,
+        referencedTable: $db.controles,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ControlesTableFilterComposer(
+              $db: $db,
+              $table: $db.controles,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$ControlePhotosTableOrderingComposer
+    extends Composer<_$BaseDeDonnees, $ControlePhotosTable> {
+  $$ControlePhotosTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get ordre => $composableBuilder(
+      column: $table.ordre, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<Uint8List> get octets => $composableBuilder(
+      column: $table.octets, builder: (column) => ColumnOrderings(column));
+
+  $$ControlesTableOrderingComposer get controleId {
+    final $$ControlesTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.controleId,
+        referencedTable: $db.controles,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ControlesTableOrderingComposer(
+              $db: $db,
+              $table: $db.controles,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$ControlePhotosTableAnnotationComposer
+    extends Composer<_$BaseDeDonnees, $ControlePhotosTable> {
+  $$ControlePhotosTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get ordre =>
+      $composableBuilder(column: $table.ordre, builder: (column) => column);
+
+  GeneratedColumn<Uint8List> get octets =>
+      $composableBuilder(column: $table.octets, builder: (column) => column);
+
+  $$ControlesTableAnnotationComposer get controleId {
+    final $$ControlesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.controleId,
+        referencedTable: $db.controles,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ControlesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.controles,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$ControlePhotosTableTableManager extends RootTableManager<
+    _$BaseDeDonnees,
+    $ControlePhotosTable,
+    PhotoLigne,
+    $$ControlePhotosTableFilterComposer,
+    $$ControlePhotosTableOrderingComposer,
+    $$ControlePhotosTableAnnotationComposer,
+    $$ControlePhotosTableCreateCompanionBuilder,
+    $$ControlePhotosTableUpdateCompanionBuilder,
+    (PhotoLigne, $$ControlePhotosTableReferences),
+    PhotoLigne,
+    PrefetchHooks Function({bool controleId})> {
+  $$ControlePhotosTableTableManager(
+      _$BaseDeDonnees db, $ControlePhotosTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ControlePhotosTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ControlePhotosTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ControlePhotosTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> controleId = const Value.absent(),
+            Value<int> ordre = const Value.absent(),
+            Value<Uint8List> octets = const Value.absent(),
+          }) =>
+              ControlePhotosCompanion(
+            id: id,
+            controleId: controleId,
+            ordre: ordre,
+            octets: octets,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required String controleId,
+            required int ordre,
+            required Uint8List octets,
+          }) =>
+              ControlePhotosCompanion.insert(
+            id: id,
+            controleId: controleId,
+            ordre: ordre,
+            octets: octets,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$ControlePhotosTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({controleId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (controleId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.controleId,
+                    referencedTable:
+                        $$ControlePhotosTableReferences._controleIdTable(db),
+                    referencedColumn:
+                        $$ControlePhotosTableReferences._controleIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$ControlePhotosTableProcessedTableManager = ProcessedTableManager<
+    _$BaseDeDonnees,
+    $ControlePhotosTable,
+    PhotoLigne,
+    $$ControlePhotosTableFilterComposer,
+    $$ControlePhotosTableOrderingComposer,
+    $$ControlePhotosTableAnnotationComposer,
+    $$ControlePhotosTableCreateCompanionBuilder,
+    $$ControlePhotosTableUpdateCompanionBuilder,
+    (PhotoLigne, $$ControlePhotosTableReferences),
+    PhotoLigne,
+    PrefetchHooks Function({bool controleId})>;
 typedef $$FileEnvoisTableCreateCompanionBuilder = FileEnvoisCompanion Function({
   Value<int> id,
   required TypeEnvoi type,
@@ -8686,6 +9419,8 @@ class $BaseDeDonneesManager {
       $$ControleMaillagesTableTableManager(_db, _db.controleMaillages);
   $$ControleEchantillonsTableTableManager get controleEchantillons =>
       $$ControleEchantillonsTableTableManager(_db, _db.controleEchantillons);
+  $$ControlePhotosTableTableManager get controlePhotos =>
+      $$ControlePhotosTableTableManager(_db, _db.controlePhotos);
   $$FileEnvoisTableTableManager get fileEnvois =>
       $$FileEnvoisTableTableManager(_db, _db.fileEnvois);
   $$ReglagesTableTableManager get reglages =>
