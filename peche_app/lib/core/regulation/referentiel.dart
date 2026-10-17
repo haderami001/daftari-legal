@@ -138,6 +138,34 @@ const referentielDemo = Referentiel(
       minimum: 115,
       organisme: 'ICCAT',
     ),
+    'GPW': RegleEspece(
+      code: 'GPW',
+      nomCommun: 'Mérou blanc',
+      nomScientifique: 'Epinephelus aeneus',
+      unite: UniteMesure.longueurCm,
+      minimum: 45,
+    ),
+    'MGR': RegleEspece(
+      code: 'MGR',
+      nomCommun: 'Courbine',
+      nomScientifique: 'Argyrosomus regius',
+      unite: UniteMesure.longueurCm,
+      minimum: 70,
+    ),
+    'MUF': RegleEspece(
+      code: 'MUF',
+      nomCommun: 'Mulet jaune',
+      nomScientifique: 'Mugil cephalus',
+      unite: UniteMesure.longueurCm,
+      minimum: 30,
+    ),
+    'SOP': RegleEspece(
+      code: 'SOP',
+      nomCommun: 'Crevette rose du large',
+      nomScientifique: 'Penaeus notialis',
+      unite: UniteMesure.longueurCm,
+      minimum: 9,
+    ),
   },
   engins: {
     TypeEngin.ligne: RegleEngin(

@@ -7,6 +7,7 @@ import '../format.dart';
 import '../models/declaration.dart';
 import '../models/navire.dart';
 import 'calcul_reglementaire.dart';
+import 'rapport.dart';
 import 'referentiel.dart';
 
 /// Génère le rapport d'inspection au format PDF (A4).
@@ -53,7 +54,17 @@ Future<Uint8List> genererRapportPdf(
     ),
     footer: (ctx) => pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: pw.CrossAxisAlignment.end,
       children: [
+        // QR code du n° de rapport : le superviseur le scanne pour
+        // retrouver le contrôle dans le tableau de bord.
+        if (identifiant != null && ctx.pageNumber == 1)
+          pw.BarcodeWidget(
+            barcode: pw.Barcode.qrCode(),
+            data: 'PECHE-CONFORME:CONTROLE:$identifiant',
+            width: 42,
+            height: 42,
+          ),
         pw.Text(
           'Référentiel ${ref.version}'
           '${identifiant == null ? '' : ' · n° $identifiant'}',
@@ -74,6 +85,7 @@ Future<Uint8List> genererRapportPdf(
         if (licence != null)
           'Licence': '${licence.numero} (${licence.segment.libelle})',
         'Position': c.position.toString(),
+        'Lieu': _texte(lieuControle(c)),
         'Agent': c.agent,
       }),
       _titre('2. Constatations', bleu),
@@ -156,6 +168,34 @@ Future<Uint8List> genererRapportPdf(
         pw.SizedBox(width: 16),
         pw.Expanded(child: _signature('Signature du capitaine', '')),
       ]),
+      // Photos de preuve en annexe, deux par ligne.
+      if (c.photos.isNotEmpty) ...[
+        pw.NewPage(),
+        _titre('Annexe : photos de preuve (${c.photos.length})', bleu),
+        pw.Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            for (final (i, photo) in c.photos.indexed)
+              pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Container(
+                    width: 250,
+                    height: 190,
+                    decoration: pw.BoxDecoration(
+                        border: pw.Border.all(
+                            width: 0.5, color: PdfColors.grey600)),
+                    child:
+                        pw.Image(pw.MemoryImage(photo), fit: pw.BoxFit.contain),
+                  ),
+                  pw.Text('Photo ${i + 1}',
+                      style: const pw.TextStyle(fontSize: 9)),
+                ],
+              ),
+          ],
+        ),
+      ],
     ],
   ));
   return doc.save();

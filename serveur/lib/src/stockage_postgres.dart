@@ -83,6 +83,12 @@ const migrations = <String>[
   );
   CREATE INDEX licences_navire_idx ON licences (navire_id);
   ''',
+  // 4 — port de débarquement, photos de preuve des contrôles.
+  '''
+  ALTER TABLE declarations ADD COLUMN port_debarquement TEXT;
+  ALTER TABLE controles ADD COLUMN port_debarquement TEXT;
+  ALTER TABLE controles ADD COLUMN photos JSONB;
+  ''',
 ];
 
 /// Stockage PostgreSQL (production).
@@ -160,6 +166,7 @@ class StockagePostgres implements Stockage {
       'empreinte': e,
       'par': par?.id,
       'par_nom': par?.nom,
+      'port': d['port_debarquement'],
     };
     final Result r;
     switch (type) {
@@ -172,10 +179,11 @@ class StockagePostgres implements Stockage {
             INSERT INTO declarations (id, navire_id, licence_numero, engin,
                 latitude, longitude, horodatage, nb_infractions,
                 poids_total_kg, equipage, captures, empreinte, envoye_par,
-                envoye_par_nom)
+                envoye_par_nom, port_debarquement)
             VALUES (@id:uuid, @navire, @licence, @engin, @lat, @lon,
                 @horodatage:timestamptz, @nb, @poids, @equipage:jsonb,
-                @captures:jsonb, @empreinte, @par:text, @par_nom:text)
+                @captures:jsonb, @empreinte, @par:text, @par_nom:text,
+                @port:text)
             ON CONFLICT (id) DO NOTHING
             RETURNING id'''),
           parameters: {
@@ -196,12 +204,12 @@ class StockagePostgres implements Stockage {
                 marquage_conforme, stockage_conforme, observations,
                 nb_infractions, amende_min_mru, amende_max_mru, maillages_mm,
                 echantillons, rapport, rapport_pdf, empreinte, envoye_par,
-                envoye_par_nom)
+                envoye_par_nom, port_debarquement, photos)
             VALUES (@id:uuid, @navire, @agent, @date:timestamptz, @lat, @lon,
                 @engin, @pavillon, @marquage, @stockage, @observations, @nb,
                 @amende_min, @amende_max, @maillages:jsonb,
                 @echantillons:jsonb, @rapport, @pdf:bytea, @empreinte,
-                @par:text, @par_nom:text)
+                @par:text, @par_nom:text, @port:text, @photos:jsonb)
             ON CONFLICT (id) DO NOTHING
             RETURNING id'''),
           parameters: {
@@ -218,6 +226,7 @@ class StockagePostgres implements Stockage {
             'echantillons': d['echantillons'],
             'rapport': d['rapport'],
             'pdf': pdf == null ? null : base64Decode(pdf),
+            'photos': d['photos_base64'],
           },
         );
     }
@@ -241,7 +250,8 @@ class StockagePostgres implements Stockage {
     };
     final r = await _pool.execute(
       Sql.named('SELECT id::text, navire_id, $colonneDate, nb_infractions, '
-          'recu_le, envoye_par_nom FROM ${type.segment} '
+          'recu_le, envoye_par_nom, latitude, longitude, port_debarquement '
+          'FROM ${type.segment} '
           'ORDER BY recu_le DESC LIMIT @limite'),
       parameters: {'limite': limite},
     );
@@ -254,6 +264,9 @@ class StockagePostgres implements Stockage {
           nbInfractions: l[3]! as int,
           recuLe: l[4]! as DateTime,
           envoyePar: l[5] as String?,
+          latitude: l[6]! as double,
+          longitude: l[7]! as double,
+          portDebarquement: l[8] as String?,
         ),
     ];
   }

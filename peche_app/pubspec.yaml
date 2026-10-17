@@ -51,6 +51,14 @@ dependencies:
     sdk: flutter
   intl: ^0.20.2
   flutter_secure_storage: ^9.2.4
+  # Photos de preuve (appareil photo du téléphone).
+  image_picker: ^1.1.2
+  # QR code des licences : affichage (capitaine) et lecture (agent).
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^7.0.1
+  # Carte des contrôles et déclarations (fond OpenStreetMap).
+  flutter_map: ^8.1.1
+  latlong2: ^0.9.1
   shelf: ^1.4.1
   # Serveur central du dépôt. L'application n'en importe que la partie
   # « en mémoire » (package:serveur_peche/serveur_memoire.dart) pour le mode

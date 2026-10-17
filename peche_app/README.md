@@ -160,6 +160,27 @@ En mer il n'y a pas de réseau : tout est enregistré **sur le téléphone**.
   réelle via `geolocator`. Si le GPS est refusé ou ne répond pas, la saisie
   reste possible et l'écran affiche « (non mesurée) ».
 
+## Contrôle sur le terrain : QR code, photos, port, carte
+
+- **QR code de la licence** : dans la déclaration, le capitaine touche
+  l'icône QR et montre le code à l'agent. Dans le contrôle, l'agent touche
+  « Scanner » : le navire est sélectionné et l'écran dit tout de suite si la
+  licence est valide ou expirée, sans réseau (`lib/core/qr_licence.dart`,
+  `lib/features/controle/scanner_licence_screen.dart`). Saisie du numéro
+  à la main si la caméra ne marche pas.
+- **Photos de preuve** : jusqu'à 6 photos par contrôle (captures, filets,
+  documents), gardées dans la base locale, envoyées au serveur et ajoutées
+  en annexe du rapport PDF (`lib/core/services/photo_service.dart`).
+- **Port de débarquement** : sur la déclaration (port prévu) et sur le
+  contrôle (« en mer » ou « à quai, port de … »), dans le rapport PDF
+  (`lib/core/models/ports.dart`, liste d'exemple à compléter). Schéma v5.
+- **Nouvelles espèces** : mérou blanc (GPW), courbine (MGR), mulet jaune
+  (MUF), crevette rose du large (SOP), tailles minimales fictives.
+- **Carte** : onglet « Carte » du tableau de bord, positions des
+  déclarations (bleu) et des contrôles (vert / rouge), fond OpenStreetMap
+  (Internet nécessaire) ; toucher un contrôle ouvre son rapport PDF.
+- Le rapport PDF porte un QR code du n° de rapport (page 1).
+
 ## Ce que contient le prototype
 
 | Fichier | Rôle |

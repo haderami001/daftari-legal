@@ -4,6 +4,7 @@ import '../../core/services/services.dart';
 import '../../core/services/supervision.dart';
 import '../../l10n/libelles.dart';
 import '../controle/rapport_pdf_screen.dart';
+import 'carte_saisies.dart';
 
 /// Tableau de bord du superviseur : ce que le serveur central a reçu.
 ///
@@ -74,7 +75,7 @@ class _SupervisionScreenState extends State<SupervisionScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: Text(l10n.moduleSupervision),
@@ -88,6 +89,7 @@ class _SupervisionScreenState extends State<SupervisionScreen> {
           bottom: TabBar(tabs: [
             Tab(text: l10n.ongletDeclarations),
             Tab(text: l10n.ongletControles),
+            Tab(text: l10n.ongletCarte),
           ]),
         ),
         body: FutureBuilder(
@@ -147,6 +149,11 @@ class _SupervisionScreenState extends State<SupervisionScreen> {
             return TabBarView(children: [
               liste(d.declarations),
               liste(d.controles, rapport: true),
+              CarteSaisies(
+                declarations: d.declarations,
+                controles: d.controles,
+                onControle: _ouvrirRapport,
+              ),
             ]);
           },
         ),

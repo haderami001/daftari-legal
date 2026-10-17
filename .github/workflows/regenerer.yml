@@ -30,10 +30,17 @@ jobs:
           dart run build_runner build --delete-conflicting-outputs
           flutter gen-l10n
       - name: Formatage
-        run: |
-          dart format lib test tool
-          dart format ../serveur/lib ../serveur/bin ../serveur/test
+        run: dart format lib test tool
+      # Le serveur est vérifié avec Dart 3.5.4 (voir serveur.yml) : on le
+      # formate avec la même version.
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.5.4'
+      - name: Formatage du serveur
+        working-directory: serveur
+        run: dart format lib bin test
       - name: Commit
+        working-directory: .
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

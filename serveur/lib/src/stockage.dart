@@ -29,6 +29,9 @@ class ResumeSaisie {
     required this.nbInfractions,
     required this.recuLe,
     this.envoyePar,
+    this.latitude,
+    this.longitude,
+    this.portDebarquement,
   });
 
   final String id;
@@ -40,6 +43,13 @@ class ResumeSaisie {
   /// Compte qui a envoyé la saisie (identifiant de connexion).
   final String? envoyePar;
 
+  /// Position de la saisie (carte du tableau de bord).
+  final double? latitude;
+  final double? longitude;
+
+  /// Code du port de débarquement, s'il a été indiqué.
+  final String? portDebarquement;
+
   Map<String, Object?> versJson() => {
         'id': id,
         'navire_id': navireId,
@@ -47,6 +57,9 @@ class ResumeSaisie {
         'nb_infractions': nbInfractions,
         'recu_le': recuLe.toUtc().toIso8601String(),
         'envoye_par': envoyePar,
+        if (latitude != null && longitude != null)
+          'position': {'lat': latitude, 'lon': longitude},
+        if (portDebarquement != null) 'port_debarquement': portDebarquement,
       };
 }
 
@@ -176,6 +189,11 @@ class StockageMemoire implements Stockage {
           nbInfractions: s.donnees['nb_infractions']! as int,
           recuLe: s.recuLe,
           envoyePar: s.envoyePar,
+          latitude:
+              ((s.donnees['position'] as Map?)?['lat'] as num?)?.toDouble(),
+          longitude:
+              ((s.donnees['position'] as Map?)?['lon'] as num?)?.toDouble(),
+          portDebarquement: s.donnees['port_debarquement'] as String?,
         ),
     ]..sort((a, b) => b.recuLe.compareTo(a.recuLe));
     return lignes.take(limite).toList();

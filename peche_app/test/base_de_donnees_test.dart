@@ -144,8 +144,9 @@ void main() {
     expect(await depots.envois.nombreEnAttente(), 0);
   });
 
-  test('migration v1 -> v4 : rapport PDF, réglages, suppression logique',
-      () async {
+  test(
+      'migration v1 -> v5 : rapport PDF, réglages, suppression logique, '
+      'port et photos', () async {
     // 1. On fabrique une base « comme sur un téléphone resté en v1 » :
     //    schéma actuel, puis on retire la colonne ajoutée en v2.
     final brute = sqlite3.openInMemory();
@@ -157,6 +158,9 @@ void main() {
     brute.execute('DROP TABLE reglages'); // ajoutée en v3
     brute.execute('ALTER TABLE navires DROP COLUMN supprime'); // v4
     brute.execute('ALTER TABLE licences DROP COLUMN supprime'); // v4
+    brute.execute('ALTER TABLE declarations DROP COLUMN port_debarquement');
+    brute.execute('ALTER TABLE controles DROP COLUMN port_debarquement');
+    brute.execute('DROP TABLE controle_photos'); // v5
     brute.userVersion = 1;
 
     // 2. On la rouvre avec le code actuel : onUpgrade doit s'exécuter.
@@ -171,6 +175,10 @@ void main() {
       date: DateTime(2026, 10, 3),
       position: PositionGps(20, -17, DateTime(2026, 10, 3)),
       engin: TypeEngin.chalutDemersal,
+      portDebarquement: 'NDB',
+      photos: [
+        Uint8List.fromList([0xFF, 0xD8, 0xFF, 0xE0]),
+      ],
     );
     final id = await saisies.enregistrerControle(
       c,
@@ -179,8 +187,12 @@ void main() {
       rapportPdf: Uint8List.fromList([37, 80, 68, 70]), // « %PDF »
     );
 
-    expect(brute.userVersion, 4);
+    expect(brute.userVersion, 5);
     expect(await saisies.rapportPdf(id), [37, 80, 68, 70]);
+    expect(await saisies.photos(id), [
+      [0xFF, 0xD8, 0xFF, 0xE0],
+    ]);
+    expect((await saisies.exporterControle(id))['port_debarquement'], 'NDB');
     final reglages = Services(v2).reglages;
     await reglages.ecrire('langue', 'ar');
     expect(await reglages.lire('langue'), 'ar');

@@ -23,6 +23,7 @@ part 'base_de_donnees.g.dart';
   Controles,
   ControleMaillages,
   ControleEchantillons,
+  ControlePhotos,
   FileEnvois,
   Reglages,
 ])
@@ -48,8 +49,9 @@ class BaseDeDonnees extends _$BaseDeDonnees {
   /// - v2 : colonne `controles.rapport_pdf` (rapport PDF signé)
   /// - v3 : table `reglages` (langue choisie)
   /// - v4 : colonnes `supprime` (navires, licences retirés du référentiel)
+  /// - v5 : port de débarquement, photos de preuve des contrôles
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -72,6 +74,11 @@ class BaseDeDonnees extends _$BaseDeDonnees {
           if (depuis < 4) {
             await m.addColumn(navires, navires.supprime);
             await m.addColumn(licences, licences.supprime);
+          }
+          if (depuis < 5) {
+            await m.addColumn(declarations, declarations.portDebarquement);
+            await m.addColumn(controles, controles.portDebarquement);
+            await m.createTable(controlePhotos);
           }
         },
         beforeOpen: (details) async {

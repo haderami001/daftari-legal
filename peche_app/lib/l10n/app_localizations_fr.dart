@@ -523,6 +523,10 @@ class AppLocalizationsFr extends AppLocalizations {
         'SOL': 'Sole',
         'YFT': 'Albacore',
         'BFT': 'Thon rouge',
+        'GPW': 'Mérou blanc',
+        'MGR': 'Courbine',
+        'MUF': 'Mulet jaune',
+        'SOP': 'Crevette rose du large',
         'other': '$code',
       },
     );
@@ -829,4 +833,111 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get quitter => 'Quitter';
+
+  @override
+  String get portDebarquement => 'Port de débarquement';
+
+  @override
+  String get portNonPrecise => 'Non précisé';
+
+  @override
+  String nomPort(String code) {
+    String _temp0 = intl.Intl.selectLogic(
+      code,
+      {
+        'NDB': 'Nouadhibou',
+        'NKC': 'Nouakchott',
+        'TAN': 'Tanit',
+        'NDG': 'N\'Diago',
+        'MHJ': 'Mhaijratt',
+        'IWK': 'Iwik',
+        'other': '$code',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get lieuControle => 'Lieu du contrôle';
+
+  @override
+  String get enMer => 'En mer';
+
+  @override
+  String aQuai(String port) {
+    return 'À quai : $port';
+  }
+
+  @override
+  String get sectionPhotos => 'Photos de preuve';
+
+  @override
+  String get prendrePhoto => 'Prendre une photo';
+
+  @override
+  String photosMax(int n) {
+    return '$n photos au maximum';
+  }
+
+  @override
+  String get aucunePhoto => 'Aucune photo (captures, filets, documents…)';
+
+  @override
+  String photoIndisponible(String erreur) {
+    return 'Photo impossible : $erreur';
+  }
+
+  @override
+  String get supprimerPhoto => 'Supprimer la photo';
+
+  @override
+  String get scannerQr => 'Scanner le QR code de la licence';
+
+  @override
+  String get qrLicence => 'QR code de la licence';
+
+  @override
+  String get qrLicenceAide =>
+      'Montrez ce code à l\'agent garde-côtes : il identifie le navire et la licence, même sans réseau.';
+
+  @override
+  String get qrInconnu => 'QR code non reconnu';
+
+  @override
+  String qrLicenceAbsente(String numero) {
+    return 'Licence $numero absente de la base locale';
+  }
+
+  @override
+  String qrLicenceValide(String numero, String date) {
+    return 'Licence $numero valide jusqu\'au $date';
+  }
+
+  @override
+  String qrLicenceExpiree(String numero, String date) {
+    return 'Licence $numero EXPIRÉE ou pas encore valide (fin : $date)';
+  }
+
+  @override
+  String get qrSaisieManuelle => 'Saisir le numéro de licence';
+
+  @override
+  String get qrViser => 'Placez le QR code dans le cadre';
+
+  @override
+  String get valider => 'Valider';
+
+  @override
+  String get ongletCarte => 'Carte';
+
+  @override
+  String get carteLegende =>
+      'Bleu : déclarations · Vert : contrôles conformes · Rouge : avec infraction';
+
+  @override
+  String get carteSansPosition => 'Aucune position à afficher';
+
+  @override
+  String get carteHorsLigne =>
+      'La carte a besoin d\'Internet pour afficher le fond (OpenStreetMap).';
 }

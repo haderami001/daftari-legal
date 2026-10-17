@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../core/services/services.dart';
 import '../../core/data/depots/flotte_depot.dart';
@@ -6,6 +7,8 @@ import '../../core/format.dart';
 import '../../core/models/declaration.dart';
 import '../../core/models/enums.dart';
 import '../../core/models/navire.dart';
+import '../../core/models/ports.dart';
+import '../../core/qr_licence.dart';
 import '../../core/regulation/calcul_reglementaire.dart';
 import '../../core/regulation/referentiel.dart';
 import '../../core/widgets/resultat_card.dart';
@@ -32,6 +35,7 @@ class _DeclarationCapitaineScreenState
   List<NavireLicence>? _flotte;
   late NavireLicence _choix;
   late TypeEngin _engin;
+  String? _port;
   bool _enregistrementEnCours = false;
 
   int _etape = 0;
@@ -91,6 +95,7 @@ class _DeclarationCapitaineScreenState
         licence: _licence,
         engin: _engin,
         position: _positionAffichee,
+        portDebarquement: _port,
         equipage: _equipage,
         captures: _captures,
       );
@@ -110,7 +115,16 @@ class _DeclarationCapitaineScreenState
       );
     }
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.moduleDeclaration)),
+      appBar: AppBar(
+        title: Text(l10n.moduleDeclaration),
+        actions: [
+          IconButton(
+            tooltip: l10n.qrLicence,
+            icon: const Icon(Icons.qr_code_2),
+            onPressed: _afficherQrLicence,
+          ),
+        ],
+      ),
       body: Stepper(
         currentStep: _etape,
         onStepTapped: (i) => setState(() => _etape = i),
@@ -188,6 +202,19 @@ class _DeclarationCapitaineScreenState
               DropdownMenuItem(value: e, child: Text(l10n.libelleEngin(e))),
           ],
           onChanged: (e) => setState(() => _engin = e!),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String?>(
+          isExpanded: true,
+          key: ValueKey('port-$_port'),
+          initialValue: _port,
+          decoration: InputDecoration(labelText: l10n.portDebarquement),
+          items: [
+            DropdownMenuItem(value: null, child: Text(l10n.portNonPrecise)),
+            for (final code in portsDebarquement.keys)
+              DropdownMenuItem(value: code, child: Text(l10n.nomPort(code))),
+          ],
+          onChanged: (p) => setState(() => _port = p),
         ),
         const SizedBox(height: 12),
         _ligne(l10n.immatriculation, _navire.immatriculation),
@@ -408,6 +435,44 @@ class _DeclarationCapitaineScreenState
       content: Text(context.l10n.declarationEnregistree(id.substring(0, 8))),
     ));
     Navigator.of(context).pop();
+  }
+
+  /// Le capitaine montre ce QR code à l'agent garde-côtes, qui le scanne
+  /// dans son module de contrôle (même sans réseau).
+  Future<void> _afficherQrLicence() {
+    final l10n = context.l10n;
+    return showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.qrLicence),
+        content: SizedBox(
+          width: 260,
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            // Fond blanc obligatoire : un QR sur fond sombre (thème
+            // sombre) n'est pas lu par tous les lecteurs.
+            ColoredBox(
+              color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: QrImageView(
+                  data: contenuQrLicence(_licence.numero, _navire.id),
+                  size: 220,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text('${_navire.nom} · ${_licence.numero}',
+                style: const TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 4),
+            Text(l10n.qrLicenceAide, textAlign: TextAlign.center),
+          ]),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: Text(l10n.fermer)),
+        ],
+      ),
+    );
   }
 
   Widget _ligne(String label, String valeur) => Padding(

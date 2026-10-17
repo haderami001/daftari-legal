@@ -57,6 +57,15 @@
         "cwd": "${workspaceFolder}"
       },
       "detail": "Rendu logiciel (swiftshader) : sur Mac Intel, Android 16 reste noir avec le rendu GPU"
+    },
+    {
+      "label": "Mac : capture d'écran de l'émulateur Android",
+      "type": "shell",
+      "command": "mkdir -p peche_app/build; \"$HOME/Library/Android/sdk/platform-tools/adb\" exec-out screencap -p > peche_app/build/ecran_android.png && echo OK",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
     }
   ]
 }

@@ -822,7 +822,7 @@ abstract class AppLocalizations {
   /// No description provided for @especeNom.
   ///
   /// In fr, this message translates to:
-  /// **'{code, select, OCC{Poulpe} CTC{Seiche} SAA{Sardinelle ronde} SOL{Sole} YFT{Albacore} BFT{Thon rouge} other{{code}}}'**
+  /// **'{code, select, OCC{Poulpe} CTC{Seiche} SAA{Sardinelle ronde} SOL{Sole} YFT{Albacore} BFT{Thon rouge} GPW{Mérou blanc} MGR{Courbine} MUF{Mulet jaune} SOP{Crevette rose du large} other{{code}}}'**
   String especeNom(String code);
 
   /// No description provided for @infLicenceInvalide.
@@ -1317,6 +1317,162 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Quitter'**
   String get quitter;
+
+  /// No description provided for @portDebarquement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Port de débarquement'**
+  String get portDebarquement;
+
+  /// No description provided for @portNonPrecise.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non précisé'**
+  String get portNonPrecise;
+
+  /// No description provided for @nomPort.
+  ///
+  /// In fr, this message translates to:
+  /// **'{code, select, NDB{Nouadhibou} NKC{Nouakchott} TAN{Tanit} NDG{N\'Diago} MHJ{Mhaijratt} IWK{Iwik} other{{code}}}'**
+  String nomPort(String code);
+
+  /// No description provided for @lieuControle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lieu du contrôle'**
+  String get lieuControle;
+
+  /// No description provided for @enMer.
+  ///
+  /// In fr, this message translates to:
+  /// **'En mer'**
+  String get enMer;
+
+  /// No description provided for @aQuai.
+  ///
+  /// In fr, this message translates to:
+  /// **'À quai : {port}'**
+  String aQuai(String port);
+
+  /// No description provided for @sectionPhotos.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photos de preuve'**
+  String get sectionPhotos;
+
+  /// No description provided for @prendrePhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prendre une photo'**
+  String get prendrePhoto;
+
+  /// No description provided for @photosMax.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} photos au maximum'**
+  String photosMax(int n);
+
+  /// No description provided for @aucunePhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune photo (captures, filets, documents…)'**
+  String get aucunePhoto;
+
+  /// No description provided for @photoIndisponible.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo impossible : {erreur}'**
+  String photoIndisponible(String erreur);
+
+  /// No description provided for @supprimerPhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer la photo'**
+  String get supprimerPhoto;
+
+  /// No description provided for @scannerQr.
+  ///
+  /// In fr, this message translates to:
+  /// **'Scanner le QR code de la licence'**
+  String get scannerQr;
+
+  /// No description provided for @qrLicence.
+  ///
+  /// In fr, this message translates to:
+  /// **'QR code de la licence'**
+  String get qrLicence;
+
+  /// No description provided for @qrLicenceAide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montrez ce code à l\'agent garde-côtes : il identifie le navire et la licence, même sans réseau.'**
+  String get qrLicenceAide;
+
+  /// No description provided for @qrInconnu.
+  ///
+  /// In fr, this message translates to:
+  /// **'QR code non reconnu'**
+  String get qrInconnu;
+
+  /// No description provided for @qrLicenceAbsente.
+  ///
+  /// In fr, this message translates to:
+  /// **'Licence {numero} absente de la base locale'**
+  String qrLicenceAbsente(String numero);
+
+  /// No description provided for @qrLicenceValide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Licence {numero} valide jusqu\'au {date}'**
+  String qrLicenceValide(String numero, String date);
+
+  /// No description provided for @qrLicenceExpiree.
+  ///
+  /// In fr, this message translates to:
+  /// **'Licence {numero} EXPIRÉE ou pas encore valide (fin : {date})'**
+  String qrLicenceExpiree(String numero, String date);
+
+  /// No description provided for @qrSaisieManuelle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisir le numéro de licence'**
+  String get qrSaisieManuelle;
+
+  /// No description provided for @qrViser.
+  ///
+  /// In fr, this message translates to:
+  /// **'Placez le QR code dans le cadre'**
+  String get qrViser;
+
+  /// No description provided for @valider.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider'**
+  String get valider;
+
+  /// No description provided for @ongletCarte.
+  ///
+  /// In fr, this message translates to:
+  /// **'Carte'**
+  String get ongletCarte;
+
+  /// No description provided for @carteLegende.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bleu : déclarations · Vert : contrôles conformes · Rouge : avec infraction'**
+  String get carteLegende;
+
+  /// No description provided for @carteSansPosition.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune position à afficher'**
+  String get carteSansPosition;
+
+  /// No description provided for @carteHorsLigne.
+  ///
+  /// In fr, this message translates to:
+  /// **'La carte a besoin d\'Internet pour afficher le fond (OpenStreetMap).'**
+  String get carteHorsLigne;
 }
 
 class _AppLocalizationsDelegate
