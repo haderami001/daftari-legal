@@ -29,6 +29,13 @@
         "cwd": "${workspaceFolder}/peche_app"
       },
       "problemMatcher": []
+    },
+    {
+      "label": "Mac : état de l'environnement de développement",
+      "detail": "flutter doctor, Python, Java, CocoaPods, espace disque",
+      "type": "shell",
+      "command": "export PATH=\"$HOME/development/flutter/bin:$PATH\"; echo '== macOS'; sw_vers; uname -m; echo '== Disque'; df -h / | tail -1; echo '== Python'; which -a python3; python3 --version; python3 -m pip --version; echo '== Java'; /usr/libexec/java_home -V 2>&1 | head -5; echo '== Xcode'; xcode-select -p; xcodebuild -version 2>&1 | head -2; echo '== CocoaPods'; pod --version 2>&1 | head -1; echo '== Ruby'; ruby -v; echo '== Node'; node -v 2>&1; echo '== Git'; git --version; echo '== Flutter doctor'; flutter doctor -v",
+      "problemMatcher": []
     }
   ]
 }
