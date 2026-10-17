@@ -82,7 +82,16 @@ jobs:
           cache: true
 
       - name: Construire l'APK
-        run: flutter build apk --debug
+        run: |
+          set -o pipefail
+          flutter build apk --debug 2>&1 | tee ../apk.log
+
+      # En cas d'échec, la fin du journal devient une annotation (visible
+      # dans l'onglet « Checks » de la PR, et lisible par l'API).
+      - name: Résumé de l'erreur Android
+        if: failure()
+        run: |
+          tail -n 60 ../apk.log | python3 -c "import sys,urllib.parse; print('::error title=APK::' + sys.stdin.read().replace('%','%25').replace('\r','').replace('\n','%0A'))"
 
       - uses: actions/upload-artifact@v4
         with:
