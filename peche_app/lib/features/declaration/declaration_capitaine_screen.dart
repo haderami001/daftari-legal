@@ -163,7 +163,8 @@ class _DeclarationCapitaineScreenState
       children: [
         DropdownButtonFormField<String>(
           isExpanded: true,
-          value: _navire.id,
+          key: ValueKey(_navire.id),
+          initialValue: _navire.id,
           decoration: InputDecoration(labelText: l10n.navire),
           items: [
             for (final (:navire, licence: _) in _flotte!)
@@ -179,7 +180,8 @@ class _DeclarationCapitaineScreenState
         const SizedBox(height: 8),
         DropdownButtonFormField<TypeEngin>(
           isExpanded: true,
-          value: _engin,
+          key: ValueKey(_engin),
+          initialValue: _engin,
           decoration: InputDecoration(labelText: l10n.enginUtilise),
           items: [
             for (final e in TypeEngin.values)
@@ -325,7 +327,8 @@ class _DeclarationCapitaineScreenState
         content: Column(mainAxisSize: MainAxisSize.min, children: [
           DropdownButtonFormField<String>(
             isExpanded: true,
-            value: espece,
+            key: ValueKey(espece),
+            initialValue: espece,
             decoration: InputDecoration(labelText: l10n.espece),
             items: [
               for (final r in referentielDemo.especes.values)

@@ -132,7 +132,8 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
             children: [
               DropdownButtonFormField<String>(
                 isExpanded: true,
-                value: c.navire.id,
+                key: ValueKey(c.navire.id),
+                initialValue: c.navire.id,
                 decoration: InputDecoration(labelText: l10n.navireInspecte),
                 items: [
                   for (final (:navire, licence: _) in flotte)
@@ -198,7 +199,8 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
             children: [
               DropdownButtonFormField<TypeEngin>(
                 isExpanded: true,
-                value: c.engin,
+                key: ValueKey(c.engin),
+                initialValue: c.engin,
                 decoration: InputDecoration(labelText: l10n.enginABord),
                 items: [
                   for (final e in TypeEngin.values)
@@ -243,7 +245,8 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
             children: [
               DropdownButtonFormField<String>(
                 isExpanded: true,
-                value: _especeEchantillon,
+                key: ValueKey(_especeEchantillon),
+                initialValue: _especeEchantillon,
                 decoration: InputDecoration(labelText: l10n.espece),
                 items: [
                   for (final r in referentielDemo.especes.values)
