@@ -189,8 +189,10 @@ class StockageMemoire implements Stockage {
           nbInfractions: s.donnees['nb_infractions']! as int,
           recuLe: s.recuLe,
           envoyePar: s.envoyePar,
-          latitude: ((s.donnees['position'] as Map?)?['lat'] as num?)?.toDouble(),
-          longitude: ((s.donnees['position'] as Map?)?['lon'] as num?)?.toDouble(),
+          latitude:
+              ((s.donnees['position'] as Map?)?['lat'] as num?)?.toDouble(),
+          longitude:
+              ((s.donnees['position'] as Map?)?['lon'] as num?)?.toDouble(),
           portDebarquement: s.donnees['port_debarquement'] as String?,
         ),
     ]..sort((a, b) => b.recuLe.compareTo(a.recuLe));

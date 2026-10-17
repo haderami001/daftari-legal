@@ -102,7 +102,8 @@ List<String> verifierSaisie(
           }
         }
       }
-      if (d.containsKey('photos_base64')) verifierPhotos(d['photos_base64'], v.erreurs);
+      if (d.containsKey('photos_base64'))
+        verifierPhotos(d['photos_base64'], v.erreurs);
   }
   return v.erreurs;
 }
