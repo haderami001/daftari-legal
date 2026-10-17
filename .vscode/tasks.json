@@ -6,14 +6,28 @@
       "detail": "SQLite WebAssembly, worker Drift et pdf.js (à refaire après un changement de version de drift)",
       "type": "shell",
       "command": "export PATH=\"$HOME/development/flutter/bin:$PATH\"; flutter pub get && ./tool/preparer_web.sh",
-      "options": { "cwd": "${workspaceFolder}/peche_app" },
+      "options": {
+        "cwd": "${workspaceFolder}/peche_app"
+      },
       "problemMatcher": []
     },
     {
       "label": "Pêche Conforme : analyser et tester",
       "type": "shell",
       "command": "export PATH=\"$HOME/development/flutter/bin:$PATH\"; flutter analyze --no-fatal-infos; flutter test",
-      "options": { "cwd": "${workspaceFolder}/peche_app" },
+      "options": {
+        "cwd": "${workspaceFolder}/peche_app"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Pêche Conforme : régénérer le code Drift et formater",
+      "detail": "Après un changement de tables ou de version de drift",
+      "type": "shell",
+      "command": "export PATH=\"$HOME/development/flutter/bin:$PATH\"; flutter pub get && dart run build_runner build --delete-conflicting-outputs && dart format lib test tool",
+      "options": {
+        "cwd": "${workspaceFolder}/peche_app"
+      },
       "problemMatcher": []
     }
   ]
