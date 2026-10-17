@@ -32,7 +32,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.5'
+          flutter-version: '3.47.6'
           channel: stable
           cache: true
 
@@ -77,12 +77,21 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.5'
+          flutter-version: '3.47.6'
           channel: stable
           cache: true
 
       - name: Construire l'APK
-        run: flutter build apk --debug
+        run: |
+          set -o pipefail
+          flutter build apk --debug 2>&1 | tee ../apk.log
+
+      # En cas d'échec, la fin du journal devient une annotation (visible
+      # dans l'onglet « Checks » de la PR, et lisible par l'API).
+      - name: Résumé de l'erreur Android
+        if: failure()
+        run: |
+          tail -n 60 ../apk.log | python3 -c "import sys,urllib.parse; print('::error title=APK::' + sys.stdin.read().replace('%','%25').replace('\r','').replace('\n','%0A'))"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -114,7 +123,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.5'
+          flutter-version: '3.47.6'
           channel: stable
           cache: true
 
@@ -122,9 +131,9 @@ jobs:
         run: flutter pub get && ./tool/preparer_web.sh
 
       - name: Construire la version web
-        # CanvasKit (même moteur de texte que sur téléphone : l'arabe et les
-        # nombres s'affichent correctement), servi avec l'app, sans CDN.
-        run: flutter build web --web-renderer canvaskit --no-web-resources-cdn --pwa-strategy none
+        # CanvasKit (moteur par défaut, même rendu du texte que sur téléphone :
+        # l'arabe et les nombres s'affichent correctement), servi avec l'app.
+        run: flutter build web --no-web-resources-cdn --pwa-strategy none
 
       - uses: actions/upload-artifact@v4
         with:

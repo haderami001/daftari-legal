@@ -19,7 +19,7 @@ réseau.
 
 ```bash
 # 1. Installer Flutter : https://docs.flutter.dev/get-started/install
-flutter --version          # Flutter 3.24+ / Dart 3.5+
+flutter --version          # Flutter 3.47 (version de la CI)
 
 # 2. Récupérer les dépendances
 cd peche_app
@@ -51,9 +51,8 @@ dart run build_runner build --delete-conflicting-outputs
 flutter run -d chrome --dart-define=SERVEUR_DEMO=true
 ```
 
-Avec Flutter 3.24 (version de la CI), on peut ajouter
-`--web-renderer canvaskit --no-web-resources-cdn` ; cette option
-n'existe plus dans les Flutter récents (3.29+).
+Dans VS Code : *Terminal → Run Task…* propose « préparer la version web »,
+« régénérer le code Drift et formater » et « analyser et tester ».
 
 ### Dans VS Code
 

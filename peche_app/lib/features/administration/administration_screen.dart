@@ -496,7 +496,8 @@ class _NavireFormScreenState extends State<NavireFormScreen>
               validator: obligatoire,
             ),
             DropdownButtonFormField<TypeNavire>(
-              value: type,
+              key: ValueKey(type),
+              initialValue: type,
               decoration: InputDecoration(labelText: l10n.champTypeNavire),
               items: [
                 for (final t in TypeNavire.values)
@@ -535,7 +536,8 @@ class _NavireFormScreenState extends State<NavireFormScreen>
                     Row(children: [
                       Expanded(
                         child: DropdownButtonFormField<TypeCertificat>(
-                          value: c.type,
+                          key: ValueKey(c.type),
+                          initialValue: c.type,
                           items: [
                             for (final t in TypeCertificat.values)
                               DropdownMenuItem(
@@ -685,7 +687,8 @@ class _LicenceFormScreenState extends State<LicenceFormScreen>
               validator: obligatoire,
             ),
             DropdownButtonFormField<String>(
-              value: navireId,
+              key: ValueKey(navireId),
+              initialValue: navireId,
               decoration: InputDecoration(labelText: l10n.champNavire),
               items: [
                 for (final n in widget.navires)
@@ -697,7 +700,8 @@ class _LicenceFormScreenState extends State<LicenceFormScreen>
               onChanged: (v) => setState(() => navireId = v),
             ),
             DropdownButtonFormField<TypePeche>(
-              value: segment,
+              key: ValueKey(segment),
+              initialValue: segment,
               decoration: InputDecoration(labelText: l10n.champSegment),
               items: [
                 for (final s in TypePeche.values)

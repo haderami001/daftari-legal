@@ -35,7 +35,6 @@ class $NaviresTable extends Navires with TableInfo<$NaviresTable, NavireLigne> {
           GeneratedColumn.checkTextLength(minTextLength: 3, maxTextLength: 3),
       type: DriftSqlType.string,
       requiredDuringInsert: true);
-  static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumnWithTypeConverter<TypeNavire, String> type =
       GeneratedColumn<String>('type', aliasedName, false,
@@ -116,7 +115,6 @@ class $NaviresTable extends Navires with TableInfo<$NaviresTable, NavireLigne> {
     } else if (isInserting) {
       context.missing(_pavillonMeta);
     }
-    context.handle(_typeMeta, const VerificationResult.success());
     if (data.containsKey('longueur_m')) {
       context.handle(_longueurMMeta,
           longueurM.isAcceptableOrUnknown(data['longueur_m']!, _longueurMMeta));
@@ -512,7 +510,6 @@ class $CertificatsTable extends Certificats
       requiredDuringInsert: true,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'REFERENCES navires (id) ON DELETE CASCADE'));
-  static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumnWithTypeConverter<TypeCertificat, String> type =
       GeneratedColumn<String>('type', aliasedName, false,
@@ -551,7 +548,6 @@ class $CertificatsTable extends Certificats
     } else if (isInserting) {
       context.missing(_navireIdMeta);
     }
-    context.handle(_typeMeta, const VerificationResult.success());
     if (data.containsKey('numero')) {
       context.handle(_numeroMeta,
           numero.isAcceptableOrUnknown(data['numero']!, _numeroMeta));
@@ -818,15 +814,11 @@ class $LicencesTable extends Licences
       requiredDuringInsert: true,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('REFERENCES navires (id)'));
-  static const VerificationMeta _segmentMeta =
-      const VerificationMeta('segment');
   @override
   late final GeneratedColumnWithTypeConverter<TypePeche, String> segment =
       GeneratedColumn<String>('segment', aliasedName, false,
               type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<TypePeche>($LicencesTable.$convertersegment);
-  static const VerificationMeta _enginsAutorisesMeta =
-      const VerificationMeta('enginsAutorises');
   @override
   late final GeneratedColumnWithTypeConverter<Set<TypeEngin>, String>
       enginsAutorises = GeneratedColumn<String>(
@@ -834,8 +826,6 @@ class $LicencesTable extends Licences
               type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<Set<TypeEngin>>(
               $LicencesTable.$converterenginsAutorises);
-  static const VerificationMeta _especesCiblesMeta =
-      const VerificationMeta('especesCibles');
   @override
   late final GeneratedColumnWithTypeConverter<Set<String>, String>
       especesCibles = GeneratedColumn<String>(
@@ -897,9 +887,6 @@ class $LicencesTable extends Licences
     } else if (isInserting) {
       context.missing(_navireIdMeta);
     }
-    context.handle(_segmentMeta, const VerificationResult.success());
-    context.handle(_enginsAutorisesMeta, const VerificationResult.success());
-    context.handle(_especesCiblesMeta, const VerificationResult.success());
     if (data.containsKey('date_debut')) {
       context.handle(_dateDebutMeta,
           dateDebut.isAcceptableOrUnknown(data['date_debut']!, _dateDebutMeta));
@@ -1530,7 +1517,6 @@ class $DeclarationsTable extends Declarations
       requiredDuringInsert: true,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('REFERENCES licences (numero)'));
-  static const VerificationMeta _enginMeta = const VerificationMeta('engin');
   @override
   late final GeneratedColumnWithTypeConverter<TypeEngin, String> engin =
       GeneratedColumn<String>('engin', aliasedName, false,
@@ -1610,7 +1596,6 @@ class $DeclarationsTable extends Declarations
     } else if (isInserting) {
       context.missing(_licenceNumeroMeta);
     }
-    context.handle(_enginMeta, const VerificationResult.success());
     if (data.containsKey('latitude')) {
       context.handle(_latitudeMeta,
           latitude.isAcceptableOrUnknown(data['latitude']!, _latitudeMeta));
@@ -2616,7 +2601,6 @@ class $ControlesTable extends Controles
   late final GeneratedColumn<double> longitude = GeneratedColumn<double>(
       'longitude', aliasedName, false,
       type: DriftSqlType.double, requiredDuringInsert: true);
-  static const VerificationMeta _enginMeta = const VerificationMeta('engin');
   @override
   late final GeneratedColumnWithTypeConverter<TypeEngin, String> engin =
       GeneratedColumn<String>('engin', aliasedName, false,
@@ -2759,7 +2743,6 @@ class $ControlesTable extends Controles
     } else if (isInserting) {
       context.missing(_longitudeMeta);
     }
-    context.handle(_enginMeta, const VerificationResult.success());
     if (data.containsKey('pavillon_conforme')) {
       context.handle(
           _pavillonConformeMeta,
@@ -3912,7 +3895,6 @@ class $FileEnvoisTable extends FileEnvois
       requiredDuringInsert: false,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumnWithTypeConverter<TypeEnvoi, String> type =
       GeneratedColumn<String>('type', aliasedName, false,
@@ -3980,7 +3962,6 @@ class $FileEnvoisTable extends FileEnvois
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
-    context.handle(_typeMeta, const VerificationResult.success());
     if (data.containsKey('entite_id')) {
       context.handle(_entiteIdMeta,
           entiteId.isAcceptableOrUnknown(data['entite_id']!, _entiteIdMeta));
@@ -4641,7 +4622,7 @@ final class $$NaviresTableReferences
 
   $$CertificatsTableProcessedTableManager get certificatsRefs {
     final manager = $$CertificatsTableTableManager($_db, $_db.certificats)
-        .filter((f) => f.navireId.id($_item.id));
+        .filter((f) => f.navireId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_certificatsRefsTable($_db));
     return ProcessedTableManager(
@@ -4655,7 +4636,7 @@ final class $$NaviresTableReferences
 
   $$LicencesTableProcessedTableManager get licencesRefs {
     final manager = $$LicencesTableTableManager($_db, $_db.licences)
-        .filter((f) => f.navireId.id($_item.id));
+        .filter((f) => f.navireId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_licencesRefsTable($_db));
     return ProcessedTableManager(
@@ -4670,7 +4651,7 @@ final class $$NaviresTableReferences
 
   $$DeclarationsTableProcessedTableManager get declarationsRefs {
     final manager = $$DeclarationsTableTableManager($_db, $_db.declarations)
-        .filter((f) => f.navireId.id($_item.id));
+        .filter((f) => f.navireId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_declarationsRefsTable($_db));
     return ProcessedTableManager(
@@ -4685,7 +4666,7 @@ final class $$NaviresTableReferences
 
   $$ControlesTableProcessedTableManager get controlesRefs {
     final manager = $$ControlesTableTableManager($_db, $_db.controles)
-        .filter((f) => f.navireId.id($_item.id));
+        .filter((f) => f.navireId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_controlesRefsTable($_db));
     return ProcessedTableManager(
@@ -5071,7 +5052,8 @@ class $$NaviresTableTableManager extends RootTableManager<
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (certificatsRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<NavireLigne, $NaviresTable,
+                            CertificatLigne>(
                         currentTable: table,
                         referencedTable:
                             $$NaviresTableReferences._certificatsRefsTable(db),
@@ -5083,7 +5065,8 @@ class $$NaviresTableTableManager extends RootTableManager<
                             referencedItems.where((e) => e.navireId == item.id),
                         typedResults: items),
                   if (licencesRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<NavireLigne, $NaviresTable,
+                            LicenceLigne>(
                         currentTable: table,
                         referencedTable:
                             $$NaviresTableReferences._licencesRefsTable(db),
@@ -5095,7 +5078,8 @@ class $$NaviresTableTableManager extends RootTableManager<
                             referencedItems.where((e) => e.navireId == item.id),
                         typedResults: items),
                   if (declarationsRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<NavireLigne, $NaviresTable,
+                            DeclarationLigne>(
                         currentTable: table,
                         referencedTable:
                             $$NaviresTableReferences._declarationsRefsTable(db),
@@ -5107,7 +5091,8 @@ class $$NaviresTableTableManager extends RootTableManager<
                             referencedItems.where((e) => e.navireId == item.id),
                         typedResults: items),
                   if (controlesRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<NavireLigne, $NaviresTable,
+                            ControleLigne>(
                         currentTable: table,
                         referencedTable:
                             $$NaviresTableReferences._controlesRefsTable(db),
@@ -5167,8 +5152,10 @@ final class $$CertificatsTableReferences extends BaseReferences<_$BaseDeDonnees,
           $_aliasNameGenerator(db.certificats.navireId, db.navires.id));
 
   $$NaviresTableProcessedTableManager get navireId {
+    final $_column = $_itemColumn<String>('navire_id')!;
+
     final manager = $$NaviresTableTableManager($_db, $_db.navires)
-        .filter((f) => f.id($_item.navireId));
+        .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_navireIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -5443,8 +5430,10 @@ final class $$LicencesTableReferences
       .createAlias($_aliasNameGenerator(db.licences.navireId, db.navires.id));
 
   $$NaviresTableProcessedTableManager get navireId {
+    final $_column = $_itemColumn<String>('navire_id')!;
+
     final manager = $$NaviresTableTableManager($_db, $_db.navires)
-        .filter((f) => f.id($_item.navireId));
+        .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_navireIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -5458,8 +5447,8 @@ final class $$LicencesTableReferences
               db.licences.numero, db.quotas.licenceNumero));
 
   $$QuotasTableProcessedTableManager get quotasRefs {
-    final manager = $$QuotasTableTableManager($_db, $_db.quotas)
-        .filter((f) => f.licenceNumero.numero($_item.numero));
+    final manager = $$QuotasTableTableManager($_db, $_db.quotas).filter((f) =>
+        f.licenceNumero.numero.sqlEquals($_itemColumn<String>('numero')!));
 
     final cache = $_typedResult.readTableOrNull(_quotasRefsTable($_db));
     return ProcessedTableManager(
@@ -5474,7 +5463,8 @@ final class $$LicencesTableReferences
 
   $$DeclarationsTableProcessedTableManager get declarationsRefs {
     final manager = $$DeclarationsTableTableManager($_db, $_db.declarations)
-        .filter((f) => f.licenceNumero.numero($_item.numero));
+        .filter((f) =>
+            f.licenceNumero.numero.sqlEquals($_itemColumn<String>('numero')!));
 
     final cache = $_typedResult.readTableOrNull(_declarationsRefsTable($_db));
     return ProcessedTableManager(
@@ -5839,7 +5829,8 @@ class $$LicencesTableTableManager extends RootTableManager<
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (quotasRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<LicenceLigne, $LicencesTable,
+                            QuotaLigne>(
                         currentTable: table,
                         referencedTable:
                             $$LicencesTableReferences._quotasRefsTable(db),
@@ -5850,7 +5841,7 @@ class $$LicencesTableTableManager extends RootTableManager<
                                 .where((e) => e.licenceNumero == item.numero),
                         typedResults: items),
                   if (declarationsRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<LicenceLigne, $LicencesTable, DeclarationLigne>(
                         currentTable: table,
                         referencedTable: $$LicencesTableReferences
                             ._declarationsRefsTable(db),
@@ -5903,8 +5894,10 @@ final class $$QuotasTableReferences
           $_aliasNameGenerator(db.quotas.licenceNumero, db.licences.numero));
 
   $$LicencesTableProcessedTableManager get licenceNumero {
+    final $_column = $_itemColumn<String>('licence_numero')!;
+
     final manager = $$LicencesTableTableManager($_db, $_db.licences)
-        .filter((f) => f.numero($_item.licenceNumero));
+        .filter((f) => f.numero.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_licenceNumeroTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -6156,8 +6149,10 @@ final class $$DeclarationsTableReferences extends BaseReferences<
           $_aliasNameGenerator(db.declarations.navireId, db.navires.id));
 
   $$NaviresTableProcessedTableManager get navireId {
+    final $_column = $_itemColumn<String>('navire_id')!;
+
     final manager = $$NaviresTableTableManager($_db, $_db.navires)
-        .filter((f) => f.id($_item.navireId));
+        .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_navireIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -6169,8 +6164,10 @@ final class $$DeclarationsTableReferences extends BaseReferences<
           db.declarations.licenceNumero, db.licences.numero));
 
   $$LicencesTableProcessedTableManager get licenceNumero {
+    final $_column = $_itemColumn<String>('licence_numero')!;
+
     final manager = $$LicencesTableTableManager($_db, $_db.licences)
-        .filter((f) => f.numero($_item.licenceNumero));
+        .filter((f) => f.numero.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_licenceNumeroTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -6184,8 +6181,8 @@ final class $$DeclarationsTableReferences extends BaseReferences<
                   db.declarations.id, db.equipages.declarationId));
 
   $$EquipagesTableProcessedTableManager get equipagesRefs {
-    final manager = $$EquipagesTableTableManager($_db, $_db.equipages)
-        .filter((f) => f.declarationId.id($_item.id));
+    final manager = $$EquipagesTableTableManager($_db, $_db.equipages).filter(
+        (f) => f.declarationId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_equipagesRefsTable($_db));
     return ProcessedTableManager(
@@ -6199,8 +6196,8 @@ final class $$DeclarationsTableReferences extends BaseReferences<
                   db.declarations.id, db.captures.declarationId));
 
   $$CapturesTableProcessedTableManager get capturesRefs {
-    final manager = $$CapturesTableTableManager($_db, $_db.captures)
-        .filter((f) => f.declarationId.id($_item.id));
+    final manager = $$CapturesTableTableManager($_db, $_db.captures).filter(
+        (f) => f.declarationId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_capturesRefsTable($_db));
     return ProcessedTableManager(
@@ -6639,7 +6636,8 @@ class $$DeclarationsTableTableManager extends RootTableManager<
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (equipagesRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<DeclarationLigne,
+                            $DeclarationsTable, MembreEquipageLigne>(
                         currentTable: table,
                         referencedTable: $$DeclarationsTableReferences
                             ._equipagesRefsTable(db),
@@ -6651,7 +6649,8 @@ class $$DeclarationsTableTableManager extends RootTableManager<
                                 .where((e) => e.declarationId == item.id),
                         typedResults: items),
                   if (capturesRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<DeclarationLigne,
+                            $DeclarationsTable, CaptureLigne>(
                         currentTable: table,
                         referencedTable: $$DeclarationsTableReferences
                             ._capturesRefsTable(db),
@@ -6709,8 +6708,10 @@ final class $$EquipagesTableReferences extends BaseReferences<_$BaseDeDonnees,
           $_aliasNameGenerator(db.equipages.declarationId, db.declarations.id));
 
   $$DeclarationsTableProcessedTableManager get declarationId {
+    final $_column = $_itemColumn<String>('declaration_id')!;
+
     final manager = $$DeclarationsTableTableManager($_db, $_db.declarations)
-        .filter((f) => f.id($_item.declarationId));
+        .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_declarationIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -6972,8 +6973,10 @@ final class $$CapturesTableReferences
           $_aliasNameGenerator(db.captures.declarationId, db.declarations.id));
 
   $$DeclarationsTableProcessedTableManager get declarationId {
+    final $_column = $_itemColumn<String>('declaration_id')!;
+
     final manager = $$DeclarationsTableTableManager($_db, $_db.declarations)
-        .filter((f) => f.id($_item.declarationId));
+        .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_declarationIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -7247,8 +7250,10 @@ final class $$ControlesTableReferences
       .createAlias($_aliasNameGenerator(db.controles.navireId, db.navires.id));
 
   $$NaviresTableProcessedTableManager get navireId {
+    final $_column = $_itemColumn<String>('navire_id')!;
+
     final manager = $$NaviresTableTableManager($_db, $_db.navires)
-        .filter((f) => f.id($_item.navireId));
+        .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_navireIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -7262,9 +7267,9 @@ final class $$ControlesTableReferences
                   db.controles.id, db.controleMaillages.controleId));
 
   $$ControleMaillagesTableProcessedTableManager get controleMaillagesRefs {
-    final manager =
-        $$ControleMaillagesTableTableManager($_db, $_db.controleMaillages)
-            .filter((f) => f.controleId.id($_item.id));
+    final manager = $$ControleMaillagesTableTableManager(
+            $_db, $_db.controleMaillages)
+        .filter((f) => f.controleId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache =
         $_typedResult.readTableOrNull(_controleMaillagesRefsTable($_db));
@@ -7280,9 +7285,9 @@ final class $$ControlesTableReferences
 
   $$ControleEchantillonsTableProcessedTableManager
       get controleEchantillonsRefs {
-    final manager =
-        $$ControleEchantillonsTableTableManager($_db, $_db.controleEchantillons)
-            .filter((f) => f.controleId.id($_item.id));
+    final manager = $$ControleEchantillonsTableTableManager(
+            $_db, $_db.controleEchantillons)
+        .filter((f) => f.controleId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache =
         $_typedResult.readTableOrNull(_controleEchantillonsRefsTable($_db));
@@ -7773,7 +7778,8 @@ class $$ControlesTableTableManager extends RootTableManager<
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (controleMaillagesRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<ControleLigne, $ControlesTable,
+                            MaillageLigne>(
                         currentTable: table,
                         referencedTable: $$ControlesTableReferences
                             ._controleMaillagesRefsTable(db),
@@ -7785,7 +7791,8 @@ class $$ControlesTableTableManager extends RootTableManager<
                                 .where((e) => e.controleId == item.id),
                         typedResults: items),
                   if (controleEchantillonsRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<ControleLigne, $ControlesTable,
+                            EchantillonLigne>(
                         currentTable: table,
                         referencedTable: $$ControlesTableReferences
                             ._controleEchantillonsRefsTable(db),
@@ -7841,8 +7848,10 @@ final class $$ControleMaillagesTableReferences extends BaseReferences<
           db.controleMaillages.controleId, db.controles.id));
 
   $$ControlesTableProcessedTableManager get controleId {
+    final $_column = $_itemColumn<String>('controle_id')!;
+
     final manager = $$ControlesTableTableManager($_db, $_db.controles)
-        .filter((f) => f.id($_item.controleId));
+        .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_controleIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -8084,8 +8093,10 @@ final class $$ControleEchantillonsTableReferences extends BaseReferences<
           db.controleEchantillons.controleId, db.controles.id));
 
   $$ControlesTableProcessedTableManager get controleId {
+    final $_column = $_itemColumn<String>('controle_id')!;
+
     final manager = $$ControlesTableTableManager($_db, $_db.controles)
-        .filter((f) => f.id($_item.controleId));
+        .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_controleIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
