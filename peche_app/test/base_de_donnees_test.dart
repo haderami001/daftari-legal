@@ -185,4 +185,31 @@ void main() {
     await reglages.ecrire('langue', 'ar');
     expect(await reglages.lire('langue'), 'ar');
   });
+
+  test('le nombre d\'envois en attente est surveillé en continu', () async {
+    final valeurs = <int>[];
+    final abonnement =
+        depots.envois.surveillerNombreEnAttente().listen(valeurs.add);
+    addTearDown(abonnement.cancel);
+    await pumpEventQueue();
+    expect(valeurs, [0]);
+
+    final (:navire, :licence) =
+        (await depots.flotte.naviresAvecLicence()).first;
+    final d = DeclarationCapitaine(
+      navire: navire,
+      licence: licence,
+      engin: licence.enginsAutorises.first,
+      position: PositionGps(20, -17, DateTime(2026, 10, 3)),
+    );
+    await depots.saisies
+        .enregistrerDeclaration(d, calcul.verifierDeclaration(d));
+    await pumpEventQueue();
+    expect(valeurs.last, 1); // émis tout seul, sans redemander
+
+    final envoi = (await depots.envois.enAttente()).single;
+    await depots.envois.marquerEnvoye(envoi.id);
+    await pumpEventQueue();
+    expect(valeurs.last, 0);
+  });
 }
