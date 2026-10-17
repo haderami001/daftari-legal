@@ -50,12 +50,13 @@
     {
       "label": "Mac : lancer l'émulateur Android (Pixel_Peche)",
       "type": "shell",
-      "command": "mkdir -p peche_app/build; \"$HOME/Library/Android/sdk/emulator/emulator\" -avd Pixel_Peche -no-snapshot-load -gpu host 2>&1 | tee peche_app/build/emulateur.log",
+      "command": "mkdir -p peche_app/build; pkill -f qemu-system-x86_64; sleep 3; \"$HOME/Library/Android/sdk/emulator/emulator\" -avd Pixel_Peche -no-snapshot -gpu swiftshader_indirect -no-boot-anim 2>&1 | tee peche_app/build/emulateur.log",
       "problemMatcher": [],
       "isBackground": true,
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "detail": "Rendu logiciel (swiftshader) : sur Mac Intel, Android 16 reste noir avec le rendu GPU"
     }
   ]
 }
