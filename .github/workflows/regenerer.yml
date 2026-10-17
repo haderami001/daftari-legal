@@ -30,7 +30,9 @@ jobs:
           dart run build_runner build --delete-conflicting-outputs
           flutter gen-l10n
       - name: Formatage
-        run: dart format lib test tool
+        run: |
+          dart format lib test tool
+          dart format ../serveur/lib ../serveur/bin ../serveur/test
       - name: Commit
         run: |
           git config user.name "github-actions[bot]"
