@@ -50,8 +50,12 @@
     {
       "label": "Mac : lancer l'émulateur Android (Pixel_Peche)",
       "type": "shell",
-      "command": "export PATH=\"$HOME/development/flutter/bin:$PATH\"; flutter emulators --launch Pixel_Peche && sleep 60 && flutter devices",
-      "problemMatcher": []
+      "command": "mkdir -p peche_app/build; \"$HOME/Library/Android/sdk/emulator/emulator\" -avd Pixel_Peche -no-snapshot-load -gpu host 2>&1 | tee peche_app/build/emulateur.log",
+      "problemMatcher": [],
+      "isBackground": true,
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     }
   ]
 }
