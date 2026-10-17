@@ -48,8 +48,12 @@ dart run build_runner build --delete-conflicting-outputs
 
 ```bash
 ./tool/preparer_web.sh       # SQLite WebAssembly, worker Drift, pdf.js
-flutter run -d chrome --web-renderer canvaskit --no-web-resources-cdn
+flutter run -d chrome --dart-define=SERVEUR_DEMO=true
 ```
+
+Avec Flutter 3.24 (version de la CI), on peut ajouter
+`--web-renderer canvaskit --no-web-resources-cdn` ; cette option
+n'existe plus dans les Flutter récents (3.29+).
 
 ### Dans VS Code
 

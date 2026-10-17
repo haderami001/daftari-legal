@@ -50,7 +50,8 @@ dependencies:
   geolocator_android: 4.6.1
   flutter_localizations:
     sdk: flutter
-  intl: ^0.19.0
+  # 0.19 pour Flutter 3.24 (CI), 0.20 pour les Flutter récents (3.27+)
+  intl: ">=0.19.0 <0.21.0"
   flutter_secure_storage: ^9.2.4
   shelf: ^1.4.1
   # Serveur central du dépôt. L'application n'en importe que la partie
