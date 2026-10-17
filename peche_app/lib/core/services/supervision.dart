@@ -14,16 +14,25 @@ class SaisieRecue {
     required this.nbInfractions,
     required this.recuLe,
     this.envoyePar,
+    this.latitude,
+    this.longitude,
+    this.portDebarquement,
   });
 
-  factory SaisieRecue.depuisJson(Map<String, Object?> j) => SaisieRecue(
-        id: j['id']! as String,
-        navireId: j['navire_id']! as String,
-        date: DateTime.parse(j['date']! as String).toLocal(),
-        nbInfractions: j['nb_infractions']! as int,
-        recuLe: DateTime.parse(j['recu_le']! as String).toLocal(),
-        envoyePar: j['envoye_par'] as String?,
-      );
+  factory SaisieRecue.depuisJson(Map<String, Object?> j) {
+    final position = j['position'] as Map?;
+    return SaisieRecue(
+      id: j['id']! as String,
+      navireId: j['navire_id']! as String,
+      date: DateTime.parse(j['date']! as String).toLocal(),
+      nbInfractions: j['nb_infractions']! as int,
+      recuLe: DateTime.parse(j['recu_le']! as String).toLocal(),
+      envoyePar: j['envoye_par'] as String?,
+      latitude: (position?['lat'] as num?)?.toDouble(),
+      longitude: (position?['lon'] as num?)?.toDouble(),
+      portDebarquement: j['port_debarquement'] as String?,
+    );
+  }
 
   final String id;
   final String navireId;
@@ -31,6 +40,13 @@ class SaisieRecue {
   final int nbInfractions;
   final DateTime recuLe;
   final String? envoyePar;
+
+  /// Position de la saisie (`null` pour un ancien serveur).
+  final double? latitude;
+  final double? longitude;
+  final String? portDebarquement;
+
+  bool get aUnePosition => latitude != null && longitude != null;
 }
 
 /// Consultation des saisies reçues par le serveur (rôle `superviseur`) :

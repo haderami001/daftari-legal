@@ -51,6 +51,7 @@ List<String> verifierSaisie(
   v.choix('engin', enginsConnus);
   v.position('position');
   v.entier('nb_infractions', min: 0);
+  if (d.containsKey('port_debarquement')) v.texte('port_debarquement');
 
   switch (type) {
     case TypeSaisie.declaration:
@@ -101,8 +102,51 @@ List<String> verifierSaisie(
           }
         }
       }
+      if (d.containsKey('photos_base64')) verifierPhotos(d['photos_base64'], v.erreurs);
   }
   return v.erreurs;
+}
+
+/// Nombre et taille maximum des photos de preuve d'un contrôle.
+const maxPhotos = 6;
+const maxOctetsPhoto = 4 * 1024 * 1024;
+
+/// Photos de preuve : liste de JPEG ou PNG encodés en base64.
+void verifierPhotos(Object? photos, List<String> erreurs) {
+  if (photos is! List) {
+    erreurs.add('photos_base64 : doit être une liste');
+    return;
+  }
+  if (photos.length > maxPhotos) {
+    erreurs.add('photos_base64 : $maxPhotos photos au maximum');
+  }
+  for (final (i, p) in photos.indexed) {
+    final nom = 'photos_base64[$i]';
+    if (p is! String) {
+      erreurs.add('$nom : doit être un texte');
+      continue;
+    }
+    final List<int> octets;
+    try {
+      octets = base64Decode(p);
+    } on FormatException {
+      erreurs.add('$nom : base64 invalide');
+      continue;
+    }
+    final jpeg = octets.length > 3 &&
+        octets[0] == 0xFF &&
+        octets[1] == 0xD8 &&
+        octets[2] == 0xFF;
+    final png = octets.length > 8 &&
+        octets[0] == 0x89 &&
+        octets[1] == 0x50 &&
+        octets[2] == 0x4E &&
+        octets[3] == 0x47;
+    if (!jpeg && !png) erreurs.add('$nom : n\'est pas une image JPEG ou PNG');
+    if (octets.length > maxOctetsPhoto) {
+      erreurs.add('$nom : plus de ${maxOctetsPhoto ~/ (1024 * 1024)} Mo');
+    }
+  }
 }
 
 class _Verificateur {

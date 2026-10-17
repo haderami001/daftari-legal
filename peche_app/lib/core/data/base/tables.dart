@@ -92,6 +92,9 @@ class Declarations extends Table {
   RealColumn get longitude => real()();
   DateTimeColumn get horodatage => dateTime()();
   IntColumn get nbInfractions => integer().withDefault(const Constant(0))();
+
+  /// Code du port de débarquement prévu (v5, voir `ports.dart`).
+  TextColumn get portDebarquement => text().nullable()();
   DateTimeColumn get creeLe => dateTime().withDefault(currentDateAndTime)();
 
   @override
@@ -139,6 +142,9 @@ class Controles extends Table {
 
   /// Rapport PDF tel que signé (ajouté dans la version 2 du schéma).
   BlobColumn get rapportPdf => blob().nullable()();
+
+  /// Contrôle à quai : code du port (v5). `null` = contrôle en mer.
+  TextColumn get portDebarquement => text().nullable()();
   DateTimeColumn get creeLe => dateTime().withDefault(currentDateAndTime)();
 
   @override
@@ -160,6 +166,18 @@ class ControleEchantillons extends Table {
       text().references(Controles, #id, onDelete: KeyAction.cascade)();
   TextColumn get especeCode => text().withLength(min: 3, max: 3)();
   RealColumn get valeur => real()();
+}
+
+/// Photos de preuve prises pendant le contrôle (v5), en JPEG.
+@DataClassName('PhotoLigne')
+class ControlePhotos extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get controleId =>
+      text().references(Controles, #id, onDelete: KeyAction.cascade)();
+
+  /// Ordre d'affichage (0, 1, 2…), le même que dans le rapport PDF.
+  IntColumn get ordre => integer()();
+  BlobColumn get octets => blob()();
 }
 
 // ---------------------------------------------------------------------------

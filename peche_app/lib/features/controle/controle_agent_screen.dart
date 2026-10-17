@@ -8,6 +8,7 @@ import '../../core/format.dart';
 import '../../core/models/declaration.dart';
 import '../../core/models/enums.dart';
 import '../../core/models/navire.dart';
+import '../../core/models/ports.dart';
 import '../../core/regulation/calcul_reglementaire.dart';
 import '../../core/regulation/rapport.dart';
 import '../../core/regulation/rapport_pdf.dart';
@@ -15,6 +16,7 @@ import '../../core/regulation/referentiel.dart';
 import '../../core/widgets/resultat_card.dart';
 import '../../l10n/libelles.dart';
 import 'rapport_pdf_screen.dart';
+import 'scanner_licence_screen.dart';
 
 /// Prototype : fiche d'inspection de l'agent garde-côtes.
 ///
@@ -121,7 +123,16 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
     final regleEspece = referentielDemo.espece(_especeEchantillon)!;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.moduleControle)),
+      appBar: AppBar(
+        title: Text(l10n.moduleControle),
+        actions: [
+          IconButton(
+            tooltip: l10n.scannerQr,
+            icon: const Icon(Icons.qr_code_scanner),
+            onPressed: _scannerLicence,
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -155,6 +166,20 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
               Text(l10n.positionValeur(
                   '${_position == null ? l10n.gpsRecherche : isolerGaucheDroite('${c.position}')}'
                   '${_position?.demonstration ?? false ? ' ${l10n.gpsNonMesuree}' : ''}')),
+              DropdownButtonFormField<String?>(
+                isExpanded: true,
+                key: ValueKey('lieu-${c.portDebarquement}'),
+                initialValue: c.portDebarquement,
+                decoration: InputDecoration(labelText: l10n.lieuControle),
+                items: [
+                  DropdownMenuItem(value: null, child: Text(l10n.enMer)),
+                  for (final code in portsDebarquement.keys)
+                    DropdownMenuItem(
+                        value: code,
+                        child: Text(l10n.aQuai(l10n.nomPort(code)))),
+                ],
+                onChanged: (p) => setState(() => c.portDebarquement = p),
+              ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(l10n.pavillonConcordant),
@@ -306,6 +331,48 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
             ],
           ),
 
+          // ---------- 6. Photos de preuve ----------
+          _Section(
+            titre: l10n.sectionPhotos,
+            icone: Icons.photo_camera,
+            children: [
+              if (c.photos.isEmpty)
+                Text(l10n.aucunePhoto)
+              else
+                Wrap(spacing: 8, runSpacing: 8, children: [
+                  for (final (i, photo) in c.photos.indexed)
+                    Stack(children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.memory(photo,
+                            width: 96, height: 96, fit: BoxFit.cover),
+                      ),
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: IconButton.filledTonal(
+                          visualDensity: VisualDensity.compact,
+                          tooltip: l10n.supprimerPhoto,
+                          icon: const Icon(Icons.close, size: 16),
+                          onPressed: () =>
+                              setState(() => c.photos.removeAt(i)),
+                        ),
+                      ),
+                    ]),
+                ]),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                icon: const Icon(Icons.add_a_photo),
+                label: Text(c.photos.length < Controle.maxPhotos
+                    ? l10n.prendrePhoto
+                    : l10n.photosMax(Controle.maxPhotos)),
+                onPressed: c.photos.length < Controle.maxPhotos
+                    ? _prendrePhoto
+                    : null,
+              ),
+            ],
+          ),
+
           const SizedBox(height: 8),
           ResultatCard(resultat: resultat),
           const SizedBox(height: 12),
@@ -318,6 +385,48 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _prendrePhoto() async {
+    final messager = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
+    try {
+      final photo = await _services.photo.prendrePhoto();
+      if (photo == null || !mounted) return;
+      setState(() => _controle.photos.add(photo));
+    } catch (e) {
+      // Permission refusée, pas d'appareil photo…
+      messager.showSnackBar(
+          SnackBar(content: Text(l10n.photoIndisponible('$e'))));
+    }
+  }
+
+  /// Le capitaine présente le QR code de sa licence : on sélectionne le
+  /// navire et on affiche tout de suite si la licence est valide.
+  Future<void> _scannerLicence() async {
+    final numero = await Navigator.of(context).push<String>(
+        MaterialPageRoute(builder: (_) => const ScannerLicenceScreen()));
+    if (numero == null || !mounted) return;
+    final l10n = context.l10n;
+    final trouve = _flotte!
+        .where((x) => x.licence.numero.toUpperCase() == numero.toUpperCase())
+        .firstOrNull;
+    final messager = ScaffoldMessenger.of(context);
+    if (trouve == null) {
+      messager.showSnackBar(
+          SnackBar(content: Text(l10n.qrLicenceAbsente(numero))));
+      return;
+    }
+    setState(() => _nouveauControle(trouve));
+    final fin = MaterialLocalizations.of(context)
+        .formatShortDate(trouve.licence.dateFin);
+    final valide = trouve.licence.estValideLe(DateTime.now());
+    messager.showSnackBar(SnackBar(
+      backgroundColor: valide ? Colors.green.shade700 : Colors.red.shade700,
+      content: Text(valide
+          ? l10n.qrLicenceValide(trouve.licence.numero, fin)
+          : l10n.qrLicenceExpiree(trouve.licence.numero, fin)),
+    ));
   }
 
   void _ajouterMaillage() {

@@ -6,13 +6,14 @@ import '../data/depots/flotte_depot.dart';
 import '../data/depots/reglages_depot.dart';
 import '../data/depots/saisie_depot.dart';
 import 'administration.dart';
+import 'photo_service.dart';
 import 'position_service.dart';
 import 'session.dart';
 import 'supervision.dart';
 import 'synchronisation.dart';
 
 /// Tout ce dont les écrans ont besoin, créé une seule fois au démarrage :
-/// la base locale, ses dépôts, le GPS et la synchronisation.
+/// la base locale, ses dépôts, le GPS, l'appareil photo et la synchronisation.
 ///
 /// En test, on crée des `Services` avec une base en mémoire, une position
 /// fixe et un faux serveur : les écrans ne voient pas la différence.
@@ -20,6 +21,7 @@ class Services {
   Services(
     this.base, {
     this.position = const PositionGeolocator(),
+    this.photo = const PhotoImagePicker(),
     ApiSynchro? api,
     this.administration,
     this.supervision,
@@ -43,6 +45,7 @@ class Services {
   final FileEnvoiDepot envois;
   final ReglagesDepot reglages;
   final ServicePosition position;
+  final ServicePhoto photo;
 
   /// Compte connecté (Keycloak) ou mode démonstration.
   final Session session;

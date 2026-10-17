@@ -35,6 +35,7 @@ class SaisieDepot {
             longitude: d.position.longitude,
             horodatage: d.position.horodatage,
             nbInfractions: Value(resultat.infractions.length),
+            portDebarquement: Value(d.portDebarquement),
           ));
       for (final m in d.equipage) {
         await _db.into(_db.equipages).insert(EquipagesCompanion.insert(
@@ -95,7 +96,12 @@ class SaisieDepot {
             amendeMax: resultat.amendeMax,
             rapport: rapport,
             rapportPdf: Value(rapportPdf),
+            portDebarquement: Value(c.portDebarquement),
           ));
+      for (final (i, photo) in c.photos.indexed) {
+        await _db.into(_db.controlePhotos).insert(ControlePhotosCompanion.insert(
+            controleId: id, ordre: i, octets: photo));
+      }
       for (final m in c.maillagesMm) {
         await _db.into(_db.controleMaillages).insert(
             ControleMaillagesCompanion.insert(controleId: id, mesureMm: m));
@@ -120,6 +126,15 @@ class SaisieDepot {
           ..where((c) => c.id.equals(controleId)))
         .getSingleOrNull();
     return ligne?.rapportPdf;
+  }
+
+  /// Relit les photos de preuve d'un contrôle, dans l'ordre de prise.
+  Future<List<Uint8List>> photos(String controleId) async {
+    final lignes = await (_db.select(_db.controlePhotos)
+          ..where((p) => p.controleId.equals(controleId))
+          ..orderBy([(p) => OrderingTerm.asc(p.ordre)]))
+        .get();
+    return [for (final l in lignes) l.octets];
   }
 
   /// Relit les captures d'une déclaration enregistrée.
@@ -155,6 +170,7 @@ class SaisieDepot {
       'position': {'lat': d.latitude, 'lon': d.longitude},
       'horodatage': d.horodatage.toUtc().toIso8601String(),
       'nb_infractions': d.nbInfractions,
+      if (d.portDebarquement != null) 'port_debarquement': d.portDebarquement,
       'equipage': [
         for (final m in equipage)
           {'nom': m.nom, 'fonction': m.fonction, 'nationalite': m.nationalite},
@@ -175,6 +191,7 @@ class SaisieDepot {
     final echantillons = await (_db.select(_db.controleEchantillons)
           ..where((t) => t.controleId.equals(id)))
         .get();
+    final photos = await this.photos(id);
     return {
       'id': c.id,
       'navire_id': c.navireId,
@@ -197,6 +214,9 @@ class SaisieDepot {
       'rapport': c.rapport,
       if (c.rapportPdf != null)
         'rapport_pdf_base64': base64Encode(c.rapportPdf!),
+      if (c.portDebarquement != null) 'port_debarquement': c.portDebarquement,
+      if (photos.isNotEmpty)
+        'photos_base64': [for (final p in photos) base64Encode(p)],
     };
   }
 

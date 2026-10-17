@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'enums.dart';
 import 'navire.dart';
 
@@ -49,6 +51,7 @@ class DeclarationCapitaine {
     required this.licence,
     required this.engin,
     required this.position,
+    this.portDebarquement,
     List<MembreEquipage>? equipage,
     List<Capture>? captures,
   })  : equipage = equipage ?? [],
@@ -58,6 +61,9 @@ class DeclarationCapitaine {
   final Licence licence;
   final TypeEngin engin;
   final PositionGps position;
+
+  /// Code du port de débarquement prévu (`ports.dart`), si connu.
+  final String? portDebarquement;
   final List<MembreEquipage> equipage;
   final List<Capture> captures;
 
@@ -89,8 +95,11 @@ class Controle {
     List<double>? maillagesMm,
     List<Echantillon>? echantillons,
     this.observations = '',
+    this.portDebarquement,
+    List<Uint8List>? photos,
   })  : maillagesMm = maillagesMm ?? [],
-        echantillons = echantillons ?? [];
+        echantillons = echantillons ?? [],
+        photos = photos ?? [];
 
   final Navire navire;
   final String agent;
@@ -106,4 +115,13 @@ class Controle {
   final List<double> maillagesMm;
   final List<Echantillon> echantillons;
   String observations;
+
+  /// Contrôle à quai : code du port (`ports.dart`). `null` = en mer.
+  String? portDebarquement;
+
+  /// Photos de preuve (JPEG), dans l'ordre de prise.
+  final List<Uint8List> photos;
+
+  /// Nombre maximal de photos par contrôle (taille de l'envoi au serveur).
+  static const maxPhotos = 6;
 }

@@ -346,7 +346,7 @@
       }
     }
   },
-  "especeNom": "{code, select, OCC{Poulpe} CTC{Seiche} SAA{Sardinelle ronde} SOL{Sole} YFT{Albacore} BFT{Thon rouge} other{{code}}}",
+  "especeNom": "{code, select, OCC{Poulpe} CTC{Seiche} SAA{Sardinelle ronde} SOL{Sole} YFT{Albacore} BFT{Thon rouge} GPW{Mérou blanc} MGR{Courbine} MUF{Mulet jaune} SOP{Crevette rose du large} other{{code}}}",
   "@especeNom": {
     "placeholders": {
       "code": {
@@ -502,13 +502,40 @@
   "choisirDate": "Choisir une date",
   "aucunElement": "Aucun élément pour l'instant",
   "adminRefus": "Refusé par le serveur : {message}",
-  "@adminRefus": {"placeholders": {"message": {"type": "String"}}},
+  "@adminRefus": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
   "adminChargement": "Chargement impossible : {message}",
-  "@adminChargement": {"placeholders": {"message": {"type": "String"}}},
+  "@adminChargement": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
   "licenceDe": "{numero} — navire {navire}",
-  "@licenceDe": {"placeholders": {"numero": {"type": "String"}, "navire": {"type": "String"}}},
+  "@licenceDe": {
+    "placeholders": {
+      "numero": {
+        "type": "String"
+      },
+      "navire": {
+        "type": "String"
+      }
+    }
+  },
   "confirmerSuppression": "Supprimer « {nom} » ?",
-  "@confirmerSuppression": {"placeholders": {"nom": {"type": "String"}}},
+  "@confirmerSuppression": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
   "suppressionExplication": "Il disparaîtra des listes et des téléphones à la prochaine synchronisation. Les déclarations et contrôles déjà faits sont conservés.",
   "navireSupprime": "Navire supprimé",
   "licenceSupprimee": "Licence supprimée",
@@ -517,16 +544,124 @@
   "ongletDeclarations": "Déclarations",
   "ongletControles": "Contrôles",
   "navireLe": "Navire {navire} — {date}",
-  "@navireLe": {"placeholders": {"navire": {"type": "String"}, "date": {"type": "String"}}},
+  "@navireLe": {
+    "placeholders": {
+      "navire": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "nbInfractions": "{n, plural, =0{aucune infraction} =1{1 infraction} other{{n} infractions}}",
-  "@nbInfractions": {"placeholders": {"n": {"type": "int"}}},
+  "@nbInfractions": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "envoyePar": "envoyé par {compte}",
-  "@envoyePar": {"placeholders": {"compte": {"type": "String"}}},
+  "@envoyePar": {
+    "placeholders": {
+      "compte": {
+        "type": "String"
+      }
+    }
+  },
   "avecInfraction": "avec infraction(s)",
   "modificationsEnregistrees": "{n, plural, =1{1 modification enregistrée} other{{n} modifications enregistrées}}",
-  "@modificationsEnregistrees": {"placeholders": {"n": {"type": "int"}}},
+  "@modificationsEnregistrees": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "quitterSansEnregistrer": "Quitter sans enregistrer ?",
   "modificationsPerdues": "Les modifications de ce formulaire seront perdues.",
   "rester": "Rester",
-  "quitter": "Quitter"
+  "quitter": "Quitter",
+  "portDebarquement": "Port de débarquement",
+  "portNonPrecise": "Non précisé",
+  "nomPort": "{code, select, NDB{Nouadhibou} NKC{Nouakchott} TAN{Tanit} NDG{N'Diago} MHJ{Mhaijratt} IWK{Iwik} other{{code}}}",
+  "@nomPort": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "lieuControle": "Lieu du contrôle",
+  "enMer": "En mer",
+  "aQuai": "À quai : {port}",
+  "@aQuai": {
+    "placeholders": {
+      "port": {
+        "type": "String"
+      }
+    }
+  },
+  "sectionPhotos": "Photos de preuve",
+  "prendrePhoto": "Prendre une photo",
+  "photosMax": "{n} photos au maximum",
+  "@photosMax": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "aucunePhoto": "Aucune photo (captures, filets, documents…)",
+  "photoIndisponible": "Photo impossible : {erreur}",
+  "@photoIndisponible": {
+    "placeholders": {
+      "erreur": {
+        "type": "String"
+      }
+    }
+  },
+  "supprimerPhoto": "Supprimer la photo",
+  "scannerQr": "Scanner le QR code de la licence",
+  "qrLicence": "QR code de la licence",
+  "qrLicenceAide": "Montrez ce code à l'agent garde-côtes : il identifie le navire et la licence, même sans réseau.",
+  "qrInconnu": "QR code non reconnu",
+  "qrLicenceAbsente": "Licence {numero} absente de la base locale",
+  "@qrLicenceAbsente": {
+    "placeholders": {
+      "numero": {
+        "type": "String"
+      }
+    }
+  },
+  "qrLicenceValide": "Licence {numero} valide jusqu'au {date}",
+  "@qrLicenceValide": {
+    "placeholders": {
+      "numero": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "qrLicenceExpiree": "Licence {numero} EXPIRÉE ou pas encore valide (fin : {date})",
+  "@qrLicenceExpiree": {
+    "placeholders": {
+      "numero": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "qrSaisieManuelle": "Saisir le numéro de licence",
+  "qrViser": "Placez le QR code dans le cadre",
+  "valider": "Valider",
+  "ongletCarte": "Carte",
+  "carteLegende": "Bleu : déclarations · Vert : contrôles conformes · Rouge : avec infraction",
+  "carteSansPosition": "Aucune position à afficher",
+  "carteHorsLigne": "La carte a besoin d'Internet pour afficher le fond (OpenStreetMap)."
 }
