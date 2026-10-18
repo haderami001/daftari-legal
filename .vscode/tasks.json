@@ -2,6 +2,13 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Mac : installer CocoaPods (iPhone)",
+      "detail": "Nécessaire pour compiler l'app sur le simulateur iPhone. Journal : peche_app/build/cocoapods.log",
+      "type": "shell",
+      "command": "./outils/installer_cocoapods.sh",
+      "problemMatcher": []
+    },
+    {
       "label": "Mac : utiliser le Java d'Android Studio pour Gradle",
       "detail": "Corrige « Gradle build failed due to Java/Gradle incompatibility » (Java 25 trop récent)",
       "type": "shell",
