@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/services/services.dart';
+import '../../core/theme.dart';
 import '../../l10n/libelles.dart';
 import '../../main.dart';
 import '../administration/administration_screen.dart';
@@ -131,6 +132,8 @@ class _AccueilScreenState extends State<AccueilScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          _Entete(nom: profil.nomComplet),
+          const SizedBox(height: 12),
           if (!profil.peutDeclarer &&
               !profil.peutControler &&
               !(profil.peutSuperviser && services.supervision != null))
@@ -138,11 +141,11 @@ class _AccueilScreenState extends State<AccueilScreen> {
               leading: const Icon(Icons.info_outline),
               title: Text(l10n.aucunModule),
             ),
-          for (final (icone, titre, sousTitre, ecran) in modules)
+          for (final (i, (icone, titre, sousTitre, ecran)) in modules.indexed)
             Card(
               child: ListTile(
                 contentPadding: const EdgeInsets.all(12),
-                leading: Icon(icone, size: 36),
+                leading: _IconeModule(icone, _couleursModules[i % 6]),
                 title: Text(titre),
                 subtitle: Text(sousTitre),
                 trailing: const Icon(Icons.chevron_right),
@@ -161,7 +164,8 @@ class _AccueilScreenState extends State<AccueilScreen> {
                   leading: Badge(
                     isLabelVisible: (n ?? 0) > 0,
                     label: Text('${n ?? 0}'),
-                    child: const Icon(Icons.cloud_upload, size: 36),
+                    child: const _IconeModule(
+                        Icons.cloud_upload, CouleursPeche.vertMauritanie),
                   ),
                   title: Text(l10n.moduleEnvois),
                   subtitle: Text(switch (n) {
@@ -177,6 +181,97 @@ class _AccueilScreenState extends State<AccueilScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Couleur de l'icône de chaque module, dans l'ordre de la liste.
+const _couleursModules = [
+  CouleursPeche.ocean,
+  CouleursPeche.marine,
+  CouleursPeche.sauvetage,
+  CouleursPeche.vertMauritanie,
+  Color(0xFF6A4C93),
+  Color(0xFF00838F),
+];
+
+/// Icône de module dans un carré arrondi coloré.
+class _IconeModule extends StatelessWidget {
+  const _IconeModule(this.icone, this.couleur);
+
+  final IconData icone;
+  final Color couleur;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: 52,
+        height: 52,
+        decoration: BoxDecoration(
+          color: couleur.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Icon(icone, color: couleur, size: 30),
+      );
+}
+
+/// Bandeau d'accueil : nom de l'application, mission, compte connecté.
+class _Entete extends StatelessWidget {
+  const _Entete({required this.nom});
+
+  final String nom;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final texte = Theme.of(context).textTheme;
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: CouleursPeche.degradeEntete,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(children: [
+        Container(
+          width: 64,
+          height: 64,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.anchor, color: CouleursPeche.marine, size: 36),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.appTitle,
+                  style: texte.headlineSmall?.copyWith(
+                      color: Colors.white, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 4),
+              Text(l10n.accueilMission,
+                  style: texte.bodyMedium?.copyWith(color: Colors.white70)),
+              const SizedBox(height: 8),
+              // Bande aux couleurs du drapeau mauritanien.
+              Row(children: [
+                for (final c in const [
+                  Color(0xFFD01C1F),
+                  CouleursPeche.vertMauritanie,
+                  CouleursPeche.or,
+                  CouleursPeche.vertMauritanie,
+                  Color(0xFFD01C1F),
+                ])
+                  Container(width: 18, height: 4, color: c),
+              ]),
+              if (nom.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(l10n.connecteEnTantQue(nom),
+                    style: texte.bodySmall?.copyWith(color: Colors.white)),
+              ],
+            ],
+          ),
+        ),
+      ]),
     );
   }
 }

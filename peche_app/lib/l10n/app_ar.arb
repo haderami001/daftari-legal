@@ -228,5 +228,7 @@
   "ongletCarte": "الخريطة",
   "carteLegende": "أزرق: تصريحات · أخضر: مراقبات مطابقة · أحمر: مع مخالفة",
   "carteSansPosition": "لا توجد مواقع للعرض",
-  "carteHorsLigne": "تحتاج الخريطة إلى الإنترنت لعرض الخلفية (OpenStreetMap)."
+  "carteHorsLigne": "تحتاج الخريطة إلى الإنترنت لعرض الخلفية (OpenStreetMap).",
+  "accueilMission": "مراقبة الصيد والتصريح به في موريتانيا",
+  "connecteEnTantQue": "متصل: {nom}"
 }
