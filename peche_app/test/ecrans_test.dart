@@ -33,6 +33,7 @@ void main() {
 
   Future<void> ouvrir(WidgetTester tester, String module) async {
     await lancer(tester);
+    await faireDefiler(tester, find.text(module));
     await tester.tap(find.text(module));
     await tester.pumpAndSettle();
   }
@@ -57,6 +58,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Retour à l'accueil : la saisie attend dans la file d'envoi.
+    await faireDefiler(tester, find.text('1 saisie à envoyer au serveur'));
     expect(find.text('1 saisie à envoyer au serveur'), findsOneWidget);
     expect(await base.select(base.declarations).get(), hasLength(1));
   });
@@ -103,6 +105,7 @@ void main() {
     await services.saisies.enregistrerDeclaration(
         d, const CalculReglementaire(referentielDemo).verifierDeclaration(d));
 
+    await faireDefiler(tester, find.text('Envois en attente'));
     await tester.tap(find.text('Envois en attente'));
     await tester.pumpAndSettle();
     expect(find.textContaining('500 kg'), findsOneWidget);
@@ -125,3 +128,9 @@ void main() {
     expect(find.textContaining('Code des pêches'), findsOneWidget);
   });
 }
+
+/// Fait défiler l'accueil jusqu'à [cible] (le bandeau d'en-tête pousse les
+/// derniers modules sous le bas de l'écran de test).
+Future<void> faireDefiler(WidgetTester tester, Finder cible) =>
+    tester.scrollUntilVisible(cible, 150,
+        scrollable: find.byType(Scrollable).first);
