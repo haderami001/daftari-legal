@@ -141,17 +141,6 @@ class _AccueilScreenState extends State<AccueilScreen> {
               leading: const Icon(Icons.info_outline),
               title: Text(l10n.aucunModule),
             ),
-          for (final (i, (icone, titre, sousTitre, ecran)) in modules.indexed)
-            Card(
-              child: ListTile(
-                contentPadding: const EdgeInsets.all(12),
-                leading: _IconeModule(icone, _couleursModules[i % 6]),
-                title: Text(titre),
-                subtitle: Text(sousTitre),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => _ouvrir(ecran),
-              ),
-            ),
           // StreamBuilder : redessine la carte à chaque nouvelle valeur
           // du flux (comme FutureBuilder, mais pour plusieurs valeurs).
           StreamBuilder<int>(
@@ -179,6 +168,17 @@ class _AccueilScreenState extends State<AccueilScreen> {
               );
             },
           ),
+          for (final (i, (icone, titre, sousTitre, ecran)) in modules.indexed)
+            Card(
+              child: ListTile(
+                contentPadding: const EdgeInsets.all(12),
+                leading: _IconeModule(icone, _couleursModules[i % 6]),
+                title: Text(titre),
+                subtitle: Text(sousTitre),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _ouvrir(ecran),
+              ),
+            ),
         ],
       ),
     );
