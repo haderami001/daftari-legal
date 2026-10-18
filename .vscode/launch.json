@@ -2,6 +2,17 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Pêche Conforme (émulateur Android, rendu logiciel)",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "peche_app",
+      "program": "lib/main.dart",
+      "args": [
+        "--dart-define=SERVEUR_DEMO=true",
+        "--no-enable-impeller"
+      ]
+    },
+    {
       "name": "Pêche Conforme (démo complète, navigateur)",
       "request": "launch",
       "type": "dart",
