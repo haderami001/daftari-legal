@@ -10,8 +10,10 @@ import 'package:flutter_test/flutter_test.dart';
 /// donc sur une surface de 800 × 1400 (points logiques).
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   setUp(() {
-    final vue =
-        TestWidgetsFlutterBinding.ensureInitialized().platformDispatcher.views.first;
+    final vue = TestWidgetsFlutterBinding.ensureInitialized()
+        .platformDispatcher
+        .views
+        .first;
     vue.physicalSize = const Size(2400, 4200);
     vue.devicePixelRatio = 3;
   });
