@@ -126,8 +126,8 @@ void main() {
     testWidgets('ajout d\'un navire puis de sa licence, refus affiché',
         (tester) async {
       final services = await lancer(tester, 'admin');
-      await tester.scrollUntilVisible(find.text('Navires et licences'), 150,
-          scrollable: find.byType(Scrollable).first);
+      await tester.ensureVisible(find.text('Navires et licences'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Navires et licences'));
       await tester.pumpAndSettle();
       expect(find.text('Aucun élément pour l\'instant'), findsOneWidget);
