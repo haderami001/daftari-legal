@@ -663,5 +663,14 @@
   "ongletCarte": "Carte",
   "carteLegende": "Bleu : déclarations · Vert : contrôles conformes · Rouge : avec infraction",
   "carteSansPosition": "Aucune position à afficher",
-  "carteHorsLigne": "La carte a besoin d'Internet pour afficher le fond (OpenStreetMap)."
+  "carteHorsLigne": "La carte a besoin d'Internet pour afficher le fond (OpenStreetMap).",
+  "accueilMission": "Contrôle et déclaration des pêches en Mauritanie",
+  "connecteEnTantQue": "Connecté : {nom}",
+  "@connecteEnTantQue": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      }
+    }
+  }
 }

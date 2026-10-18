@@ -9,6 +9,7 @@ import 'core/services/services.dart';
 import 'core/services/session.dart';
 import 'core/services/supervision.dart';
 import 'core/services/synchronisation.dart';
+import 'core/theme.dart';
 import 'features/accueil/accueil_screen.dart';
 import 'features/connexion/connexion_screen.dart';
 import 'l10n/libelles.dart';
@@ -117,8 +118,8 @@ class _PecheAppState extends State<PecheApp> {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        theme: _theme(Brightness.light),
-        darkTheme: _theme(Brightness.dark),
+        theme: themePeche(Brightness.light),
+        darkTheme: themePeche(Brightness.dark),
         // Écran de connexion tant qu'aucun compte n'est connecté.
         home: ListenableBuilder(
           listenable: widget.services.session,
@@ -133,13 +134,3 @@ class _PecheAppState extends State<PecheApp> {
     );
   }
 }
-
-/// Thème commun. Police latine Noto Sans, et Noto Sans Arabic pour les
-/// caractères arabes (même famille de dessin, rendu cohérent).
-ThemeData _theme(Brightness luminosite) => ThemeData(
-      colorSchemeSeed: const Color(0xFF0B5E8A),
-      brightness: luminosite,
-      useMaterial3: true,
-      fontFamily: 'NotoSans',
-      fontFamilyFallback: const ['NotoSansArabic'],
-    );

@@ -57,7 +57,18 @@ jobs:
         run: flutter analyze
 
       - name: Tests
-        run: flutter test
+        shell: bash
+        run: |
+          set +e
+          flutter test --reporter expanded 2>&1 | tee test.log
+          statut=${PIPESTATUS[0]}
+          if [ "$statut" -ne 0 ]; then
+            # Résumé des échecs en annotation, lisible sans télécharger le journal.
+            resume=$(grep -E -B2 -A14 "EXCEPTION CAUGHT|\[E\]$" test.log | head -c 12000 \
+              | sed -e 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+            echo "::error title=Tests en échec::${resume}"
+          fi
+          exit "$statut"
 
   # Application Android installable : téléchargeable depuis l'onglet
   # « Actions » de GitHub (section Artifacts) pour l'essayer sur un téléphone.
