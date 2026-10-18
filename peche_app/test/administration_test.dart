@@ -126,8 +126,7 @@ void main() {
     testWidgets('ajout d\'un navire puis de sa licence, refus affiché',
         (tester) async {
       final services = await lancer(tester, 'admin');
-      await tester.ensureVisible(find.text('Navires et licences'));
-      await tester.pumpAndSettle();
+      await afficherModule(tester);
       await tester.tap(find.text('Navires et licences'));
       await tester.pumpAndSettle();
       expect(find.text('Aucun élément pour l\'instant'), findsOneWidget);
@@ -150,6 +149,7 @@ void main() {
       await tester.tap(find.byType(BackButton));
       await tester.pumpAndSettle();
       expect(find.text('1 modification enregistrée'), findsOneWidget);
+      await afficherModule(tester);
       await tester.tap(find.text('Navires et licences'));
       await tester.pumpAndSettle();
       final navire =
@@ -249,4 +249,14 @@ class _AuthAgent implements serveur.Authentificateur {
   @override
   Future<serveur.Utilisateur?> verifier(String jeton) async =>
       const serveur.Utilisateur(id: 'a', nom: 'a', roles: {'agent'});
+}
+
+/// Fait défiler l'accueil jusqu'au module d'administration, le dernier de la
+/// liste (construit seulement quand il approche de l'écran).
+Future<void> afficherModule(WidgetTester tester) async {
+  final module = find.text('Navires et licences');
+  await tester.scrollUntilVisible(module, 150,
+      scrollable: find.byType(Scrollable).first);
+  await tester.ensureVisible(module);
+  await tester.pumpAndSettle();
 }
