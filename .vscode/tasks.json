@@ -2,6 +2,13 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Mac : utiliser le Java d'Android Studio pour Gradle",
+      "detail": "Corrige « Gradle build failed due to Java/Gradle incompatibility » (Java 25 trop récent)",
+      "type": "shell",
+      "command": "export PATH=\"$HOME/development/flutter/bin:$PATH\"; for d in \"/Applications/Android Studio.app\" \"$HOME/Applications/Android Studio.app\"; do [ -d \"$d\" ] && J=\"$d/Contents/jbr/Contents/Home\"; done; echo \"Java d'Android Studio : $J\"; \"$J/bin/java\" -version && flutter config --jdk-dir \"$J\" && flutter doctor -v | grep -i java",
+      "problemMatcher": []
+    },
+    {
       "label": "Pêche Conforme : préparer la version web",
       "detail": "SQLite WebAssembly, worker Drift et pdf.js (à refaire après un changement de version de drift)",
       "type": "shell",
