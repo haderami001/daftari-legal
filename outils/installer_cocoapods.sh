@@ -25,7 +25,7 @@ echo "RubyGems : $(gem -v 2>&1)"
 REP="$(ruby -e 'print Gem.user_dir')"
 # Ruby 2.6 du Mac : versions des dépendances compatibles.
 if ruby -e 'exit(RUBY_VERSION < "3.0" ? 0 : 1)'; then
-  for g in "i18n:1.14.6" "activesupport:6.1.7.10" "ffi:1.16.3" "securerandom:0.3.2" "drb:2.0.6" "minitest:5.25.1" "public_suffix:5.1.1" "concurrent-ruby:1.3.4" "i18n:1.14.6" "xcodeproj:1.27.0"; do
+  for g in "i18n:1.14.6" "zeitwerk:2.6.18" "activesupport:6.1.7.10" "ffi:1.16.3" "securerandom:0.3.2" "drb:2.0.6" "minitest:5.25.1" "public_suffix:5.1.1" "concurrent-ruby:1.3.4" "i18n:1.14.6" "xcodeproj:1.27.0"; do
     gem install --user-install --no-document "${g%%:*}" -v "${g##*:}" || echo "(échec ${g})"
   done
 fi
