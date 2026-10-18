@@ -125,7 +125,8 @@ etape_ios() {
 etape_flutter() {
   etape "Flutter : configuration et diagnostic"
   export PATH="$DEV/flutter/bin:$PATH"
-  local studio; studio=$(trouver_studio) && flutter config --android-studio-dir "$studio"
+  local studio; studio=$(trouver_studio) && flutter config --android-studio-dir "$studio" \
+    && flutter config --jdk-dir "$(java_home)" # Java 21 de Studio (Gradle refuse Java 25)
   [ -d "$SDK" ] && flutter config --android-sdk "$SDK"
   [ -d "$SDK" ] && { export JAVA_HOME; JAVA_HOME="$(java_home)"; yes | flutter doctor --android-licenses >/dev/null 2>&1; }
   flutter doctor -v
