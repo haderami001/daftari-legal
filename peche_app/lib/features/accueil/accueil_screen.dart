@@ -238,7 +238,8 @@ class _Entete extends StatelessWidget {
             color: Colors.white,
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.anchor, color: CouleursPeche.marine, size: 36),
+          child:
+              const Icon(Icons.anchor, color: CouleursPeche.marine, size: 36),
         ),
         const SizedBox(width: 16),
         Expanded(

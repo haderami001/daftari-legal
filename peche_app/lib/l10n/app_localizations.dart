@@ -1473,6 +1473,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'La carte a besoin d\'Internet pour afficher le fond (OpenStreetMap).'**
   String get carteHorsLigne;
+
+  /// No description provided for @accueilMission.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contrôle et déclaration des pêches en Mauritanie'**
+  String get accueilMission;
+
+  /// No description provided for @connecteEnTantQue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connecté : {nom}'**
+  String connecteEnTantQue(String nom);
 }
 
 class _AppLocalizationsDelegate

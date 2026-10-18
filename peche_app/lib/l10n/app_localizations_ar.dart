@@ -950,4 +950,12 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get carteHorsLigne =>
       'تحتاج الخريطة إلى الإنترنت لعرض الخلفية (OpenStreetMap).';
+
+  @override
+  String get accueilMission => 'مراقبة الصيد والتصريح به في موريتانيا';
+
+  @override
+  String connecteEnTantQue(String nom) {
+    return 'متصل: $nom';
+  }
 }

@@ -940,4 +940,13 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get carteHorsLigne =>
       'La carte a besoin d\'Internet pour afficher le fond (OpenStreetMap).';
+
+  @override
+  String get accueilMission =>
+      'Contrôle et déclaration des pêches en Mauritanie';
+
+  @override
+  String connecteEnTantQue(String nom) {
+    return 'Connecté : $nom';
+  }
 }
