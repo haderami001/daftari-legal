@@ -131,6 +131,5 @@ void main() {
 
 /// Fait défiler l'accueil jusqu'à [cible] (le bandeau d'en-tête pousse les
 /// derniers modules sous le bas de l'écran de test).
-Future<void> faireDefiler(WidgetTester tester, Finder cible) =>
-    tester.scrollUntilVisible(cible, 150,
-        scrollable: find.byType(Scrollable).first);
+Future<void> faireDefiler(WidgetTester tester, Finder cible) => tester
+    .scrollUntilVisible(cible, 150, scrollable: find.byType(Scrollable).first);
