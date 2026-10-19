@@ -17,6 +17,13 @@ abstract final class CouleursPeche {
   );
 }
 
+/// Police de l'app. À répéter dans chaque `textStyle` de bouton : il
+/// remplace tout le style du texte (sinon retour à la police par défaut).
+const _police = TextStyle(
+  fontFamily: 'NotoSans',
+  fontFamilyFallback: ['NotoSansArabic'],
+);
+
 /// Thème commun (clair et sombre). Police latine Noto Sans, et Noto Sans
 /// Arabic pour les caractères arabes (même famille de dessin).
 ThemeData themePeche(Brightness luminosite) {
@@ -77,7 +84,7 @@ ThemeData themePeche(Brightness luminosite) {
       style: FilledButton.styleFrom(
         minimumSize: const Size(64, 48),
         shape: RoundedRectangleBorder(borderRadius: arrondi),
-        textStyle: const TextStyle(fontWeight: FontWeight.w700),
+        textStyle: _police.copyWith(fontWeight: FontWeight.w700),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(

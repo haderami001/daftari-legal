@@ -178,6 +178,7 @@ class _Chiffres extends StatelessWidget {
     final avecInfraction = saisies.where((s) => s.nbInfractions > 0).length;
     Widget tuile(String valeur, String libelle) => Expanded(
           child: Card(
+            margin: const EdgeInsets.symmetric(horizontal: 4),
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Column(children: [
