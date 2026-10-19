@@ -97,9 +97,17 @@ void main() {
       expect(find.textContaining('Navire N1'), findsOneWidget);
       expect(find.textContaining('aucune infraction'), findsOneWidget);
       expect(find.textContaining('envoyé par jeton-partage'), findsOneWidget);
+      // Le contrôle a des infractions : la carte le compte même sur
+      // l'onglet des déclarations (toutes les saisies, pas l'onglet).
+      Finder carteInfractions() => find.ancestor(
+          of: find.text('avec infraction(s)'), matching: find.byType(Card));
+      expect(find.descendant(of: carteInfractions(), matching: find.text('1')),
+          findsOneWidget);
 
       await tester.tap(find.widgetWithText(Tab, 'Contrôles'));
       await tester.pumpAndSettle();
+      expect(find.descendant(of: carteInfractions(), matching: find.text('1')),
+          findsOneWidget);
       expect(find.textContaining('Navire N2'), findsOneWidget);
       await tester.tap(find.textContaining('Navire N2'));
       // L'aperçu PDF s'anime en continu : pas de pumpAndSettle.
