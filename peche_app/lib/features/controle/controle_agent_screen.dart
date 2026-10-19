@@ -166,6 +166,7 @@ class _ControleAgentScreenState extends State<ControleAgentScreen> {
               Text(l10n.positionValeur(
                   '${_position == null ? l10n.gpsRecherche : isolerGaucheDroite('${c.position}')}'
                   '${_position?.demonstration ?? false ? ' ${l10n.gpsNonMesuree}' : ''}')),
+              const SizedBox(height: 12),
               DropdownButtonFormField<String?>(
                 isExpanded: true,
                 key: ValueKey('lieu-${c.portDebarquement}'),

@@ -175,6 +175,8 @@ class _DeclarationCapitaineScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Place pour le libellé posé sur le cadre (sinon coupé par l'étape).
+        const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           isExpanded: true,
           key: ValueKey(_navire.id),
