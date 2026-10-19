@@ -108,13 +108,17 @@ class _SupervisionScreenState extends State<SupervisionScreen> {
               return const Center(child: CircularProgressIndicator());
             }
             final d = etat.data!;
+            // Toutes les saisies reçues, quel que soit l'onglet ouvert.
+            final avecInfraction = [...d.declarations, ...d.controles]
+                .where((s) => s.nbInfractions > 0)
+                .length;
             Widget liste(List<SaisieRecue> saisies, {bool rapport = false}) =>
                 RefreshIndicator(
                   onRefresh: _actualiser,
                   child: ListView(
                     padding: const EdgeInsets.all(12),
                     children: [
-                      _Chiffres(d.stats, saisies),
+                      _Chiffres(d.stats, avecInfraction),
                       if (saisies.isEmpty)
                         Padding(
                           padding: const EdgeInsets.all(24),
@@ -167,15 +171,14 @@ class _SupervisionScreenState extends State<SupervisionScreen> {
 
 /// Chiffres clés en tête de liste.
 class _Chiffres extends StatelessWidget {
-  const _Chiffres(this.stats, this.saisies);
+  const _Chiffres(this.stats, this.avecInfraction);
 
   final Map<String, int> stats;
-  final List<SaisieRecue> saisies;
+  final int avecInfraction;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final avecInfraction = saisies.where((s) => s.nbInfractions > 0).length;
     Widget tuile(String valeur, String libelle) => Expanded(
           child: Card(
             margin: const EdgeInsets.symmetric(horizontal: 4),
