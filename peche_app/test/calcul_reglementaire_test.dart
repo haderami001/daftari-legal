@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:peche_app/core/data/donnees_demo.dart';
 import 'package:peche_app/core/models/declaration.dart';
 import 'package:peche_app/core/models/enums.dart';
+import 'package:peche_app/core/models/navire.dart';
 import 'package:peche_app/core/regulation/calcul_reglementaire.dart';
 import 'package:peche_app/core/regulation/referentiel.dart';
 
@@ -67,6 +68,32 @@ void main() {
     );
     expect(r.infractions.map((i) => i.code),
         containsAll(['LIC_INVALIDE', 'CERT_EXPIRE']));
+  });
+
+  test('certificat de navigabilité absent', () {
+    // Même pirogue, mais sans aucun certificat à bord.
+    final sansCertificat = Navire(
+      id: pirogue.id,
+      nom: pirogue.nom,
+      immatriculation: pirogue.immatriculation,
+      pavillon: pirogue.pavillon,
+      type: pirogue.type,
+      longueurM: pirogue.longueurM,
+      puissanceKw: pirogue.puissanceKw,
+    );
+    final r = calcul.verifierDeclaration(DeclarationCapitaine(
+      navire: sansCertificat,
+      licence: licencePirogue,
+      engin: TypeEngin.casier,
+      position: PositionGps(20.85, -17.45, jour),
+      captures: const [Capture(especeCode: 'OCC', poidsKg: 200)],
+    ));
+    final i = r.infractions.single;
+    expect(i.code, 'CERT_ABSENT');
+    expect(i.gravite, Gravite.grave);
+    expect(i.message, 'Certificat de navigabilité absent.');
+    // Un certificat présent (même expiré) relève de CERT_EXPIRE, pas d'ici.
+    expect(calcul.verifierCertificats(pirogue, jour), isEmpty);
   });
 
   group('contrôle', () {

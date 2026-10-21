@@ -837,6 +837,12 @@ abstract class AppLocalizations {
   /// **'Engin « {engin} » non autorisé par la licence.'**
   String infEnginNonAutorise(String engin);
 
+  /// No description provided for @infCertificatAbsent.
+  ///
+  /// In fr, this message translates to:
+  /// **'{certificat} absent.'**
+  String infCertificatAbsent(String certificat);
+
   /// No description provided for @infCertificatExpire.
   ///
   /// In fr, this message translates to:

@@ -544,6 +544,11 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String infCertificatAbsent(String certificat) {
+    return '$certificat absent.';
+  }
+
+  @override
   String infCertificatExpire(String certificat, String numero) {
     return '$certificat n° $numero expiré.';
   }

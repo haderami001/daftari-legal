@@ -123,6 +123,7 @@
   "especeNom": "{code, select, OCC{الأخطبوط} CTC{الحبّار (السيبيا)} SAA{السردينيلا المستديرة} SOL{سمك موسى} YFT{التونة صفراء الزعانف} BFT{التونة الحمراء} GPW{الهامور الأبيض} MGR{الكوربين} MUF{البوري} SOP{الروبيان الوردي} other{{code}}}",
   "infLicenceInvalide": "الرخصة {licence} غير صالحة في هذا التاريخ.",
   "infEnginNonAutorise": "أداة الصيد «{engin}» غير مرخَّصة بموجب الرخصة.",
+  "infCertificatAbsent": "{certificat} غير موجودة.",
   "infCertificatExpire": "{certificat} رقم {numero} منتهي الصلاحية.",
   "infQuotaDepasse": "تجاوز حصة {espece}: {poids} كغ مقابل {quota} كغ مسموح بها.",
   "infPrisesAccessoires": "المصيد العرضي {pct}٪ (الحد الأقصى {max}٪ لأداة {engin}).",
