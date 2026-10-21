@@ -553,6 +553,11 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String infCertificatAbsent(String certificat) {
+    return '$certificat غير موجودة.';
+  }
+
+  @override
   String infCertificatExpire(String certificat, String numero) {
     return '$certificat رقم $numero منتهي الصلاحية.';
   }

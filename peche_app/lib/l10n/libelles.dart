@@ -40,6 +40,8 @@ extension Libelles on AppLocalizations {
       'LIC_INVALIDE' => infLicenceInvalide('${d['licence']}'),
       'ENGIN_NON_AUTORISE' =>
         infEnginNonAutorise(libelleEngin(d['engin']! as TypeEngin)),
+      'CERT_ABSENT' => infCertificatAbsent(
+          libelleCertificat(d['certificat']! as TypeCertificat)),
       'CERT_EXPIRE' => infCertificatExpire(
           libelleCertificat(d['certificat']! as TypeCertificat),
           '${d['numero']}'),

@@ -92,6 +92,14 @@ class CalculReglementaire {
 
   List<Infraction> verifierCertificats(Navire navire, DateTime jour) {
     return [
+      // Tout navire doit avoir un certificat de navigabilité à bord.
+      if (!navire.certificats.any((c) => c.type == TypeCertificat.navigabilite))
+        const Infraction(
+          code: 'CERT_ABSENT',
+          gravite: Gravite.grave,
+          message: 'Certificat de navigabilité absent.',
+          details: {'certificat': TypeCertificat.navigabilite},
+        ),
       for (final c in navire.certificats)
         if (!c.estValideLe(jour))
           Infraction(

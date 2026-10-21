@@ -370,6 +370,14 @@
       }
     }
   },
+  "infCertificatAbsent": "{certificat} absent.",
+  "@infCertificatAbsent": {
+    "placeholders": {
+      "certificat": {
+        "type": "String"
+      }
+    }
+  },
   "infCertificatExpire": "{certificat} n° {numero} expiré.",
   "@infCertificatExpire": {
     "placeholders": {

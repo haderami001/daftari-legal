@@ -79,6 +79,17 @@ void main() {
         expect(fr.messageInfraction(i), i.message, reason: i.code);
       }
     });
+
+    test('certificat de navigabilité absent : traduit', () {
+      const i = Infraction(
+        code: 'CERT_ABSENT',
+        gravite: Gravite.grave,
+        message: 'Certificat de navigabilité absent.',
+        details: {'certificat': TypeCertificat.navigabilite},
+      );
+      expect(fr.messageInfraction(i), i.message);
+      expect(ar.messageInfraction(i), 'شهادة صلاحية الإبحار غير موجودة.');
+    });
   });
 
   group('interface en arabe', () {
