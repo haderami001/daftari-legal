@@ -195,6 +195,11 @@ class _Message extends StatelessWidget {
 /// « 2027-03-31 » (format attendu par le serveur).
 String jourIso(DateTime d) => d.toIso8601String().substring(0, 10);
 
+// Mêmes formats que le serveur (serveur/lib/src/referentiel.dart) : l'erreur
+// s'affiche tout de suite, traduite, sans aller-retour réseau.
+final _identifiant = RegExp(r'^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$');
+final _troisLettres = RegExp(r'^[A-Z]{3}$');
+
 /// Comportement commun aux deux formulaires : enregistrement sur le serveur
 /// et affichage de ses refus (avec le détail champ par champ).
 mixin _Enregistrement<T extends StatefulWidget> on State<T> {
@@ -390,6 +395,17 @@ mixin _Enregistrement<T extends StatefulWidget> on State<T> {
   String? obligatoire(String? v) =>
       (v ?? '').trim().isEmpty ? context.l10n.champObligatoire : null;
 
+  /// Identifiant de navire ou numéro de licence.
+  String? identifiant(String? v) {
+    final t = (v ?? '').trim();
+    if (t.isEmpty) return context.l10n.champObligatoire;
+    return _identifiant.hasMatch(t) ? null : context.l10n.identifiantInvalide;
+  }
+
+  /// Code pays ou code FAO : 3 lettres (saisies en minuscules acceptées,
+  /// elles sont envoyées en majuscules).
+  bool troisLettres(String v) => _troisLettres.hasMatch(v.trim().toUpperCase());
+
   String? nombre(String? v) {
     final x = double.tryParse((v ?? '').replaceAll(',', '.'));
     return x != null && x > 0 ? null : context.l10n.nombreInvalide;
@@ -406,11 +422,12 @@ mixin _Enregistrement<T extends StatefulWidget> on State<T> {
       );
 
   Widget champDate(String libelle, DateTime? valeur, ValueChanged<DateTime> ok,
-          {Key? key, String? cle}) =>
+          {Key? key, String? cle, String? erreur}) =>
       FormField<DateTime>(
         key: key,
         initialValue: valeur,
-        validator: (_) => valeur == null ? context.l10n.champObligatoire : null,
+        validator: (_) =>
+            valeur == null ? context.l10n.champObligatoire : erreur,
         builder: (etat) => InputDecorator(
           decoration: InputDecoration(
               labelText: libelle,
@@ -540,7 +557,7 @@ class _NavireFormScreenState extends State<NavireFormScreen>
               decoration: InputDecoration(
                   labelText: l10n.champIdentifiant,
                   errorText: erreurServeur('id')),
-              validator: obligatoire,
+              validator: identifiant,
             ),
             TextFormField(
               controller: nom,
@@ -561,7 +578,8 @@ class _NavireFormScreenState extends State<NavireFormScreen>
                   labelText: l10n.champPavillon,
                   errorText: erreurServeur('pavillon')),
               textCapitalization: TextCapitalization.characters,
-              validator: obligatoire,
+              validator: (v) =>
+                  troisLettres(v ?? '') ? null : l10n.pavillonInvalide,
             ),
             DropdownButtonFormField<TypeNavire>(
               key: ValueKey(type),
@@ -716,6 +734,13 @@ class _LicenceFormScreenState extends State<LicenceFormScreen>
   };
   late final especes = TextEditingController(
       text: (l['especes_cibles'] as List? ?? const []).join(', '));
+
+  /// Codes saisis dans le champ des espèces (séparés par virgules/espaces).
+  List<String> get _codesEspeces => [
+        for (final c in especes.text.split(RegExp(r'[,\s]+')))
+          if (c.trim().isNotEmpty) c.trim(),
+      ];
+
   late DateTime? debut =
       l['date_debut'] == null ? null : DateTime.parse('${l['date_debut']}');
   late DateTime? fin =
@@ -748,10 +773,7 @@ class _LicenceFormScreenState extends State<LicenceFormScreen>
           for (final e in TypeEngin.values)
             if (engins.contains(e)) e.name,
         ],
-        'especes_cibles': [
-          for (final c in especes.text.split(RegExp(r'[,\s]+')))
-            if (c.trim().isNotEmpty) c.trim().toUpperCase(),
-        ],
+        'especes_cibles': [for (final c in _codesEspeces) c.toUpperCase()],
         'date_debut': jourIso(debut!),
         'date_fin': jourIso(fin!),
         'quotas_kg': {
@@ -787,7 +809,7 @@ class _LicenceFormScreenState extends State<LicenceFormScreen>
               decoration: InputDecoration(
                   labelText: l10n.champNumeroLicence,
                   errorText: erreurServeur('numero')),
-              validator: obligatoire,
+              validator: identifiant,
             ),
             DropdownButtonFormField<String>(
               key: ValueKey(navireId),
@@ -842,11 +864,17 @@ class _LicenceFormScreenState extends State<LicenceFormScreen>
                   labelText: l10n.champEspeces,
                   errorText: erreurServeur('especes_cibles')),
               textCapitalization: TextCapitalization.characters,
+              validator: (_) => _codesEspeces.every(troisLettres)
+                  ? null
+                  : l10n.especesInvalides,
             ),
             champDate(l10n.champDebut, debut, (d) => setState(() => debut = d),
                 cle: 'date_debut'),
             champDate(l10n.champFin, fin, (d) => setState(() => fin = d),
-                cle: 'date_fin'),
+                cle: 'date_fin',
+                erreur: debut != null && fin != null && fin!.isBefore(debut!)
+                    ? l10n.finAvantDebut
+                    : null),
             const SizedBox(height: 16),
             Text(l10n.quotas, style: Theme.of(context).textTheme.titleMedium),
             for (final (i, q) in quotas.indexed)
@@ -856,7 +884,8 @@ class _LicenceFormScreenState extends State<LicenceFormScreen>
                     controller: q.code,
                     decoration: InputDecoration(labelText: l10n.champEspece),
                     textCapitalization: TextCapitalization.characters,
-                    validator: obligatoire,
+                    validator: (v) =>
+                        troisLettres(v ?? '') ? null : l10n.codeFaoInvalide,
                   ),
                 ),
                 const SizedBox(width: 8),

@@ -1102,6 +1102,36 @@ abstract class AppLocalizations {
   /// **'corrigez les champs en rouge.'**
   String get corrigerChampsEnRouge;
 
+  /// No description provided for @identifiantInvalide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lettres, chiffres et « . _ - » seulement, sans espace'**
+  String get identifiantInvalide;
+
+  /// No description provided for @pavillonInvalide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code pays à 3 lettres (ex. MRT)'**
+  String get pavillonInvalide;
+
+  /// No description provided for @especesInvalides.
+  ///
+  /// In fr, this message translates to:
+  /// **'Codes FAO à 3 lettres, séparés par des virgules (ex. OCC, SOL)'**
+  String get especesInvalides;
+
+  /// No description provided for @codeFaoInvalide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code FAO à 3 lettres (ex. OCC)'**
+  String get codeFaoInvalide;
+
+  /// No description provided for @finAvantDebut.
+  ///
+  /// In fr, this message translates to:
+  /// **'La fin ne peut pas précéder le début'**
+  String get finAvantDebut;
+
   /// No description provided for @ajouterCertificat.
   ///
   /// In fr, this message translates to:

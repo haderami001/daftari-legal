@@ -703,6 +703,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get corrigerChampsEnRouge => 'صحّح الحقول المعروضة باللون الأحمر.';
 
   @override
+  String get identifiantInvalide => 'حروف وأرقام و« . _ - » فقط، بدون مسافات';
+
+  @override
+  String get pavillonInvalide => 'رمز البلد من 3 أحرف (مثال MRT)';
+
+  @override
+  String get especesInvalides =>
+      'رموز الفاو من 3 أحرف، مفصولة بفواصل (مثال OCC, SOL)';
+
+  @override
+  String get codeFaoInvalide => 'رمز الفاو من 3 أحرف (مثال OCC)';
+
+  @override
+  String get finAvantDebut => 'لا يمكن أن تسبق النهاية البداية';
+
+  @override
   String get ajouterCertificat => 'إضافة شهادة';
 
   @override

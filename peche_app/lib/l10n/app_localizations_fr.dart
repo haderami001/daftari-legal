@@ -698,6 +698,23 @@ class AppLocalizationsFr extends AppLocalizations {
   String get corrigerChampsEnRouge => 'corrigez les champs en rouge.';
 
   @override
+  String get identifiantInvalide =>
+      'Lettres, chiffres et « . _ - » seulement, sans espace';
+
+  @override
+  String get pavillonInvalide => 'Code pays à 3 lettres (ex. MRT)';
+
+  @override
+  String get especesInvalides =>
+      'Codes FAO à 3 lettres, séparés par des virgules (ex. OCC, SOL)';
+
+  @override
+  String get codeFaoInvalide => 'Code FAO à 3 lettres (ex. OCC)';
+
+  @override
+  String get finAvantDebut => 'La fin ne peut pas précéder le début';
+
+  @override
   String get ajouterCertificat => 'Ajouter un certificat';
 
   @override
