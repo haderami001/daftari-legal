@@ -1084,6 +1084,24 @@ abstract class AppLocalizations {
   /// **'Le numéro OMI doit avoir 7 chiffres'**
   String get imoInvalide;
 
+  /// No description provided for @immatriculationEnDouble.
+  ///
+  /// In fr, this message translates to:
+  /// **'Immatriculation déjà utilisée par un autre navire'**
+  String get immatriculationEnDouble;
+
+  /// No description provided for @navireInconnu.
+  ///
+  /// In fr, this message translates to:
+  /// **'Navire absent du référentiel'**
+  String get navireInconnu;
+
+  /// No description provided for @corrigerChampsEnRouge.
+  ///
+  /// In fr, this message translates to:
+  /// **'corrigez les champs en rouge.'**
+  String get corrigerChampsEnRouge;
+
   /// No description provided for @ajouterCertificat.
   ///
   /// In fr, this message translates to:

@@ -694,6 +694,15 @@ class AppLocalizationsAr extends AppLocalizations {
       'يجب أن يتكون رقم المنظمة البحرية الدولية من 7 أرقام';
 
   @override
+  String get immatriculationEnDouble => 'رقم التسجيل مستخدم بالفعل لسفينة أخرى';
+
+  @override
+  String get navireInconnu => 'السفينة غير موجودة في السجل';
+
+  @override
+  String get corrigerChampsEnRouge => 'صحّح الحقول المعروضة باللون الأحمر.';
+
+  @override
   String get ajouterCertificat => 'إضافة شهادة';
 
   @override

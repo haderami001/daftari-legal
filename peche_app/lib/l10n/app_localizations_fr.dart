@@ -688,6 +688,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get imoInvalide => 'Le numéro OMI doit avoir 7 chiffres';
 
   @override
+  String get immatriculationEnDouble =>
+      'Immatriculation déjà utilisée par un autre navire';
+
+  @override
+  String get navireInconnu => 'Navire absent du référentiel';
+
+  @override
+  String get corrigerChampsEnRouge => 'corrigez les champs en rouge.';
+
+  @override
   String get ajouterCertificat => 'Ajouter un certificat';
 
   @override

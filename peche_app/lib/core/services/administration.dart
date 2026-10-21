@@ -4,9 +4,14 @@ import 'package:http/http.dart' as http;
 
 /// Refus ou panne lors d'une opération d'administration.
 class ErreurAdministration implements Exception {
-  const ErreurAdministration(this.message, {this.details = const []});
+  const ErreurAdministration(this.message,
+      {this.code, this.details = const []});
 
   final String message;
+
+  /// Code d'erreur du serveur (`donnees_invalides`, `conflit`,
+  /// `navire_inconnu`...), absent pour une panne réseau.
+  final String? code;
 
   /// Erreurs champ par champ renvoyées par le serveur (HTTP 400).
   final List<String> details;
@@ -86,6 +91,7 @@ class ApiAdministration {
     if (corps is! Map) throw ErreurAdministration('HTTP ${r.statusCode}');
     throw ErreurAdministration(
       '${corps['message'] ?? 'HTTP ${r.statusCode}'}',
+      code: corps['erreur'] as String?,
       details: [...(corps['details'] as List? ?? const []).map((d) => '$d')],
     );
   }
