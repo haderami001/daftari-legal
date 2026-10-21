@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:peche_regles/peche_regles.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../core/services/services.dart';
 import '../../core/data/depots/flotte_depot.dart';
-import '../../core/format.dart';
-import '../../core/models/declaration.dart';
-import '../../core/models/enums.dart';
-import '../../core/models/navire.dart';
-import '../../core/models/ports.dart';
 import '../../core/qr_licence.dart';
-import '../../core/regulation/calcul_reglementaire.dart';
-import '../../core/regulation/referentiel.dart';
 import '../../core/widgets/resultat_card.dart';
 import '../../l10n/libelles.dart';
 

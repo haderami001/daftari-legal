@@ -1,10 +1,9 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
+import 'package:peche_regles/peche_regles.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../models/declaration.dart';
-import '../../regulation/calcul_reglementaire.dart';
 import '../base/base_de_donnees.dart';
 import '../base/tables.dart';
 

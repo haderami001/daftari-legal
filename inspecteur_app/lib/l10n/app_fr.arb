@@ -1,0 +1,158 @@
+{
+  "@@locale": "fr",
+  "langue": "Langue",
+  "langueSysteme": "Langue du téléphone",
+  "langueFrancais": "Français",
+  "langueArabe": "العربية",
+  "engin": "{engin, select, ligne{Ligne / palangre} filetMaillant{Filet maillant} casier{Casier / pot à poulpe} chalutDemersal{Chalut de fond} chalutPelagique{Chalut pélagique} senneTournante{Senne tournante} drague{Drague} other{{engin}}}",
+  "@engin": {
+    "placeholders": {
+      "engin": {
+        "type": "String"
+      }
+    }
+  },
+  "especeNom": "{code, select, OCC{Poulpe} CTC{Seiche} SAA{Sardinelle ronde} SOL{Sole} YFT{Albacore} BFT{Thon rouge} GPW{Mérou blanc} MGR{Courbine} MUF{Mulet jaune} SOP{Crevette rose du large} other{{code}}}",
+  "@especeNom": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "gravite": "{gravite, select, mineure{Mineure} grave{Grave} tresGrave{Très grave} other{{gravite}}}",
+  "@gravite": {
+    "placeholders": {
+      "gravite": {
+        "type": "String"
+      }
+    }
+  },
+  "uniteMm": "mm",
+  "uniteCm": "cm",
+  "uniteG": "g",
+  "organismeCodePeches": "Code des pêches (MRT)",
+  "valeursDemoDetail": "Les seuils affichés doivent être validés avec les textes officiels avant toute utilisation.",
+  "amendeIndicative": "Amende indicative : {min} à {max} MRU",
+  "@amendeIndicative": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "conforme": "Conforme",
+  "ajouter": "Ajouter",
+  "mesureMaille": "Mesure d'une maille (mm)",
+  "espece": "Espèce",
+  "maillageMinimum": "Minimum : {min} mm (tolérance {tolerance} %)",
+  "@maillageMinimum": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "tolerance": {
+        "type": "String"
+      }
+    }
+  },
+  "appTitle": "Inspecteur des pêches",
+  "accueilSousTitre": "Textes, calculs et nouveautés pour le contrôle des pêches",
+  "moduleCalculateurs": "Calculateurs",
+  "moduleCalculateursDetail": "Maillage, tailles minimales, amendes",
+  "moduleBibliotheque": "Bibliothèque juridique",
+  "moduleBibliothequeDetail": "Code des pêches, décrets, arrêtés",
+  "moduleNouveautes": "Nouveautés réglementaires",
+  "moduleNouveautesDetail": "Décrets et circulaires du ministère",
+  "bientot": "Bientôt",
+  "valeursDemoVersion": "Valeurs de démonstration ({version})",
+  "@valeursDemoVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "ongletMaillage": "Maillage",
+  "ongletTailles": "Tailles minimales",
+  "enginLabel": "Engin",
+  "mesureEchantillon": "Mesure ({unite})",
+  "@mesureEchantillon": {
+    "placeholders": {
+      "unite": {
+        "type": "String"
+      }
+    }
+  },
+  "mesuresSaisies": "Mesures : {liste}",
+  "@mesuresSaisies": {
+    "placeholders": {
+      "liste": {
+        "type": "String"
+      }
+    }
+  },
+  "effacerMesures": "Effacer les mesures",
+  "aucuneMesure": "Ajoutez une ou plusieurs mesures.",
+  "pasDeMaillage": "Pas de maillage réglementé pour cet engin.",
+  "seuilRetenu": "Seuil retenu après tolérance : {seuil} mm",
+  "@seuilRetenu": {
+    "placeholders": {
+      "seuil": {
+        "type": "String"
+      }
+    }
+  },
+  "moyenneMesuree": "Moyenne mesurée : {moyenne} mm",
+  "@moyenneMesuree": {
+    "placeholders": {
+      "moyenne": {
+        "type": "String"
+      }
+    }
+  },
+  "tailleMinimale": "Minimum : {min} {unite}",
+  "@tailleMinimale": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "unite": {
+        "type": "String"
+      }
+    }
+  },
+  "sousTaille": "{sous} sur {total} sous le minimum",
+  "@sousTaille": {
+    "placeholders": {
+      "sous": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "nonConforme": "Non conforme · {gravite}",
+  "@nonConforme": {
+    "placeholders": {
+      "gravite": {
+        "type": "String"
+      }
+    }
+  },
+  "source": "Source : {organisme} · référentiel {version}",
+  "@source": {
+    "placeholders": {
+      "organisme": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      }
+    }
+  }
+}

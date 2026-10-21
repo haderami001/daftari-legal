@@ -1,0 +1,110 @@
+# Tests automatiques de l'application « Inspecteur des pêches » et des règles
+# partagées (peche_regles/, utilisées aussi par Pêche Conforme).
+name: inspecteur_app
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'inspecteur_app/**'
+      - 'peche_regles/**'
+      - '.github/workflows/inspecteur_app.yml'
+  pull_request:
+    paths:
+      - 'inspecteur_app/**'
+      - 'peche_regles/**'
+      - '.github/workflows/inspecteur_app.yml'
+
+concurrency:
+  group: inspecteur_app-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyse-et-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.6'
+          channel: stable
+          cache: true
+
+      # Règles partagées : Dart pur, sans Flutter.
+      - name: Règles partagées (peche_regles)
+        working-directory: peche_regles
+        run: |
+          dart pub get
+          dart format --output=none --set-exit-if-changed lib
+          dart analyze --fatal-infos
+
+      - name: Dépendances
+        working-directory: inspecteur_app
+        run: flutter pub get
+
+      - name: Formatage
+        working-directory: inspecteur_app
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - name: Analyse statique
+        working-directory: inspecteur_app
+        run: flutter analyze
+
+      - name: Tests
+        working-directory: inspecteur_app
+        run: flutter test --reporter expanded
+
+  # Application Android installable : onglet « Actions » de GitHub, section
+  # Artifacts (inspecteur-apk).
+  apk-android:
+    needs: analyse-et-tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: inspecteur_app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.6'
+          channel: stable
+          cache: true
+
+      - name: Construire l'APK
+        run: flutter build apk --debug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: inspecteur-apk
+          path: inspecteur_app/build/app/outputs/flutter-apk/app-debug.apk
+
+  # Version navigateur, téléchargeable aussi (inspecteur-web).
+  web:
+    needs: analyse-et-tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: inspecteur_app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.6'
+          channel: stable
+          cache: true
+
+      - name: Construire la version web
+        run: flutter build web --no-web-resources-cdn --pwa-strategy none
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: inspecteur-web
+          path: inspecteur_app/build/web

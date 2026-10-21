@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:peche_app/core/format.dart';
+import 'package:peche_regles/peche_regles.dart';
 
 /// Dans une phrase arabe (de droite à gauche), les nombres doivent rester
 /// lisibles de gauche à droite. On mesure la position réelle des morceaux

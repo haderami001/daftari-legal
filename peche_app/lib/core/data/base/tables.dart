@@ -1,8 +1,7 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
-
-import '../../models/enums.dart';
+import 'package:peche_regles/peche_regles.dart';
 
 /// Tables SQLite de la base locale (hors ligne).
 ///

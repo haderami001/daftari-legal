@@ -2,11 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peche_app/core/data/donnees_demo.dart';
-import 'package:peche_app/core/models/declaration.dart';
-import 'package:peche_app/core/models/enums.dart';
-import 'package:peche_app/core/regulation/calcul_reglementaire.dart';
 import 'package:peche_app/core/regulation/rapport_pdf.dart';
-import 'package:peche_app/core/regulation/referentiel.dart';
+import 'package:peche_regles/peche_regles.dart';
 
 void main() {
   test('le rapport PDF est un document PDF valide', () async {

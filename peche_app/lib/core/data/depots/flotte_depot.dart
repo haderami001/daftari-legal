@@ -1,7 +1,6 @@
 import 'package:drift/drift.dart';
+import 'package:peche_regles/peche_regles.dart';
 
-import '../../models/enums.dart';
-import '../../models/navire.dart';
 import '../base/base_de_donnees.dart';
 
 /// Un navire et sa licence la plus récente.

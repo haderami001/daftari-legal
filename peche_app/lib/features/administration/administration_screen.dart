@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:peche_regles/peche_regles.dart';
 
-import '../../core/models/enums.dart';
 import '../../core/services/administration.dart';
 import '../../core/services/services.dart';
 import '../../core/theme.dart';

@@ -1,5 +1,6 @@
 # Tests automatiques de l'application Flutter « Pêche Conforme ».
-# Se lance à chaque push sur main et à chaque pull request qui touche peche_app/.
+# Se lance à chaque push sur main et à chaque pull request qui touche peche_app/
+# (ou les règles partagées peche_regles/).
 name: peche_app
 
 on:
@@ -9,12 +10,16 @@ on:
       - 'peche_app/**'
       # Le test de bout en bout de l'application démarre le serveur.
       - 'serveur/**'
+      # Règles partagées avec l'app Inspecteur.
+      - 'peche_regles/**'
       - '.github/workflows/peche_app.yml'
   pull_request:
     paths:
       - 'peche_app/**'
       # Le test de bout en bout de l'application démarre le serveur.
       - 'serveur/**'
+      # Règles partagées avec l'app Inspecteur.
+      - 'peche_regles/**'
       - '.github/workflows/peche_app.yml'
 
 concurrency:

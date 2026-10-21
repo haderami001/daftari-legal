@@ -4,14 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:peche_app/core/data/base/base_de_donnees.dart';
 import 'package:peche_app/core/data/depots/reglages_depot.dart';
 import 'package:peche_app/core/data/donnees_demo.dart';
-import 'package:peche_app/core/models/declaration.dart';
-import 'package:peche_app/core/models/enums.dart';
-import 'package:peche_app/core/regulation/calcul_reglementaire.dart';
-import 'package:peche_app/core/regulation/referentiel.dart';
 import 'package:peche_app/core/services/position_service.dart';
 import 'package:peche_app/core/services/services.dart';
 import 'package:peche_app/l10n/libelles.dart';
 import 'package:peche_app/main.dart';
+import 'package:peche_regles/peche_regles.dart';
 
 void main() {
   final fr = lookupAppLocalizations(const Locale('fr'));

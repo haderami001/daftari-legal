@@ -2,13 +2,9 @@ import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:peche_regles/peche_regles.dart';
 
-import '../format.dart';
-import '../models/declaration.dart';
-import '../models/navire.dart';
-import 'calcul_reglementaire.dart';
 import 'rapport.dart';
-import 'referentiel.dart';
 
 /// Génère le rapport d'inspection au format PDF (A4).
 ///

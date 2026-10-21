@@ -1,7 +1,4 @@
-import '../format.dart';
-import '../models/declaration.dart';
-import '../models/ports.dart';
-import 'calcul_reglementaire.dart';
+import 'package:peche_regles/peche_regles.dart';
 
 /// Génère le texte du rapport d'inspection automatique : affiché à l'agent
 /// avant signature et stocké avec le contrôle. La version PDF signée est

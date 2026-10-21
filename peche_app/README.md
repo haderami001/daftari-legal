@@ -11,7 +11,7 @@ réseau.
 🗄️ **Schéma de base de données :** [`docs/schema.sql`](docs/schema.sql)
 
 > ⚠️ Les seuils réglementaires (tailles, maillages, quotas, amendes) contenus
-> dans `lib/core/regulation/referentiel.dart` sont **fictifs** et servent
+> dans `../peche_regles/lib/src/referentiel.dart` sont **fictifs** et servent
 > uniquement à la démonstration. Ils doivent être remplacés par les valeurs
 > officielles validées.
 
@@ -130,7 +130,7 @@ En mer il n'y a pas de réseau : tout est enregistré **sur le téléphone**.
   dans la langue de l'écran.
 - Le **rapport officiel** (texte et PDF) reste en français.
 - Texte bidirectionnel : les montants utilisent une espace insécable et les
-  coordonnées GPS sont isolées (`lib/core/format.dart`), sinon « 1 200 000 »
+  coordonnées GPS sont isolées (`peche_regles/lib/src/format.dart`), sinon « 1 200 000 »
   s'afficherait « 000 200 1 » dans une phrase arabe (testé dans
   `test/bidi_test.dart`).
 - Polices embarquées **Noto Sans** et **Noto Sans Arabic** (licence OFL,
@@ -173,7 +173,7 @@ En mer il n'y a pas de réseau : tout est enregistré **sur le téléphone**.
   en annexe du rapport PDF (`lib/core/services/photo_service.dart`).
 - **Port de débarquement** : sur la déclaration (port prévu) et sur le
   contrôle (« en mer » ou « à quai, port de … »), dans le rapport PDF
-  (`lib/core/models/ports.dart`, liste d'exemple à compléter). Schéma v5.
+  (`peche_regles/lib/src/ports.dart`, liste d'exemple à compléter). Schéma v5.
 - **Nouvelles espèces** : mérou blanc (GPW), courbine (MGR), mulet jaune
   (MUF), crevette rose du large (SOP), tailles minimales fictives.
 - **Carte** : onglet « Carte » du tableau de bord, positions des
@@ -186,9 +186,7 @@ En mer il n'y a pas de réseau : tout est enregistré **sur le téléphone**.
 | Fichier | Rôle |
 |---|---|
 | `lib/main.dart` | Point d'entrée, thème, serveur (`API_URL`, `API_JETON`) |
-| `lib/core/models/` | Modèles : navire, licence, certificat, déclaration, capture, contrôle |
-| `lib/core/regulation/referentiel.dart` | Règles (espèces, engins, barèmes) |
-| `lib/core/regulation/calcul_reglementaire.dart` | Moteur : licence, quotas, prises accessoires, maillage, tailles, sanctions |
+| `../peche_regles/` | **Paquet partagé** avec l'app [Inspecteur](../inspecteur_app/README.md) : modèles (navire, licence, certificat, déclaration, capture, contrôle), référentiel (espèces, engins, barèmes) et moteur de calcul (licence, quotas, prises accessoires, maillage, tailles, sanctions) |
 | `lib/core/regulation/rapport.dart` | Rapport d'inspection (texte) |
 | `lib/core/regulation/rapport_pdf.dart` | Rapport d'inspection (PDF) |
 | `lib/core/services/` | `Services` partagés, GPS, synchronisation |
@@ -205,10 +203,10 @@ En mer il n'y a pas de réseau : tout est enregistré **sur le téléphone**.
 
 ## Pour apprendre (parcours conseillé)
 
-1. **`lib/core/models/enums.dart`** — les *enums* Dart avec des champs.
-2. **`lib/core/models/navire.dart`** — classes, constructeurs `const`,
+1. **`../peche_regles/lib/src/enums.dart`** — les *enums* Dart avec des champs.
+2. **`../peche_regles/lib/src/navire.dart`** — classes, constructeurs `const`,
    champs `final`, paramètres nommés `required`, types nullables (`String?`).
-3. **`lib/core/regulation/calcul_reglementaire.dart`** — listes avec
+3. **`../peche_regles/lib/src/calcul_reglementaire.dart`** — listes avec
    `if` / `for` à l'intérieur (*collection if/for*), `fold`, *pattern
    matching* (`case final quota? when ...`).
 4. **`test/calcul_reglementaire_test.dart`** — écrire un test : préparer des

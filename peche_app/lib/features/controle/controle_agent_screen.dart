@@ -1,18 +1,12 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:peche_regles/peche_regles.dart';
 
 import '../../core/services/services.dart';
 import '../../core/data/depots/flotte_depot.dart';
-import '../../core/format.dart';
-import '../../core/models/declaration.dart';
-import '../../core/models/enums.dart';
-import '../../core/models/navire.dart';
-import '../../core/models/ports.dart';
-import '../../core/regulation/calcul_reglementaire.dart';
 import '../../core/regulation/rapport.dart';
 import '../../core/regulation/rapport_pdf.dart';
-import '../../core/regulation/referentiel.dart';
 import '../../core/widgets/resultat_card.dart';
 import '../../l10n/libelles.dart';
 import 'rapport_pdf_screen.dart';

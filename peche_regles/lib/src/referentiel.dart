@@ -10,7 +10,7 @@
 /// mettre à jour les règles SANS republier l'application.
 library;
 
-import '../models/enums.dart';
+import 'enums.dart';
 
 enum UniteMesure {
   longueurCm('cm'),

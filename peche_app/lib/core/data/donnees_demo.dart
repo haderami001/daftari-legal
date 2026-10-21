@@ -1,5 +1,4 @@
-import '../models/enums.dart';
-import '../models/navire.dart';
+import 'package:peche_regles/peche_regles.dart';
 
 /// Données fictives pour la démo. En production : base SQLite locale
 /// (Drift) synchronisée avec l'API centrale.

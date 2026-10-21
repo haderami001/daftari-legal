@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:peche_regles/peche_regles.dart';
 
-import '../../core/regulation/referentiel.dart';
 import '../../l10n/libelles.dart';
 
 /// Guide réglementaire consultable hors ligne.

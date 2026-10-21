@@ -5,15 +5,12 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peche_app/core/data/base/base_de_donnees.dart';
 import 'package:peche_app/core/data/base/tables.dart';
-import 'package:peche_app/core/models/declaration.dart';
-import 'package:peche_app/core/models/enums.dart';
-import 'package:peche_app/core/regulation/calcul_reglementaire.dart';
 import 'package:peche_app/core/regulation/rapport.dart';
 import 'package:peche_app/core/regulation/rapport_pdf.dart';
-import 'package:peche_app/core/regulation/referentiel.dart';
 import 'package:peche_app/core/services/services.dart';
 import 'package:peche_app/core/services/session.dart';
 import 'package:peche_app/core/services/synchronisation.dart';
+import 'package:peche_regles/peche_regles.dart';
 import 'package:serveur_peche/serveur_peche.dart' as serveur;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 

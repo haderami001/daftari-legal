@@ -1,6 +1,5 @@
 import 'package:geolocator/geolocator.dart';
-
-import '../models/declaration.dart';
+import 'package:peche_regles/peche_regles.dart';
 
 /// Fournit la position du téléphone.
 ///

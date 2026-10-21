@@ -1,6 +1,6 @@
-import '../models/declaration.dart';
-import '../models/enums.dart';
-import '../models/navire.dart';
+import 'declaration.dart';
+import 'enums.dart';
+import 'navire.dart';
 import 'referentiel.dart';
 
 /// Une non-conformité détectée par le moteur de règles.

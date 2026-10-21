@@ -124,9 +124,10 @@ lib/
     └── guide/                   guide réglementaire + formation
 ```
 
-**Principe clé** : le moteur réglementaire (`core/regulation/`) n'importe pas
-Flutter. On peut le tester seul et l'exécuter tel quel sur le serveur, ce qui
-garantit que l'app et le back-office appliquent **les mêmes règles**.
+**Principe clé** : le moteur réglementaire (paquet partagé `peche_regles/`)
+n'importe pas Flutter. On peut le tester seul et l'exécuter tel quel sur le
+serveur, ce qui garantit que l'app, l'app Inspecteur et le back-office
+appliquent **les mêmes règles**.
 
 ### Fonctionnement hors ligne
 

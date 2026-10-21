@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:peche_regles/peche_regles.dart';
 
 import '../../l10n/libelles.dart';
-import '../format.dart';
-import '../models/enums.dart';
-import '../regulation/calcul_reglementaire.dart';
 
 /// Affiche le résultat du moteur réglementaire (vert = conforme).
 class ResultatCard extends StatelessWidget {

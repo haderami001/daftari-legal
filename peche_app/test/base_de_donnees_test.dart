@@ -4,10 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:peche_app/core/data/base/base_de_donnees.dart';
 import 'package:peche_app/core/data/base/tables.dart';
 import 'package:peche_app/core/services/services.dart';
-import 'package:peche_app/core/models/declaration.dart';
-import 'package:peche_app/core/models/enums.dart';
-import 'package:peche_app/core/regulation/calcul_reglementaire.dart';
-import 'package:peche_app/core/regulation/referentiel.dart';
+import 'package:peche_regles/peche_regles.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {

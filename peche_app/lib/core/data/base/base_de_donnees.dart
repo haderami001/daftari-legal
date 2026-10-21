@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+import 'package:peche_regles/peche_regles.dart';
 
-import '../../models/enums.dart';
 import '../donnees_demo.dart';
 import 'tables.dart';
 

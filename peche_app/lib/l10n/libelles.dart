@@ -1,8 +1,6 @@
 import 'package:flutter/widgets.dart';
+import 'package:peche_regles/peche_regles.dart';
 
-import '../core/models/enums.dart';
-import '../core/regulation/calcul_reglementaire.dart';
-import '../core/regulation/referentiel.dart';
 import 'app_localizations.dart';
 
 export 'app_localizations.dart';
