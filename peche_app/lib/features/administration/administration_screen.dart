@@ -202,6 +202,48 @@ mixin _Enregistrement<T extends StatefulWidget> on State<T> {
   bool enCours = false;
   ErreurAdministration? refus;
 
+  /// Champs de ce formulaire, avec le nom que leur donne le serveur
+  /// (`pavillon`, `date_fin`...) : leurs erreurs s'affichent sous le
+  /// champ, les autres restent dans le bandeau du haut.
+  Set<String> get champsServeur;
+
+  /// Erreurs du dernier refus, par champ (`pavillon` -> message).
+  Map<String, String> get _erreursChamps {
+    final r = refus;
+    if (r == null) return const {};
+    final l10n = context.l10n;
+    final erreurs = <String, String>{
+      // Détails de validation : « champ : message ».
+      for (final d in r.details)
+        if (d.indexOf(' : ') case final i when i > 0)
+          d.substring(0, i): d.substring(i + 3),
+      // Refus sans détail, rattachés à leur champ.
+      if (r.code == 'conflit') 'immatriculation': l10n.immatriculationEnDouble,
+      if (r.code == 'navire_inconnu') 'navire_id': l10n.navireInconnu,
+    };
+    return {
+      for (final MapEntry(:key, :value) in erreurs.entries)
+        if (champsServeur.contains(key)) key: value,
+    };
+  }
+
+  /// Erreur du serveur à afficher sous le champ `cle`, s'il y en a une.
+  String? erreurServeur(String cle) => _erreursChamps[cle];
+
+  /// Écart entre les lignes du formulaire : place pour l'erreur sous un
+  /// champ et pour le libellé posé sur le cadre du champ suivant.
+  List<Widget> espaces(List<Widget> lignes) => [
+        for (final (i, ligne) in lignes.indexed) ...[
+          if (i > 0) const SizedBox(height: 12),
+          ligne,
+        ],
+      ];
+
+  /// Une saisie rend le dernier refus obsolète : on l'efface.
+  void effacerRefus() {
+    if (refus != null) setState(() => refus = null);
+  }
+
   /// Contenu du formulaire en texte (tous les champs). Comparé à sa valeur
   /// à l'ouverture pour savoir si l'utilisateur a modifié quelque chose.
   String signature();
@@ -313,12 +355,21 @@ mixin _Enregistrement<T extends StatefulWidget> on State<T> {
   Widget refusAffiche() {
     final r = refus;
     if (r == null) return const SizedBox.shrink();
+    // Les erreurs déjà affichées sous leur champ ne sont pas répétées.
+    final autres = [
+      for (final d in r.details)
+        if (!champsServeur.contains(d.split(' : ').first)) d,
+    ];
     return Card(
       color: Theme.of(context).colorScheme.errorContainer,
       child: ListTile(
         leading: const Icon(Icons.error_outline),
-        title: Text(context.l10n.adminRefus(r.message)),
-        subtitle: r.details.isEmpty ? null : Text(r.details.join('\n')),
+        // Tout est déjà sous les champs : on y renvoie, sans répéter.
+        title: Text(context.l10n.adminRefus(
+            autres.isEmpty && _erreursChamps.isNotEmpty
+                ? context.l10n.corrigerChampsEnRouge
+                : r.message)),
+        subtitle: autres.isEmpty ? null : Text(autres.join('\n')),
       ),
     );
   }
@@ -355,14 +406,16 @@ mixin _Enregistrement<T extends StatefulWidget> on State<T> {
       );
 
   Widget champDate(String libelle, DateTime? valeur, ValueChanged<DateTime> ok,
-          {Key? key}) =>
+          {Key? key, String? cle}) =>
       FormField<DateTime>(
         key: key,
         initialValue: valeur,
         validator: (_) => valeur == null ? context.l10n.champObligatoire : null,
         builder: (etat) => InputDecorator(
-          decoration:
-              InputDecoration(labelText: libelle, errorText: etat.errorText),
+          decoration: InputDecoration(
+              labelText: libelle,
+              errorText:
+                  etat.errorText ?? (cle == null ? null : erreurServeur(cle))),
           child: InkWell(
             onTap: () async {
               final d = await choisirDate(valeur);
@@ -404,6 +457,12 @@ class NavireFormScreen extends StatefulWidget {
 
 class _NavireFormScreenState extends State<NavireFormScreen>
     with _Enregistrement {
+  @override
+  final champsServeur = const {
+    'id', 'nom', 'immatriculation', 'pavillon', 'type', //
+    'longueur_m', 'puissance_kw', 'numero_imo',
+  };
+
   late final Map<String, Object?> n = widget.navire ?? const {};
   late final id = TextEditingController(text: '${n['id'] ?? ''}');
   late final nom = TextEditingController(text: '${n['nom'] ?? ''}');
@@ -470,36 +529,46 @@ class _NavireFormScreenState extends State<NavireFormScreen>
       ),
       body: Form(
         key: formulaire,
+        onChanged: effacerRefus,
         child: ListView(
           padding: const EdgeInsets.all(16),
-          children: [
+          children: espaces([
             refusAffiche(),
             TextFormField(
               controller: id,
               enabled: _nouveau, // l'identifiant ne change plus ensuite
-              decoration: InputDecoration(labelText: l10n.champIdentifiant),
+              decoration: InputDecoration(
+                  labelText: l10n.champIdentifiant,
+                  errorText: erreurServeur('id')),
               validator: obligatoire,
             ),
             TextFormField(
               controller: nom,
-              decoration: InputDecoration(labelText: l10n.champNom),
+              decoration: InputDecoration(
+                  labelText: l10n.champNom, errorText: erreurServeur('nom')),
               validator: obligatoire,
             ),
             TextFormField(
               controller: immat,
-              decoration: InputDecoration(labelText: l10n.champImmatriculation),
+              decoration: InputDecoration(
+                  labelText: l10n.champImmatriculation,
+                  errorText: erreurServeur('immatriculation')),
               validator: obligatoire,
             ),
             TextFormField(
               controller: pavillon,
-              decoration: InputDecoration(labelText: l10n.champPavillon),
+              decoration: InputDecoration(
+                  labelText: l10n.champPavillon,
+                  errorText: erreurServeur('pavillon')),
               textCapitalization: TextCapitalization.characters,
               validator: obligatoire,
             ),
             DropdownButtonFormField<TypeNavire>(
               key: ValueKey(type),
               initialValue: type,
-              decoration: InputDecoration(labelText: l10n.champTypeNavire),
+              decoration: InputDecoration(
+                  labelText: l10n.champTypeNavire,
+                  errorText: erreurServeur('type')),
               items: [
                 for (final t in TypeNavire.values)
                   DropdownMenuItem(
@@ -509,21 +578,27 @@ class _NavireFormScreenState extends State<NavireFormScreen>
             ),
             TextFormField(
               controller: longueur,
-              decoration: InputDecoration(labelText: l10n.champLongueur),
+              decoration: InputDecoration(
+                  labelText: l10n.champLongueur,
+                  errorText: erreurServeur('longueur_m')),
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
               validator: nombre,
             ),
             TextFormField(
               controller: puissance,
-              decoration: InputDecoration(labelText: l10n.champPuissance),
+              decoration: InputDecoration(
+                  labelText: l10n.champPuissance,
+                  errorText: erreurServeur('puissance_kw')),
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
               validator: nombre,
             ),
             TextFormField(
               controller: imo,
-              decoration: InputDecoration(labelText: l10n.champImo),
+              decoration: InputDecoration(
+                  labelText: l10n.champImo,
+                  errorText: erreurServeur('numero_imo')),
               keyboardType: TextInputType.number,
               // Même règle que le serveur : vide, ou exactement 7 chiffres.
               validator: (v) {
@@ -594,7 +669,7 @@ class _NavireFormScreenState extends State<NavireFormScreen>
             boutonEnregistrer(() => enregistrer(
                 (api) => api.enregistrerNavire(id.text.trim(), _donnees()),
                 l10n.navireEnregistre)),
-          ],
+          ]),
         ),
       ),
     ));
@@ -623,6 +698,12 @@ class LicenceFormScreen extends StatefulWidget {
 
 class _LicenceFormScreenState extends State<LicenceFormScreen>
     with _Enregistrement {
+  @override
+  final champsServeur = const {
+    'numero', 'navire_id', 'segment', 'engins_autorises', //
+    'especes_cibles', 'date_debut', 'date_fin',
+  };
+
   late final Map<String, Object?> l = widget.licence ?? const {};
   late final numero = TextEditingController(text: '${l['numero'] ?? ''}');
   late String? navireId = l['navire_id'] as String?;
@@ -695,20 +776,25 @@ class _LicenceFormScreenState extends State<LicenceFormScreen>
       ),
       body: Form(
         key: formulaire,
+        onChanged: effacerRefus,
         child: ListView(
           padding: const EdgeInsets.all(16),
-          children: [
+          children: espaces([
             refusAffiche(),
             TextFormField(
               controller: numero,
               enabled: _nouvelle,
-              decoration: InputDecoration(labelText: l10n.champNumeroLicence),
+              decoration: InputDecoration(
+                  labelText: l10n.champNumeroLicence,
+                  errorText: erreurServeur('numero')),
               validator: obligatoire,
             ),
             DropdownButtonFormField<String>(
               key: ValueKey(navireId),
               initialValue: navireId,
-              decoration: InputDecoration(labelText: l10n.champNavire),
+              decoration: InputDecoration(
+                  labelText: l10n.champNavire,
+                  errorText: erreurServeur('navire_id')),
               items: [
                 for (final n in widget.navires)
                   DropdownMenuItem(
@@ -721,7 +807,9 @@ class _LicenceFormScreenState extends State<LicenceFormScreen>
             DropdownButtonFormField<TypePeche>(
               key: ValueKey(segment),
               initialValue: segment,
-              decoration: InputDecoration(labelText: l10n.champSegment),
+              decoration: InputDecoration(
+                  labelText: l10n.champSegment,
+                  errorText: erreurServeur('segment')),
               items: [
                 for (final s in TypePeche.values)
                   DropdownMenuItem(
@@ -734,7 +822,9 @@ class _LicenceFormScreenState extends State<LicenceFormScreen>
               validator: (_) => engins.isEmpty ? l10n.champObligatoire : null,
               builder: (etat) => InputDecorator(
                 decoration: InputDecoration(
-                    labelText: l10n.enginsAutorises, errorText: etat.errorText),
+                    labelText: l10n.enginsAutorises,
+                    errorText:
+                        etat.errorText ?? erreurServeur('engins_autorises')),
                 child: Wrap(spacing: 6, runSpacing: 6, children: [
                   for (final e in TypeEngin.values)
                     FilterChip(
@@ -748,11 +838,15 @@ class _LicenceFormScreenState extends State<LicenceFormScreen>
             ),
             TextFormField(
               controller: especes,
-              decoration: InputDecoration(labelText: l10n.champEspeces),
+              decoration: InputDecoration(
+                  labelText: l10n.champEspeces,
+                  errorText: erreurServeur('especes_cibles')),
               textCapitalization: TextCapitalization.characters,
             ),
-            champDate(l10n.champDebut, debut, (d) => setState(() => debut = d)),
-            champDate(l10n.champFin, fin, (d) => setState(() => fin = d)),
+            champDate(l10n.champDebut, debut, (d) => setState(() => debut = d),
+                cle: 'date_debut'),
+            champDate(l10n.champFin, fin, (d) => setState(() => fin = d),
+                cle: 'date_fin'),
             const SizedBox(height: 16),
             Text(l10n.quotas, style: Theme.of(context).textTheme.titleMedium),
             for (final (i, q) in quotas.indexed)
@@ -789,7 +883,7 @@ class _LicenceFormScreenState extends State<LicenceFormScreen>
             boutonEnregistrer(() => enregistrer(
                 (api) => api.enregistrerLicence(numero.text.trim(), _donnees()),
                 l10n.licenceEnregistree)),
-          ],
+          ]),
         ),
       ),
     ));
