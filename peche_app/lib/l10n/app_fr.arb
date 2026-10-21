@@ -488,6 +488,7 @@
   "champImo": "Numéro OMI (facultatif, 7 chiffres)",
   "certificats": "Certificats",
   "navigabiliteManquante": "Pas de certificat de navigabilité : chaque contrôle de ce navire relèvera une infraction grave.",
+  "imoInvalide": "Le numéro OMI doit avoir 7 chiffres",
   "ajouterCertificat": "Ajouter un certificat",
   "champNumero": "Numéro",
   "champExpiration": "Expiration",

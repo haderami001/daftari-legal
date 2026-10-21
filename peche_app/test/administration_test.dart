@@ -145,6 +145,46 @@ void main() {
       expect(avertissement, findsNothing);
     });
 
+    testWidgets('numéro OMI faux : erreur sous le champ, rien envoyé',
+        (tester) async {
+      await lancer(tester, 'admin');
+      await afficherModule(tester);
+      await tester.tap(find.text('Navires et licences'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Ajouter un navire'));
+      await tester.pumpAndSettle();
+      Future<void> saisir(String libelle, String texte) =>
+          tester.enterText(find.widgetWithText(TextFormField, libelle), texte);
+      await saisir('Identifiant (ex. N4)', 'N4');
+      await saisir('Nom', 'Tanit');
+      await saisir('Immatriculation', 'NKT-SE-0001');
+      await saisir('Longueur (m)', '20');
+      await saisir('Puissance (kW)', '300');
+      await saisir('Numéro OMI (facultatif, 7 chiffres)', '123');
+      final vertical = find.byWidgetPredicate(
+          (w) => w is Scrollable && w.axisDirection == AxisDirection.down);
+      Future<void> enregistrer() async {
+        await tester.scrollUntilVisible(find.text('Enregistrer'), 200,
+            scrollable: vertical);
+        await tester.tap(find.text('Enregistrer'));
+        await tester.pumpAndSettle();
+      }
+
+      await enregistrer();
+      await tester.scrollUntilVisible(
+          find.text('Le numéro OMI doit avoir 7 chiffres'), -200,
+          scrollable: vertical);
+      expect(find.text('Le numéro OMI doit avoir 7 chiffres'), findsOneWidget);
+      expect(find.textContaining('Refusé par le serveur'), findsNothing);
+      expect((await stockage.referentiel())['navires'], isEmpty);
+
+      await saisir('Numéro OMI (facultatif, 7 chiffres)', '9345678');
+      await enregistrer();
+      final navire =
+          ((await stockage.referentiel())['navires']! as List).single as Map;
+      expect(navire['numero_imo'], '9345678');
+    });
+
     testWidgets('ajout d\'un navire puis de sa licence, refus affiché',
         (tester) async {
       final services = await lancer(tester, 'admin');

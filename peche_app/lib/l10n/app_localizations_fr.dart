@@ -685,6 +685,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Pas de certificat de navigabilité : chaque contrôle de ce navire relèvera une infraction grave.';
 
   @override
+  String get imoInvalide => 'Le numéro OMI doit avoir 7 chiffres';
+
+  @override
   String get ajouterCertificat => 'Ajouter un certificat';
 
   @override
