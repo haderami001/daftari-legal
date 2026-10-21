@@ -1078,6 +1078,12 @@ abstract class AppLocalizations {
   /// **'Pas de certificat de navigabilité : chaque contrôle de ce navire relèvera une infraction grave.'**
   String get navigabiliteManquante;
 
+  /// No description provided for @imoInvalide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le numéro OMI doit avoir 7 chiffres'**
+  String get imoInvalide;
+
   /// No description provided for @ajouterCertificat.
   ///
   /// In fr, this message translates to:

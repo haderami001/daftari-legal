@@ -525,6 +525,13 @@ class _NavireFormScreenState extends State<NavireFormScreen>
               controller: imo,
               decoration: InputDecoration(labelText: l10n.champImo),
               keyboardType: TextInputType.number,
+              // Même règle que le serveur : vide, ou exactement 7 chiffres.
+              validator: (v) {
+                final t = (v ?? '').trim();
+                return t.isEmpty || RegExp(r'^\d{7}$').hasMatch(t)
+                    ? null
+                    : l10n.imoInvalide;
+              },
             ),
             const SizedBox(height: 16),
             Text(l10n.certificats,

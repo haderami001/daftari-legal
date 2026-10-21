@@ -690,6 +690,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'لا توجد شهادة صلاحية الإبحار: كل تفتيش لهذه السفينة سيسجّل مخالفة جسيمة.';
 
   @override
+  String get imoInvalide =>
+      'يجب أن يتكون رقم المنظمة البحرية الدولية من 7 أرقام';
+
+  @override
   String get ajouterCertificat => 'إضافة شهادة';
 
   @override
