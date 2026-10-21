@@ -681,6 +681,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get certificats => 'Certificats';
 
   @override
+  String get navigabiliteManquante =>
+      'Pas de certificat de navigabilité : chaque contrôle de ce navire relèvera une infraction grave.';
+
+  @override
   String get ajouterCertificat => 'Ajouter un certificat';
 
   @override

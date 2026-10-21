@@ -487,6 +487,7 @@
   "champPuissance": "Puissance (kW)",
   "champImo": "Numéro OMI (facultatif, 7 chiffres)",
   "certificats": "Certificats",
+  "navigabiliteManquante": "Pas de certificat de navigabilité : chaque contrôle de ce navire relèvera une infraction grave.",
   "ajouterCertificat": "Ajouter un certificat",
   "champNumero": "Numéro",
   "champExpiration": "Expiration",
