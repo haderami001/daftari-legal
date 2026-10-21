@@ -186,7 +186,7 @@ En mer il n'y a pas de réseau : tout est enregistré **sur le téléphone**.
 | Fichier | Rôle |
 |---|---|
 | `lib/main.dart` | Point d'entrée, thème, serveur (`API_URL`, `API_JETON`) |
-| `../peche_regles/` | **Paquet partagé** avec l'app [Inspecteur](../inspecteur_app/README.md) : modèles (navire, licence, certificat, déclaration, capture, contrôle), référentiel (espèces, engins, barèmes) et moteur de calcul (licence, quotas, prises accessoires, maillage, tailles, sanctions) |
+| `../peche_regles/` | **Règles de la pêche** (paquet Dart pur, copié dans l'app Inspecteur) : modèles (navire, licence, certificat, déclaration, capture, contrôle), référentiel (espèces, engins, barèmes) et moteur de calcul (licence, quotas, prises accessoires, maillage, tailles, sanctions) |
 | `lib/core/regulation/rapport.dart` | Rapport d'inspection (texte) |
 | `lib/core/regulation/rapport_pdf.dart` | Rapport d'inspection (PDF) |
 | `lib/core/services/` | `Services` partagés, GPS, synchronisation |

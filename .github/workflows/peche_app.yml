@@ -1,6 +1,6 @@
 # Tests automatiques de l'application Flutter « Pêche Conforme ».
 # Se lance à chaque push sur main et à chaque pull request qui touche peche_app/
-# (ou les règles partagées peche_regles/).
+# (ou les règles de la pêche, peche_regles/).
 name: peche_app
 
 on:
@@ -10,7 +10,7 @@ on:
       - 'peche_app/**'
       # Le test de bout en bout de l'application démarre le serveur.
       - 'serveur/**'
-      # Règles partagées avec l'app Inspecteur.
+      # Règles de la pêche (paquet utilisé par l'application).
       - 'peche_regles/**'
       - '.github/workflows/peche_app.yml'
   pull_request:
@@ -18,7 +18,7 @@ on:
       - 'peche_app/**'
       # Le test de bout en bout de l'application démarre le serveur.
       - 'serveur/**'
-      # Règles partagées avec l'app Inspecteur.
+      # Règles de la pêche (paquet utilisé par l'application).
       - 'peche_regles/**'
       - '.github/workflows/peche_app.yml'
 
@@ -40,6 +40,14 @@ jobs:
           flutter-version: '3.47.6'
           channel: stable
           cache: true
+
+      # Règles de la pêche : Dart pur, sans Flutter.
+      - name: Règles (peche_regles)
+        working-directory: peche_regles
+        run: |
+          dart pub get
+          dart format --output=none --set-exit-if-changed lib
+          dart analyze --fatal-infos
 
       - name: Dépendances
         run: flutter pub get

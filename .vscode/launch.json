@@ -37,21 +37,6 @@
       ]
     },
     {
-      "name": "Inspecteur des pêches (téléphone / émulateur)",
-      "request": "launch",
-      "type": "dart",
-      "cwd": "inspecteur_app",
-      "program": "lib/main.dart"
-    },
-    {
-      "name": "Inspecteur des pêches (navigateur Chrome)",
-      "request": "launch",
-      "type": "dart",
-      "cwd": "inspecteur_app",
-      "program": "lib/main.dart",
-      "deviceId": "chrome"
-    },
-    {
       "name": "Pêche Conforme (téléphone / émulateur, démo complète)",
       "request": "launch",
       "type": "dart",

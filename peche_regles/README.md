@@ -1,10 +1,11 @@
-# Règles de la pêche (paquet partagé)
+# Règles de la pêche
 
-Code **Dart pur** (sans Flutter) partagé par les applications du dépôt :
+Code **Dart pur** (sans Flutter) utilisé par [Pêche Conforme](../peche_app/README.md) :
+modèles, référentiel des seuils et moteur de calcul. Séparé de l'application
+pour pouvoir être testé seul et réutilisé (serveur, autres applications).
 
-- [Pêche Conforme](../peche_app/README.md) : déclarations et contrôles ;
-- [Inspecteur des pêches](../inspecteur_app/README.md) : assistant de
-  l'inspecteur.
+L'application **Inspecteur des pêches** (dépôt `inspecteur`) en contient une
+**copie** : une règle modifiée ici doit y être recopiée.
 
 Contenu :
 
@@ -15,7 +16,7 @@ Contenu :
 | `calcul_reglementaire.dart` | moteur de calcul : infractions, gravité, amendes |
 | `format.dart` | affichage des montants et des textes gauche-droite |
 
-Les deux applications l'utilisent avec :
+Pêche Conforme l'utilise avec :
 
 ```yaml
 dependencies:

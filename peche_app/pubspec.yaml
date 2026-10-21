@@ -43,7 +43,7 @@ dependencies:
   printing: ^5.14.3
   geolocator: ^13.0.4
   http: ^1.6.0
-  # Règles partagées avec l'app Inspecteur (modèles, référentiel, calcul).
+  # Règles de la pêche (modèles, référentiel, calcul) : paquet Dart pur.
   peche_regles:
     path: ../peche_regles
   # Version fixée : geolocator_android 4.6.2 utilise `flutter.compileSdkVersion`
