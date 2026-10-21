@@ -187,7 +187,8 @@ void main() {
       expect(navire['numero_imo'], '9345678');
     });
 
-    testWidgets('erreurs du serveur affichées sous leur champ', (tester) async {
+    testWidgets('formats vérifiés par l\'app, refus du serveur sous le champ',
+        (tester) async {
       await lancer(tester, 'admin');
       await afficherModule(tester);
       await tester.tap(find.text('Navires et licences'));
@@ -207,19 +208,21 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.text('Enregistrer'));
         await tester.pumpAndSettle();
-        await tester.scrollUntilVisible(
-            find.textContaining('Refusé par le serveur'), -200,
-            scrollable: vertical);
       }
 
-      // Erreur sous le champ `libelle` (dans son cadre), et nulle part
-      // ailleurs.
-      Finder sous(String libelle, String erreur) => find.descendant(
-          of: find.widgetWithText(TextFormField, libelle),
-          matching: find.textContaining(erreur));
+      Future<void> voir(Finder f) async {
+        await tester.scrollUntilVisible(f, -200, scrollable: vertical);
+        await tester.pumpAndSettle();
+      }
 
-      // Navire valide, puis un second avec un pavillon faux et la même
-      // immatriculation.
+      // Erreur affichée dans le cadre du champ `libelle`.
+      Finder sous(String libelle, String erreur) => find.descendant(
+          of: find.widgetWithText(InputDecorator, libelle),
+          matching: find.textContaining(erreur));
+      final refus = find.textContaining('Refusé par le serveur');
+      const pavillon = 'Pavillon (code à 3 lettres, ex. MRT)';
+
+      // Navire valide.
       await tester.tap(find.text('Ajouter un navire'));
       await tester.pumpAndSettle();
       await saisir('Identifiant (ex. N4)', 'N4');
@@ -227,32 +230,30 @@ void main() {
       await saisir('Immatriculation', 'NKT-SE-0001');
       await saisir('Longueur (m)', '20');
       await saisir('Puissance (kW)', '300');
-      await tester.scrollUntilVisible(find.text('Enregistrer'), 200,
-          scrollable: vertical);
-      await tester.ensureVisible(find.text('Enregistrer'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Enregistrer'));
-      await tester.pumpAndSettle();
+      await enregistrer();
 
+      // Second navire : identifiant et pavillon mal formés, arrêtés par
+      // l'app (message traduit), sans rien envoyer au serveur.
       await tester.tap(find.text('Ajouter un navire'));
       await tester.pumpAndSettle();
-      await saisir('Identifiant (ex. N4)', 'N5');
+      await saisir('Identifiant (ex. N4)', 'N 5');
       await saisir('Nom', 'Copie');
       await saisir('Immatriculation', 'NKT-SE-0001');
-      await saisir('Pavillon (code à 3 lettres, ex. MRT)', 'XX');
+      await saisir(pavillon, 'XX');
       await saisir('Longueur (m)', '10');
       await saisir('Puissance (kW)', '10');
       await enregistrer();
-      // Le format est vérifié avant l'écriture : le pavillon d'abord.
-      expect(sous('Pavillon (code à 3 lettres, ex. MRT)', 'code pays'),
-          findsOneWidget);
+      await voir(sous('Identifiant (ex. N4)', 'sans espace'));
+      expect(sous('Identifiant (ex. N4)', 'sans espace'), findsOneWidget);
+      expect(sous(pavillon, 'Code pays à 3 lettres'), findsOneWidget);
+      expect(refus, findsNothing);
+      expect((await stockage.referentiel())['navires'], hasLength(1));
 
-      // Pavillon corrigé : le serveur refuse le doublon d'immatriculation.
-      await saisir('Pavillon (code à 3 lettres, ex. MRT)', 'MRT');
-      await tester.pumpAndSettle();
-      // Toute modification efface les erreurs devenues anciennes.
-      expect(find.textContaining('code pays'), findsNothing);
+      // Formats corrigés : seul le serveur voit le doublon d'immatriculation.
+      await saisir('Identifiant (ex. N4)', 'N5');
+      await saisir(pavillon, 'MRT');
       await enregistrer();
+      await voir(refus);
       expect(
           sous('Immatriculation',
               'Immatriculation déjà utilisée par un autre navire'),
@@ -260,8 +261,12 @@ void main() {
       // Le bandeau renvoie aux champs, sans répéter le détail.
       expect(
           find.textContaining('corrigez les champs en rouge'), findsOneWidget);
+      // Toute modification efface les erreurs devenues anciennes.
+      await saisir('Immatriculation', 'NKT-SE-0002');
+      await tester.pumpAndSettle();
+      expect(refus, findsNothing);
 
-      // Licence : code d'espèce invalide, sous le champ des espèces.
+      // Licence : codes d'espèces faux et fin avant le début.
       tester
           .state<ScaffoldMessengerState>(find.byType(ScaffoldMessenger))
           .clearSnackBars();
@@ -280,17 +285,29 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Casier / pot à poulpe'));
       const especes = 'Espèces ciblées (codes FAO séparés par des virgules)';
-      await saisir(especes, 'POULPE');
-      for (final champ in ['Début', 'Fin']) {
+      await saisir(especes, 'OCC, POULPE');
+      // Début : le 15 du mois prochain ; fin : aujourd'hui.
+      for (final (champ, moisSuivant) in [('Début', true), ('Fin', false)]) {
         await tester.ensureVisible(find.widgetWithText(InputDecorator, champ));
         await tester.pumpAndSettle();
         await tester.tap(find.widgetWithText(InputDecorator, champ));
         await tester.pumpAndSettle();
+        if (moisSuivant) {
+          await tester.tap(find.byTooltip('Mois suivant'));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('15'));
+          await tester.pumpAndSettle();
+        }
         await tester.tap(find.text('OK'));
         await tester.pumpAndSettle();
       }
       await enregistrer();
-      expect(sous(especes, 'codes FAO à 3 lettres'), findsOneWidget);
+      await voir(sous(especes, 'Codes FAO à 3 lettres'));
+      expect(sous(especes, 'Codes FAO à 3 lettres'), findsOneWidget);
+      expect(
+          sous('Fin', 'La fin ne peut pas précéder le début'), findsOneWidget);
+      expect(refus, findsNothing);
+      expect((await stockage.referentiel())['licences'], isEmpty);
     });
 
     testWidgets('ajout d\'un navire puis de sa licence, refus affiché',
