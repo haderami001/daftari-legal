@@ -686,6 +686,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get certificats => 'الشهادات';
 
   @override
+  String get navigabiliteManquante =>
+      'لا توجد شهادة صلاحية الإبحار: كل تفتيش لهذه السفينة سيسجّل مخالفة جسيمة.';
+
+  @override
   String get ajouterCertificat => 'إضافة شهادة';
 
   @override

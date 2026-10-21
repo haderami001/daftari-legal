@@ -123,6 +123,28 @@ void main() {
       expect(find.text('Navires et licences'), findsNothing);
     });
 
+    testWidgets('avertit tant que le certificat de navigabilité manque',
+        (tester) async {
+      await lancer(tester, 'admin');
+      await afficherModule(tester);
+      await tester.tap(find.text('Navires et licences'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Ajouter un navire'));
+      await tester.pumpAndSettle();
+      final avertissement =
+          find.textContaining('Pas de certificat de navigabilité');
+      expect(avertissement, findsOneWidget);
+
+      // Le nouveau certificat est par défaut un certificat de navigabilité.
+      // « Enregistrer » est sous le bouton : les deux deviennent visibles.
+      await tester.scrollUntilVisible(find.text('Enregistrer'), 200,
+          scrollable: find.byWidgetPredicate(
+              (w) => w is Scrollable && w.axisDirection == AxisDirection.down));
+      await tester.tap(find.text('Ajouter un certificat'));
+      await tester.pumpAndSettle();
+      expect(avertissement, findsNothing);
+    });
+
     testWidgets('ajout d\'un navire puis de sa licence, refus affiché',
         (tester) async {
       final services = await lancer(tester, 'admin');
@@ -136,12 +158,30 @@ void main() {
       await tester.pumpAndSettle();
       Future<void> saisir(String libelle, String texte) =>
           tester.enterText(find.widgetWithText(TextFormField, libelle), texte);
+      // Liste verticale du formulaire (les champs texte ont aussi un
+      // Scrollable, horizontal).
+      final vertical = find.byWidgetPredicate(
+          (w) => w is Scrollable && w.axisDirection == AxisDirection.down);
+      // « Enregistrer » est en bas du formulaire : on le fait défiler.
+      Future<void> enregistrer() async {
+        // Le message flottant d'un enregistrement précédent couvrirait le
+        // bouton.
+        tester
+            .state<ScaffoldMessengerState>(find.byType(ScaffoldMessenger))
+            .clearSnackBars();
+        await tester.scrollUntilVisible(find.text('Enregistrer'), 200,
+            scrollable: vertical);
+        await tester.ensureVisible(find.text('Enregistrer'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Enregistrer'));
+      }
+
       await saisir('Identifiant (ex. N4)', 'N4');
       await saisir('Nom', 'Tanit');
       await saisir('Immatriculation', 'NKT-SE-0001');
       await saisir('Longueur (m)', '30,5');
       await saisir('Puissance (kW)', '500');
-      await tester.tap(find.text('Enregistrer'));
+      await enregistrer();
       await tester.pumpAndSettle();
 
       expect(find.text('Tanit'), findsOneWidget);
@@ -165,8 +205,12 @@ void main() {
       await saisir('Immatriculation', 'NKT-SE-0001');
       await saisir('Longueur (m)', '10');
       await saisir('Puissance (kW)', '10');
-      await tester.tap(find.text('Enregistrer'));
+      await enregistrer();
       await tester.pumpAndSettle();
+      // Le refus s'affiche en haut du formulaire.
+      await tester.scrollUntilVisible(
+          find.textContaining('Refusé par le serveur'), -200,
+          scrollable: vertical);
       expect(find.textContaining('Refusé par le serveur'), findsOneWidget);
       expect(find.textContaining('déjà utilisée'), findsOneWidget);
 
@@ -190,11 +234,6 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Quitter sans enregistrer\u00a0?'), findsNothing);
       expect(find.text('Ajouter un navire'), findsOneWidget);
-
-      // Liste verticale du formulaire (les champs texte ont aussi un
-      // Scrollable, horizontal).
-      final vertical = find.byWidgetPredicate(
-          (w) => w is Scrollable && w.axisDirection == AxisDirection.down);
 
       // Licence du nouveau navire.
       await tester.tap(find.text('Licences'));
@@ -221,11 +260,7 @@ void main() {
       await tester.pumpAndSettle();
       await saisir('Espèce (code FAO)', 'SAA');
       await saisir('kg', '80000');
-      await tester.scrollUntilVisible(find.text('Enregistrer'), 200,
-          scrollable: vertical);
-      await tester.ensureVisible(find.text('Enregistrer'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Enregistrer'));
+      await enregistrer();
       await tester.pumpAndSettle();
 
       final licence =

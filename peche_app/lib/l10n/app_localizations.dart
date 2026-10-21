@@ -1072,6 +1072,12 @@ abstract class AppLocalizations {
   /// **'Certificats'**
   String get certificats;
 
+  /// No description provided for @navigabiliteManquante.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de certificat de navigabilité : chaque contrôle de ce navire relèvera une infraction grave.'**
+  String get navigabiliteManquante;
+
   /// No description provided for @ajouterCertificat.
   ///
   /// In fr, this message translates to:

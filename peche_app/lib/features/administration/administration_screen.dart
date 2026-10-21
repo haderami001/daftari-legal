@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../core/models/enums.dart';
 import '../../core/services/administration.dart';
 import '../../core/services/services.dart';
+import '../../core/theme.dart';
 import '../../l10n/libelles.dart';
 
 /// Administration du référentiel central : navires et licences.
@@ -528,6 +529,16 @@ class _NavireFormScreenState extends State<NavireFormScreen>
             const SizedBox(height: 16),
             Text(l10n.certificats,
                 style: Theme.of(context).textTheme.titleMedium),
+            // Pas bloquant, mais chaque contrôle relèvera CERT_ABSENT.
+            if (!certificats.any((c) => c.type == TypeCertificat.navigabilite))
+              Card(
+                color: CouleursPeche.sauvetage.withValues(alpha: 0.18),
+                child: ListTile(
+                  leading: const Icon(Icons.warning_amber,
+                      color: CouleursPeche.sauvetage),
+                  title: Text(l10n.navigabiliteManquante),
+                ),
+              ),
             for (final (i, c) in certificats.indexed)
               Card(
                 child: Padding(
@@ -536,6 +547,7 @@ class _NavireFormScreenState extends State<NavireFormScreen>
                     Row(children: [
                       Expanded(
                         child: DropdownButtonFormField<TypeCertificat>(
+                          isExpanded: true,
                           key: ValueKey(c.type),
                           initialValue: c.type,
                           items: [
